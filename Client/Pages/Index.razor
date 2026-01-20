@@ -1,0 +1,275 @@
+@page "/"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@using ETechEnergie.Shared.Models
+
+<PageTitle>e-Tech Energie+ | L'expertise technique et énergétique au service de Thiès</PageTitle>
+
+<section class="hero">
+    <div class="hero-content">
+        <h1>e-Tech Energie+</h1>
+        <p class="tagline">L'expertise technique et énergétique au service de Thiès</p>
+        <p class="subtitle">Performance, fiabilité et évolutivité des solutions technologiques pour votre entreprise</p>
+        <div class="hero-actions">
+            <a href="/services" class="btn btn-primary">Nos Services</a>
+            <a href="/contact" class="btn btn-secondary">Contactez-nous</a>
+        </div>
+    </div>
+</section>
+
+<section class="services-preview">
+    <div class="container">
+        <h2>Nos Domaines d'Expertise</h2>
+        <div class="services-grid">
+            @if (services == null)
+            {
+                <p><em>Chargement des services...</em></p>
+            }
+            else
+            {
+                @foreach (var service in services.Take(4))
+                {
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas @service.IconClass"></i>
+                        </div>
+                        <h3>@service.Name</h3>
+                        <p>@service.Description</p>
+                    </div>
+                }
+            }
+        </div>
+        <div class="text-center mt-4">
+            <a href="/services" class="btn btn-outline">Voir tous nos services</a>
+        </div>
+    </div>
+</section>
+
+<section class="why-choose-us">
+    <div class="container">
+        <h2>Pourquoi Choisir e-Tech Energie+ ?</h2>
+        <div class="features-grid">
+            <div class="feature">
+                <i class="fas fa-certificate"></i>
+                <h3>Expertise Reconnue</h3>
+                <p>Des techniciens qualifiés et expérimentés dans tous les domaines techniques</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-shield-alt"></i>
+                <h3>Qualité Garantie</h3>
+                <p>Respect des normes internationales et garantie sur tous nos travaux</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-leaf"></i>
+                <h3>Solutions Écologiques</h3>
+                <p>Engagement pour les énergies renouvelables et le développement durable</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-headset"></i>
+                <h3>Support 24/7</h3>
+                <p>Une équipe à votre écoute pour tous vos besoins techniques</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="container">
+        <h2>Prêt à Démarrer Votre Projet ?</h2>
+        <p>Contactez-nous dès aujourd'hui pour une consultation gratuite</p>
+        <a href="/contact" class="btn btn-primary btn-lg">Demander un Devis</a>
+    </div>
+</section>
+
+@code {
+    private Service[]? services;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            services = await Http.GetFromJsonAsync<Service[]>("api/services");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur lors du chargement des services: {ex.Message}");
+        }
+    }
+}
+
+<style>
+    .hero {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        padding: 100px 20px;
+        text-align: center;
+    }
+
+    .hero-content h1 {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        font-weight: bold;
+    }
+
+    .tagline {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #fbbf24;
+    }
+
+    .subtitle {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .services-preview {
+        padding: 80px 20px;
+        background: #f9fafb;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    h2 {
+        text-align: center;
+        font-size: 2.5rem;
+        margin-bottom: 3rem;
+        color: #1e3a8a;
+    }
+
+    .services-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .service-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .service-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+    }
+
+    .service-icon {
+        font-size: 3rem;
+        color: #3b82f6;
+        margin-bottom: 1rem;
+    }
+
+    .service-card h3 {
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+        color: #1e3a8a;
+    }
+
+    .why-choose-us {
+        padding: 80px 20px;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+    }
+
+    .feature {
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .feature i {
+        font-size: 3rem;
+        color: #fbbf24;
+        margin-bottom: 1rem;
+    }
+
+    .feature h3 {
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+        color: #1e3a8a;
+    }
+
+    .cta-section {
+        background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+        color: white;
+        padding: 80px 20px;
+        text-align: center;
+    }
+
+    .cta-section h2 {
+        color: white;
+    }
+
+    .btn {
+        padding: 12px 30px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+        display: inline-block;
+        border: 2px solid transparent;
+    }
+
+    .btn-primary {
+        background: #fbbf24;
+        color: #1e3a8a;
+    }
+
+    .btn-primary:hover {
+        background: #f59e0b;
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: white;
+        border-color: white;
+    }
+
+    .btn-secondary:hover {
+        background: white;
+        color: #1e3a8a;
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: #1e3a8a;
+        border-color: #1e3a8a;
+    }
+
+    .btn-outline:hover {
+        background: #1e3a8a;
+        color: white;
+    }
+
+    .btn-lg {
+        padding: 15px 40px;
+        font-size: 1.2rem;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .mt-4 {
+        margin-top: 2rem;
+    }
+</style>

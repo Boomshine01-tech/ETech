@@ -1,0 +1,259 @@
+@page "/services"
+@inject HttpClient Http
+@using ETechEnergie.Shared.Models
+
+<PageTitle>Nos Services - e-Tech Energie+</PageTitle>
+
+<div class="page-header">
+    <div class="container">
+        <h1>Nos Services</h1>
+        <p>Des solutions complètes pour tous vos besoins techniques et énergétiques</p>
+    </div>
+</div>
+
+<section class="services-section">
+    <div class="container">
+        @if (services == null)
+        {
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Chargement des services...</p>
+            </div>
+        }
+        else if (!services.Any())
+        {
+            <p class="no-data">Aucun service disponible pour le moment.</p>
+        }
+        else
+        {
+            <div class="services-list">
+                @foreach (var service in services)
+                {
+                    <div class="service-detail-card">
+                        <div class="service-header">
+                            <div class="service-icon-large">
+                                <i class="fas @service.IconClass"></i>
+                            </div>
+                            <h2>@service.Name</h2>
+                        </div>
+                        <div class="service-body">
+                            <p class="service-description">@service.Description</p>
+                            <div class="service-detailed">
+                                @service.DetailedDescription
+                            </div>
+                            <div class="service-actions">
+                                <a href="/contact" class="btn btn-primary">
+                                    <i class="fas fa-envelope"></i> Demander un devis
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+<section class="cta-services">
+    <div class="container">
+        <h2>Besoin d'un Service Personnalisé ?</h2>
+        <p>Notre équipe est à votre disposition pour étudier vos besoins spécifiques</p>
+        <a href="/contact" class="btn btn-light btn-lg">Contactez-nous</a>
+    </div>
+</section>
+
+@code {
+    private Service[]? services;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            services = await Http.GetFromJsonAsync<Service[]>("api/services");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur: {ex.Message}");
+        }
+    }
+}
+
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        padding: 60px 20px;
+        text-align: center;
+    }
+
+    .page-header h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .page-header p {
+        font-size: 1.3rem;
+        opacity: 0.9;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .services-section {
+        padding: 60px 20px;
+    }
+
+    .services-list {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .service-detail-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .service-detail-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .service-header {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        padding: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .service-icon-large {
+        font-size: 4rem;
+        color: #3b82f6;
+        min-width: 80px;
+        text-align: center;
+    }
+
+    .service-header h2 {
+        font-size: 2rem;
+        color: #1e3a8a;
+        margin: 0;
+    }
+
+    .service-body {
+        padding: 2rem;
+    }
+
+    .service-description {
+        font-size: 1.2rem;
+        color: #3b82f6;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+
+    .service-detailed {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #4b5563;
+        margin-bottom: 2rem;
+    }
+
+    .service-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn {
+        padding: 12px 30px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: 2px solid transparent;
+    }
+
+    .btn-primary {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #2563eb;
+        transform: translateY(-2px);
+    }
+
+    .btn-light {
+        background: white;
+        color: #1e3a8a;
+    }
+
+    .btn-light:hover {
+        background: #f3f4f6;
+    }
+
+    .btn-lg {
+        padding: 15px 40px;
+        font-size: 1.2rem;
+    }
+
+    .cta-services {
+        background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+        color: white;
+        padding: 80px 20px;
+        text-align: center;
+    }
+
+    .cta-services h2 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .cta-services p {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 4rem;
+        font-size: 1.5rem;
+        color: #6b7280;
+    }
+
+    .loading i {
+        font-size: 3rem;
+        color: #3b82f6;
+        margin-bottom: 1rem;
+    }
+
+    .no-data {
+        text-align: center;
+        padding: 3rem;
+        font-size: 1.2rem;
+        color: #6b7280;
+    }
+
+    @@media (max-width: 768px) {
+        .service-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .service-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+        }
+    }
+</style>

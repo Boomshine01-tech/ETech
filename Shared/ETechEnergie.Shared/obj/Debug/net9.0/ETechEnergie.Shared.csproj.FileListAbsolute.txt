@@ -1,0 +1,11 @@
+C:\Bureau\MonApp\Shared\ETechEnergie.Shared\bin\Debug\net9.0\ETechEnergie.Shared.deps.json
+C:\Bureau\MonApp\Shared\ETechEnergie.Shared\bin\Debug\net9.0\ETechEnergie.Shared.dll
+C:\Bureau\MonApp\Shared\ETechEnergie.Shared\bin\Debug\net9.0\ETechEnergie.Shared.pdb
+C:\Bureau\MonApp\Shared\ETechEnergie.Shared\obj\Debug\net9.0\ETechEnergie.Shared.GeneratedMSBuildEditorConfig.editorconfig
+C:\Bureau\MonApp\Shared\ETechEnergie.Shared\obj\Debug\net9.0\ETechEnergie.Shared.AssemblyInfoInputs.cache
+C:\Bureau\MonApp\Shared\ETechEnergie.Shared\obj\Debug\net9.0\ETechEnergie.Shared.AssemblyInfo.cs
+C:\Bureau\MonApp\Shared\ETechEnergie.Shared\obj\Debug\net9.0\ETechEnergie.Shared.csproj.CoreCompileInputs.cache
+C:\Bureau\MonApp\Shared\ETechEnergie.Shared\obj\Debug\net9.0\ETechEnergie.Shared.dll
+C:\Bureau\MonApp\Shared\ETechEnergie.Shared\obj\Debug\net9.0\refint\ETechEnergie.Shared.dll
+C:\Bureau\MonApp\Shared\ETechEnergie.Shared\obj\Debug\net9.0\ETechEnergie.Shared.pdb
+C:\Bureau\MonApp\Shared\ETechEnergie.Shared\obj\Debug\net9.0\ref\ETechEnergie.Shared.dll

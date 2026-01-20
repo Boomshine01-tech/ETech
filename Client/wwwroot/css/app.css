@@ -1,0 +1,116 @@
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+}
+
+body {
+    background: #f9fafb;
+}
+
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loader {
+    text-align: center;
+    color: white;
+}
+
+.loader i {
+    color: #fbbf24;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.loader p {
+    margin-top: 1rem;
+    font-size: 1.2rem;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+#blazor-error-ui {
+    background: #ef4444;
+    color: white;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    text-align: center;
+    z-index: 10000;
+}
+
+#blazor-error-ui .reload {
+    color: white;
+    text-decoration: underline;
+    margin-left: 1rem;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    margin-left: 1rem;
+    font-size: 1.5rem;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+a {
+    color: #3b82f6;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: #2563eb;
+}
+
+button {
+    font-family: inherit;
+}
+
+input, textarea, select {
+    font-family: inherit;
+}
+
+.validation-message {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    body {
+        font-size: 14px;
+    }
+}
+</style>

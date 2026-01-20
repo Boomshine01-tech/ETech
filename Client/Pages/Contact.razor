@@ -1,0 +1,423 @@
+@page "/contact"
+@inject HttpClient Http
+@inject NotificationService NotificationService
+@inject CartService CartService
+@using ETechEnergie.Shared.Models
+@using ETechEnergie.Shared.Configuration
+@using ETechEnergie.Client.Services
+@using System.Net.Http.Json
+
+<PageTitle>Contact - e-Tech Energie+</PageTitle>
+
+<div class="page-header">
+    <div class="container">
+        <h1>Contactez-nous</h1>
+        <p>Notre équipe est à votre écoute pour répondre à tous vos besoins</p>
+    </div>
+</div>
+
+<section class="contact-section">
+    <div class="container">
+        <div class="contact-grid">
+            <div class="contact-info">
+                <h2>Informations de Contact</h2>
+                
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="info-content">
+                        <h3>Adresse</h3>
+                        <p>@CompanyInfo.Address</p>
+                        <p>@CompanyInfo.City, @CompanyInfo.Country</p>
+                        <a href="@CompanyInfo.GoogleMapsUrl" target="_blank" class="map-link">
+                            <i class="fas fa-external-link-alt"></i> Voir sur Google Maps
+                        </a>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="info-content">
+                        <h3>Téléphone</h3>
+                        <p><a href="tel:@CompanyInfo.Phone1.Replace(" ", "")">@CompanyInfo.Phone1</a></p>
+                        <p><a href="tel:@CompanyInfo.Phone2.Replace(" ", "")">@CompanyInfo.Phone2</a></p>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <div class="info-content">
+                        <h3>WhatsApp</h3>
+                        <p>
+                            <a href="https://wa.me/@CompanyInfo.WhatsApp.Replace("+", "").Replace(" ", "")" 
+                               target="_blank" class="whatsapp-link">
+                                <i class="fab fa-whatsapp"></i> @CompanyInfo.WhatsApp
+                            </a>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="info-content">
+                        <h3>Email</h3>
+                        <p><a href="mailto:@CompanyInfo.EmailContact">@CompanyInfo.EmailContact</a></p>
+                        <p><a href="mailto:@CompanyInfo.EmailInfo">@CompanyInfo.EmailInfo</a></p>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="info-content">
+                        <h3>Horaires d'ouverture</h3>
+                        <p>@CompanyInfo.HoursWeekdays</p>
+                        <p>@CompanyInfo.HoursSaturday</p>
+                        <p class="closed">@CompanyInfo.HoursSunday</p>
+                    </div>
+                </div>
+
+                <div class="social-links">
+                    <h3>Suivez-nous</h3>
+                    <div class="social-icons">
+                        <a href="@CompanyInfo.FacebookUrl" target="_blank" rel="noopener noreferrer" 
+                           class="social-icon facebook" title="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="@CompanyInfo.TwitterUrl" target="_blank" rel="noopener noreferrer" 
+                           class="social-icon twitter" title="Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="@CompanyInfo.LinkedInUrl" target="_blank" rel="noopener noreferrer" 
+                           class="social-icon linkedin" title="LinkedIn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a href="@CompanyInfo.InstagramUrl" target="_blank" rel="noopener noreferrer" 
+                           class="social-icon instagram" title="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-form-container">
+                <h2>Envoyez-nous un Message</h2>
+                
+                @if (showSuccessMessage)
+                {
+                    <div class="success-alert">
+                        <i class="fas fa-check-circle"></i>
+                        <p>Votre message a été envoyé avec succès ! Nous vous contacterons bientôt.</p>
+                    </div>
+                }
+
+                <EditForm Model="@contactRequest" OnValidSubmit="HandleSubmit">
+                    <DataAnnotationsValidator />
+
+                    <div class="form-group">
+                        <label for="name">Nom complet *</label>
+                        <InputText id="name" class="form-control" @bind-Value="contactRequest.Name" 
+                                   placeholder="Votre nom complet" />
+                        <ValidationMessage For="@(() => contactRequest.Name)" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <InputText id="email" type="email" class="form-control" @bind-Value="contactRequest.Email" 
+                                   placeholder="votre@email.com" />
+                        <ValidationMessage For="@(() => contactRequest.Email)" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Téléphone *</label>
+                        <InputText id="phone" class="form-control" @bind-Value="contactRequest.Phone" 
+                                   placeholder="+221 77 123 45 67" />
+                        <ValidationMessage For="@(() => contactRequest.Phone)" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="company">Entreprise (optionnel)</label>
+                        <InputText id="company" class="form-control" @bind-Value="contactRequest.Company" 
+                                   placeholder="Nom de votre entreprise" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Message *</label>
+                        <InputTextArea id="message" class="form-control" @bind-Value="contactRequest.Message" 
+                                       rows="5" placeholder="Décrivez votre projet ou votre besoin..." />
+                        <ValidationMessage For="@(() => contactRequest.Message)" />
+                    </div>
+
+                    <button type="submit" class="btn btn-submit" disabled="@isSubmitting">
+                        @if (isSubmitting)
+                        {
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>Envoi en cours...</span>
+                        }
+                        else
+                        {
+                            <i class="fas fa-paper-plane"></i>
+                            <span>Envoyer le message</span>
+                        }
+                    </button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    private ContactRequest contactRequest = new ContactRequest();
+    private bool isSubmitting = false;
+    private bool showSuccessMessage = false;
+
+    private async Task HandleSubmit()
+    {
+        isSubmitting = true;
+        showSuccessMessage = false;
+    
+        try
+        {
+            if (CartService.Items.Any())
+            {
+                contactRequest.CartItemsJson = System.Text.Json.JsonSerializer.Serialize(CartService.Items);
+            }
+        
+            var response = await Http.PostAsJsonAsync("api/contact", contactRequest);
+        
+            if (response.IsSuccessStatusCode)
+            {
+                showSuccessMessage = true;
+            
+                CartService.ClearCart();
+            
+                contactRequest = new ContactRequest();
+                await Task.Delay(100);
+            }
+            else
+            {
+                NotificationService.ShowError("Une erreur s'est produite.");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError($"Erreur: {ex.Message}");
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}
+
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        padding: 60px 20px;
+        text-align: center;
+    }
+
+    .page-header h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .contact-section {
+        padding: 60px 20px;
+    }
+
+    .contact-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 3rem;
+    }
+
+    .info-item {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: #f9fafb;
+        border-radius: 10px;
+    }
+
+    .info-icon {
+        font-size: 2rem;
+        color: #3b82f6;
+        min-width: 50px;
+    }
+
+    .info-content h3 {
+        font-size: 1.2rem;
+        color: #1e3a8a;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-content p {
+        color: #6b7280;
+        margin: 0.3rem 0;
+    }
+
+    .info-content a {
+        color: #3b82f6;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+
+    .info-content a:hover {
+        color: #2563eb;
+        text-decoration: underline;
+    }
+
+    .map-link, .whatsapp-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        font-weight: 600;
+    }
+
+    .whatsapp-link {
+        color: #25D366 !important;
+    }
+
+    .closed {
+        color: #ef4444 !important;
+        font-weight: 600;
+    }
+
+    .social-links {
+        margin-top: 2rem;
+    }
+
+    .social-links h3 {
+        font-size: 1.2rem;
+        color: #1e3a8a;
+        margin-bottom: 1rem;
+    }
+
+    .social-icons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .social-icon {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        text-decoration: none;
+        font-size: 1.3rem;
+        transition: all 0.3s;
+        color: white;
+    }
+
+    .social-icon.facebook { background: #1877F2; }
+    .social-icon.twitter { background: #1DA1F2; }
+    .social-icon.linkedin { background: #0A66C2; }
+    .social-icon.instagram { background: linear-gradient(45deg, #F58529, #DD2A7B, #8134AF); }
+
+    .social-icon:hover {
+        transform: translateY(-5px) scale(1.1);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    }
+
+    .contact-form-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .success-alert {
+        background: #d1fae5;
+        border: 2px solid #10b981;
+        color: #065f46;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .success-alert i {
+        font-size: 1.5rem;
+        color: #10b981;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e5e7eb;
+        border-radius: 5px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #3b82f6;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 15px;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+        background: #2563eb;
+    }
+
+    .btn-submit:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+    }
+
+    @@media (max-width: 968px) {
+        .contact-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

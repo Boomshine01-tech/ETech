@@ -1,0 +1,353 @@
+@page "/products"
+@inject HttpClient Http
+@inject CartService CartService
+@inject NotificationService NotificationService
+@using ETechEnergie.Shared.Models
+@using ETechEnergie.Client.Services
+
+<PageTitle>Nos Produits - e-Tech Energie+</PageTitle>
+
+<div class="page-header">
+    <div class="container">
+        <h1>Nos Produits</h1>
+        <p>Équipements électroniques et informatiques de qualité professionnelle</p>
+    </div>
+</div>
+
+<section class="products-section">
+    <div class="container">
+        <div class="products-toolbar">
+            <div class="filter-section">
+                <label for="category-filter">Filtrer par catégorie:</label>
+                <select id="category-filter" @onchange="FilterByCategory" class="category-select">
+                    <option value="">Toutes les catégories</option>
+                    @if (categories != null)
+                    {
+                        @foreach (var category in categories)
+                        {
+                            <option value="@category.Id">@category.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="cart-info">
+                <a href="/cart" class="cart-link">
+                    <i class="fas fa-shopping-cart"></i>
+                    Panier (@CartService.ItemCount)
+                </a>
+            </div>
+        </div>
+
+        @if (filteredProducts == null)
+        {
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Chargement des produits...</p>
+            </div>
+        }
+        else if (!filteredProducts.Any())
+        {
+            <p class="no-data">Aucun produit disponible dans cette catégorie.</p>
+        }
+        else
+        {
+            <div class="products-grid">
+                @foreach (var product in filteredProducts)
+                {
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="@product.ImageUrl" alt="@product.Name" />
+                            @if (product.Stock <= 5)
+                            {
+                                <span class="stock-badge low">Stock faible</span>
+                            }
+                        </div>
+                        <div class="product-info">
+                            <span class="product-category">@product.Category?.Name</span>
+                            <h3>@product.Name</h3>
+                            <p class="product-description">@product.Description</p>
+                            <div class="product-footer">
+                                <span class="product-price">@product.Price.ToString("N0") FCFA</span>
+                                @if (product.Stock > 0)
+                                {
+                                    <button class="btn btn-add-cart" @onclick="() => AddToCart(product)">
+                                        <i class="fas fa-cart-plus"></i> Ajouter
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-disabled" disabled>
+                                        Rupture de stock
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+@code {
+    private Product[]? products;
+    private Category[]? categories;
+    private Product[]? filteredProducts;
+    private int? selectedCategoryId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            products = await Http.GetFromJsonAsync<Product[]>("api/products");
+            categories = await Http.GetFromJsonAsync<Category[]>("api/categories");
+            filteredProducts = products;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur: {ex.Message}");
+        }
+    }
+
+    private void FilterByCategory(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString();
+        
+        if (string.IsNullOrEmpty(value))
+        {
+            filteredProducts = products;
+        }
+        else if (int.TryParse(value, out int categoryId))
+        {
+            filteredProducts = products?.Where(p => p.CategoryId == categoryId).ToArray();
+        }
+    }
+
+    private void AddToCart(Product product)
+    {
+        CartService.AddToCart(product);
+        NotificationService.ShowSuccess($"{product.Name} ajouté au panier");
+    }
+}
+
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        padding: 60px 20px;
+        text-align: center;
+    }
+
+    .page-header h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .page-header p {
+        font-size: 1.3rem;
+        opacity: 0.9;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .products-section {
+        padding: 60px 20px;
+    }
+
+    .products-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .filter-section {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .category-select {
+        padding: 10px 15px;
+        border: 2px solid #e5e7eb;
+        border-radius: 5px;
+        font-size: 1rem;
+        min-width: 200px;
+    }
+
+    .cart-link {
+        background: #3b82f6;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background 0.3s;
+    }
+
+    .cart-link:hover {
+        background: #2563eb;
+    }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 2rem;
+    }
+
+    .product-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .product-image {
+        position: relative;
+        height: 200px;
+        background: #f3f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .product-image img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+    }
+
+    .stock-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #ef4444;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .product-info {
+        padding: 1.5rem;
+    }
+
+    .product-category {
+        display: inline-block;
+        background: #dbeafe;
+        color: #1e40af;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .product-info h3 {
+        font-size: 1.3rem;
+        color: #1e3a8a;
+        margin: 0.5rem 0;
+    }
+
+    .product-description {
+        color: #6b7280;
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+
+    .product-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .product-price {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #1e3a8a;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border-radius: 5px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-add-cart {
+        background: #10b981;
+        color: white;
+    }
+
+    .btn-add-cart:hover {
+        background: #059669;
+        transform: translateY(-2px);
+    }
+
+    .btn-disabled {
+        background: #9ca3af;
+        color: white;
+        cursor: not-allowed;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 4rem;
+        font-size: 1.5rem;
+        color: #6b7280;
+    }
+
+    .loading i {
+        font-size: 3rem;
+        color: #3b82f6;
+        margin-bottom: 1rem;
+    }
+
+    .no-data {
+        text-align: center;
+        padding: 3rem;
+        font-size: 1.2rem;
+        color: #6b7280;
+    }
+
+    @@media (max-width: 768px) {
+        .products-toolbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .filter-section {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .category-select {
+            min-width: 100%;
+        }
+    }
+</style>

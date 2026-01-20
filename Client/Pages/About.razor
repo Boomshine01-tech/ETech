@@ -1,0 +1,240 @@
+@page "/about"
+@inject HttpClient Http
+@using ETechEnergie.Shared.Models
+@using ETechEnergie.Shared.Configuration
+
+<PageTitle>À Propos - e-Tech Energie+</PageTitle>
+
+<div class="page-header">
+    <div class="container">
+        <h1>À Propos de @CompanyInfo.CompanyName</h1>
+        <p>@CompanyInfo.Slogan</p>
+    </div>
+</div>
+
+<section class="about-section">
+    <div class="container">
+        <div class="about-content">
+            <h2>Notre Histoire</h2>
+            <p>
+                e-Tech Energie+ est une entreprise sénégalaise spécialisée dans les solutions techniques et énergétiques.
+                Basée à Thiès, nous nous engageons à fournir des services de qualité supérieure à nos clients à travers
+                tout le Sénégal.
+            </p>
+            <p>
+                Notre expertise couvre un large éventail de domaines, de l'installation électrique aux énergies renouvelables,
+                en passant par la maintenance industrielle et le génie civil. Nous sommes fiers de contribuer au développement
+                technologique et énergétique de notre région.
+            </p>
+        </div>
+
+        <div class="values-grid">
+            <div class="value-card">
+                <i class="fas fa-award"></i>
+                <h3>Excellence</h3>
+                <p>Nous visons l'excellence dans chaque projet, garantissant qualité et professionnalisme</p>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-handshake"></i>
+                <h3>Fiabilité</h3>
+                <p>Des partenaires de confiance pour vos projets les plus importants</p>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-lightbulb"></i>
+                <h3>Innovation</h3>
+                <p>Nous adoptons les dernières technologies pour des solutions modernes</p>
+            </div>
+            <div class="value-card">
+                <i class="fas fa-users"></i>
+                <h3>Proximité</h3>
+                <p>Une équipe à l'écoute de vos besoins et disponible à tout moment</p>
+            </div>
+        </div>
+
+        <div class="team-section">
+            <h2>Rencontrez Notre Équipe</h2>
+            <p class="team-intro">
+                Notre force réside dans notre équipe de professionnels qualifiés et passionnés.
+            </p>
+            
+            @if (teamMembers == null)
+            {
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Chargement de l'équipe...</p>
+                </div>
+            }
+            else if (!teamMembers.Any())
+            {
+                <p class="no-data">Aucun membre d'équipe à afficher.</p>
+            }
+            else
+            {
+                <div class="team-grid">
+                    @foreach (var member in teamMembers)
+                    {
+                        <div class="team-member-card">
+                            <div class="member-photo">
+                                <img src="@member.ImageUrl" alt="@member.Name" />
+                            </div>
+                            <div class="member-info">
+                                <h3>@member.Name</h3>
+                                <p class="member-position">@member.Position</p>
+                                <p class="member-bio">@member.Bio</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+@code {
+    private TeamMember[]? teamMembers;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            teamMembers = await Http.GetFromJsonAsync<TeamMember[]>("api/team");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur: {ex.Message}");
+        }
+    }
+}
+
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        padding: 60px 20px;
+        text-align: center;
+    }
+
+    .page-header h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .about-section {
+        padding: 60px 20px;
+    }
+
+    .about-content {
+        margin-bottom: 4rem;
+    }
+
+    .about-content h2 {
+        font-size: 2.5rem;
+        color: #1e3a8a;
+        margin-bottom: 1.5rem;
+    }
+
+    .about-content p {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #4b5563;
+        margin-bottom: 1rem;
+    }
+
+    .values-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-bottom: 4rem;
+    }
+
+    .value-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: transform 0.3s;
+    }
+
+    .value-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .value-card i {
+        font-size: 3rem;
+        color: #3b82f6;
+        margin-bottom: 1rem;
+    }
+
+    .value-card h3 {
+        font-size: 1.5rem;
+        color: #1e3a8a;
+        margin-bottom: 1rem;
+    }
+
+    .team-section h2 {
+        font-size: 2.5rem;
+        color: #1e3a8a;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .team-intro {
+        text-align: center;
+        font-size: 1.1rem;
+        color: #6b7280;
+        margin-bottom: 3rem;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .team-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 2rem;
+    }
+
+    .team-member {
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .member-avatar {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+    }
+
+    .member-avatar i {
+        font-size: 2.5rem;
+        color: #3b82f6;
+    }
+
+    .team-member h4 {
+        font-size: 1.2rem;
+        color: #1e3a8a;
+        margin-bottom: 0.5rem;
+    }
+
+    .team-member p {
+        color: #6b7280;
+    }
+
+    @@media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 2rem;
+        }
+    }
+</style>
