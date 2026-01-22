@@ -146,4 +146,4 @@ C:\Bureau\MonApp\Server\obj\Debug\net9.0\ref\ETechEnergie.Server.dll
 C:\Bureau\MonApp\Server\bin\Debug\net9.0\BouncyCastle.Cryptography.dll
 C:\Bureau\MonApp\Server\bin\Debug\net9.0\MailKit.dll
 C:\Bureau\MonApp\Server\bin\Debug\net9.0\MimeKit.dll
-C:\Bureau\MonApp\Server\bin\Debug\net9.0\appsettings.Docker.json
+C:\Bureau\MonApp\Server\obj\Debug\net9.0\ETechEnergie.Server.sourcelink.json

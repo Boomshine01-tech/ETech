@@ -3,37 +3,62 @@ using ETechEnergie.Server.Data;
 using ETechEnergie.Server.Configuration;
 using ETechEnergie.Server.Services;
 using System.Text.Json.Serialization;
-using Npgsql.EntityFrameworkCore.PostgreSQL;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ IMPORTANT : Charger appsettings.Docker.json si en environnement Docker
-if (builder.Environment.IsProduction())
+/// =======================================================
+/// CONFIGURATION POSTGRESQL (RENDER / LOCAL)
+/// =======================================================
+string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// Render fournit DATABASE_URL
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+if (!string.IsNullOrEmpty(databaseUrl))
 {
-    builder.Configuration.AddJsonFile("appsettings.Docker.json", optional: true, reloadOnChange: true);
+    Console.WriteLine("🌍 DATABASE_URL détectée (Render)");
+
+    var uri = new Uri(databaseUrl);
+    var userInfo = uri.UserInfo.Split(':');
+
+    var port = uri.Port > 0 ? uri.Port : 5432;
+
+    Console.WriteLine($"📦 PostgreSQL Host     : {uri.Host}");
+    Console.WriteLine($"📦 PostgreSQL Port     : {port}");
+    Console.WriteLine($"📦 PostgreSQL Database : {uri.AbsolutePath.Trim('/')}");
+    Console.WriteLine($"📦 PostgreSQL User     : {userInfo[0]}");
+
+    connectionString =
+        $"Host={uri.Host};" +
+        $"Port={port};" +
+        $"Database={uri.AbsolutePath.Trim('/')};" +
+        $"Username={userInfo[0]};" +
+        $"Password={userInfo[1]};" +
+        $"SSL Mode=Require;" +
+        $"Trust Server Certificate=true";
+}
+else
+{
+    Console.WriteLine("⚠️ DATABASE_URL absente → utilisation appsettings");
 }
 
-// Configuration de la base de données
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-Console.WriteLine($"🔌 Connexion à la base de données : {connectionString?.Split(';')[0]}");
+Console.WriteLine("🔌 Chaîne de connexion PostgreSQL prête");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(
-        connectionString,
-        npgsqlOptionsAction: npgsqlOptions =>
-        {
-            npgsqlOptions.EnableRetryOnFailure(
-                maxRetryCount: 5,
-                maxRetryDelay: TimeSpan.FromSeconds(30),
-                errorCodesToAdd: null);
-        }));
+{
+    options.UseNpgsql(connectionString);
+   });
 
-// Configuration des emails
-builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
+
+/// =======================================================
+/// SERVICES
+/// =======================================================
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
+
 builder.Services.AddScoped<IEmailService, EmailService>();
 
-// Configuration des contrôleurs
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -44,10 +69,9 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowBlazorClient", policy =>
+    options.AddPolicy("AllowAll", policy =>
     {
         policy.AllowAnyOrigin()
               .AllowAnyMethod()
@@ -55,80 +79,61 @@ builder.Services.AddCors(options =>
     });
 });
 
+
+/// =======================================================
+/// BUILD APP
+/// =======================================================
 var app = builder.Build();
 
-// ✅ NOUVEAU : Attendre que PostgreSQL soit prêt et initialiser la base
+
+/// =======================================================
+/// MIGRATIONS AUTOMATIQUES
+/// =======================================================
 using (var scope = app.Services.CreateScope())
 {
-    var retryCount = 0;
-    const int maxRetries = 10;
-    
-    while (retryCount < maxRetries)
+    try
     {
-        try
-        {
-            Console.WriteLine($"⏳ Tentative de connexion à PostgreSQL ({retryCount + 1}/{maxRetries})...");
-            
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            
-            // ✅ Attendre que la base de données soit accessible
-            await context.Database.CanConnectAsync();
-            
-            Console.WriteLine("✅ Connexion à PostgreSQL établie");
-            
-            // ✅ Appliquer les migrations ou créer la base
-            await context.Database.EnsureCreatedAsync();
-            
-            // ✅ Initialiser les données
-            await DbInitializer.Initialize(context);
-            
-            Console.WriteLine("✅ Base de données initialisée avec succès");
-            break;
-        }
-        catch (Exception ex)
-        {
-            retryCount++;
-            Console.WriteLine($"❌ Erreur de connexion ({retryCount}/{maxRetries}): {ex.Message}");
-            
-            if (retryCount >= maxRetries)
-            {
-                Console.WriteLine("❌ Impossible de se connecter à PostgreSQL après plusieurs tentatives");
-                throw;
-            }
-            
-            Console.WriteLine("⏳ Nouvelle tentative dans 5 secondes...");
-            await Task.Delay(5000);
-        }
+        Console.WriteLine("⏳ Application des migrations EF Core...");
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await context.Database.MigrateAsync();
+        Console.WriteLine("✅ Migrations appliquées avec succès");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("❌ ERREUR lors des migrations PostgreSQL");
+        Console.WriteLine(ex.Message);
+        throw;
     }
 }
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-    app.UseWebAssemblyDebugging();
-}
 
-// ✅ En production, activer Swagger aussi (utile pour tester dans Docker)
-if (app.Environment.IsProduction())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+/// =======================================================
+/// MIDDLEWARE
+/// =======================================================
+app.UseSwagger();
+app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
-app.UseCors("AllowBlazorClient");
 app.UseRouting();
+app.UseCors("AllowAll");
 app.UseAuthorization();
 
 app.MapControllers();
 app.MapFallbackToFile("index.html");
 
-Console.WriteLine("🚀 Application démarrée");
+
+/// =======================================================
+/// PORT RENDER
+/// =======================================================
+var portEnv = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+app.Urls.Add($"http://0.0.0.0:{portEnv}");
+
+Console.WriteLine("==========================================");
+Console.WriteLine("🚀 APPLICATION DÉMARRÉE");
 Console.WriteLine($"🌐 Environnement : {app.Environment.EnvironmentName}");
-Console.WriteLine($"🔗 URL : http://localhost:8080");
+Console.WriteLine($"🔗 Port          : {portEnv}");
+Console.WriteLine("==========================================");
 
 app.Run();

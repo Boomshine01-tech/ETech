@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ETechEnergie.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260107082233_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260122050114_InitialRenderMigration")]
+    partial class InitialRenderMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -56,6 +56,9 @@ namespace ETechEnergie.Server.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CartItemsJson")
+                        .HasColumnType("text");
 
                     b.Property<string>("Company")
                         .HasMaxLength(100)

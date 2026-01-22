@@ -54,6 +54,9 @@ namespace ETechEnergie.Server.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("CartItemsJson")
+                        .HasColumnType("text");
+
                     b.Property<string>("Company")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");

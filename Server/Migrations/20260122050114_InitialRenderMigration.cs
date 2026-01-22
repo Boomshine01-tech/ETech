@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ETechEnergie.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialRenderMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -37,6 +37,7 @@ namespace ETechEnergie.Server.Migrations
                     Company = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     Phone = table.Column<string>(type: "text", nullable: false),
                     Message = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: false),
+                    CartItemsJson = table.Column<string>(type: "text", nullable: true),
                     SubmittedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     IsProcessed = table.Column<bool>(type: "boolean", nullable: false)
                 },

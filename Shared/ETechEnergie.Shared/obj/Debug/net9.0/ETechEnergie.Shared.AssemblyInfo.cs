@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ETechEnergie.Shared")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ea53682784add8bd50de45fc8dc83fb774a6b965")]
 [assembly: System.Reflection.AssemblyProductAttribute("ETechEnergie.Shared")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ETechEnergie.Shared")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

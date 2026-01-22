@@ -9,3 +9,4 @@ C:\Bureau\MonApp\Shared\ETechEnergie.Shared\obj\Debug\net9.0\ETechEnergie.Shared
 C:\Bureau\MonApp\Shared\ETechEnergie.Shared\obj\Debug\net9.0\refint\ETechEnergie.Shared.dll
 C:\Bureau\MonApp\Shared\ETechEnergie.Shared\obj\Debug\net9.0\ETechEnergie.Shared.pdb
 C:\Bureau\MonApp\Shared\ETechEnergie.Shared\obj\Debug\net9.0\ref\ETechEnergie.Shared.dll
+C:\Bureau\MonApp\Shared\ETechEnergie.Shared\obj\Debug\net9.0\ETechEnergie.Shared.sourcelink.json
