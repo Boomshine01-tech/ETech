@@ -97,7 +97,7 @@ using (var scope = app.Services.CreateScope())
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await context.Database.MigrateAsync();
         Console.WriteLine("✅ Migrations appliquées avec succès");
-        Dbinitializer.Initialize(context);
+        DbInitializer.Initialize(context);
     }
     catch (Exception ex)
     {
