@@ -159,7 +159,13 @@ public class EmailService : IEmailService
             email.Body = bodyBuilder.ToMessageBody();
 
             using var smtp = new SmtpClient();
-            await smtp.ConnectAsync(_emailSettings.SmtpServer, _emailSettings.SmtpPort, SecureSocketOptions.StartTls);
+            smtp.Timeout = 30000; // 30 secondes
+        
+            await smtp.ConnectAsync(
+                _emailSettings.SmtpServer, 
+                465,  // Port SSL au lieu de 587
+                SecureSocketOptions.SslOnConnect  // Au lieu de StartTls
+            );
             await smtp.AuthenticateAsync(_emailSettings.Username, _emailSettings.Password);
             await smtp.SendAsync(email);
             await smtp.DisconnectAsync(true);
