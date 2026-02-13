@@ -1,0 +1,154 @@
+@inject AuthenticationService AuthService
+@inject NavigationManager Navigation
+
+@if (isAuthenticated && isAuthorized)
+{
+    @ChildContent
+}
+else if (isLoading)
+{
+    <div class="auth-loading">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Vérification...</span>
+        </div>
+        <p>Vérification de l'authentification...</p>
+    </div>
+}
+else if (!isAuthenticated)
+{
+    <div class="auth-error">
+        <i class="fas fa-lock fa-3x"></i>
+        <h3>Accès restreint</h3>
+        <p>Vous devez être connecté pour accéder à cette page.</p>
+        <a href="/login" class="btn btn-primary">Se connecter</a>
+    </div>
+}
+else if (!isAuthorized)
+{
+    <div class="auth-error">
+        <i class="fas fa-ban fa-3x"></i>
+        <h3>Accès refusé</h3>
+        <p>Vous n'avez pas les permissions nécessaires pour accéder à cette page.</p>
+        <a href="/" class="btn btn-secondary">Retour à l'accueil</a>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public bool RequireAdmin { get; set; } = false;
+
+    private bool isAuthenticated = false;
+    private bool isAuthorized = false;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CheckAuthentication();
+    }
+
+    private async Task CheckAuthentication()
+    {
+        isLoading = true;
+
+        try
+        {
+            isAuthenticated = await AuthService.IsAuthenticatedAsync();
+
+            if (isAuthenticated)
+            {
+                if (RequireAdmin)
+                {
+                    isAuthorized = await AuthService.IsAdminAsync();
+                }
+                else
+                {
+                    isAuthorized = true;
+                }
+            }
+
+            // Rediriger si non authentifié
+            if (!isAuthenticated)
+            {
+                Navigation.NavigateTo("/login");
+            }
+            // Rediriger si authentifié mais pas autorisé
+            else if (!isAuthorized)
+            {
+                Navigation.NavigateTo("/");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur lors de la vérification de l'authentification: {ex.Message}");
+            isAuthenticated = false;
+            isAuthorized = false;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}
+
+<style>
+    .auth-loading, .auth-error {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 60vh;
+        padding: 40px 20px;
+        text-align: center;
+    }
+
+    .auth-loading p {
+        margin-top: 20px;
+        color: #6b7280;
+    }
+
+    .auth-error i {
+        color: #3b82f6;
+        margin-bottom: 20px;
+    }
+
+    .auth-error h3 {
+        color: #1e3a8a;
+        margin-bottom: 10px;
+    }
+
+    .auth-error p {
+        color: #6b7280;
+        margin-bottom: 30px;
+    }
+
+    .btn {
+        padding: 12px 30px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-block;
+        transition: all 0.3s;
+    }
+
+    .btn-primary {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #2563eb;
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: #6b7280;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #4b5563;
+    }
+</style>
