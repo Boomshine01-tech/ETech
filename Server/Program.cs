@@ -203,9 +203,7 @@ using (var scope = app.Services.CreateScope())
             await context.SaveChangesAsync();
             
             Console.WriteLine("✅ Utilisateur admin créé:");
-            Console.WriteLine("   Username: admin");
-            Console.WriteLine("   Password: Admin123!");
-            Console.WriteLine("   ⚠️  CHANGEZ CE MOT DE PASSE EN PRODUCTION!");
+    
         }
     }
     catch (Exception ex)
