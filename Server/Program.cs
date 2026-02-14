@@ -54,13 +54,72 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 /// =======================================================
 /// JWT AUTHENTICATION
 /// =======================================================
-var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY") 
-    ?? jwtSettings["SecretKey"] 
-    ?? throw new InvalidOperationException("JWT SecretKey non configurée");
 
 Console.WriteLine("🔐 Configuration JWT Authentication...");
 
+// 1. Lire depuis les variables d'environnement (PRIORITAIRE pour Render)
+var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
+var issuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
+var audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
+var expirationHours = Environment.GetEnvironmentVariable("JWT_EXPIRATION_HOURS");
+
+// 2. Si absent, lire depuis appsettings.json (pour développement local)
+if (string.IsNullOrEmpty(secretKey))
+{
+    var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+    secretKey = jwtSettings["SecretKey"];
+    issuer = jwtSettings["Issuer"];
+    audience = jwtSettings["Audience"];
+    expirationHours = jwtSettings["ExpirationHours"];
+    Console.WriteLine("📝 JWT Config depuis appsettings.json");
+}
+else
+{
+    Console.WriteLine("🌍 JWT Config depuis variables d'environnement Render");
+}
+
+// 3. Valeurs par défaut si toujours vides
+if (string.IsNullOrEmpty(issuer))
+{
+    issuer = "ETechEnergie";
+    Console.WriteLine($"⚠️ JWT_ISSUER absent, utilisation par défaut: {issuer}");
+}
+
+if (string.IsNullOrEmpty(audience))
+{
+    audience = "ETechEnergieClient";
+    Console.WriteLine($"⚠️ JWT_AUDIENCE absent, utilisation par défaut: {audience}");
+}
+
+if (string.IsNullOrEmpty(expirationHours))
+{
+    expirationHours = "24";
+}
+
+// 4. Validation finale
+if (string.IsNullOrEmpty(secretKey))
+{
+    throw new InvalidOperationException(
+        "❌ JWT_SECRET_KEY non configurée !\n" +
+        "Sur Render, ajoutez la variable d'environnement : JWT_SECRET_KEY\n" +
+        "En local, ajoutez-la dans appsettings.json");
+}
+
+if (secretKey.Length < 32)
+{
+    throw new InvalidOperationException(
+        $"❌ JWT_SECRET_KEY trop courte ({secretKey.Length} caractères)!\n" +
+        "La clé doit faire au moins 32 caractères.");
+}
+
+// 5. Afficher la configuration (pour debug)
+Console.WriteLine("✅ Configuration JWT:");
+Console.WriteLine($"   Issuer        : {issuer}");
+Console.WriteLine($"   Audience      : {audience}");
+Console.WriteLine($"   Expiration    : {expirationHours}h");
+Console.WriteLine($"   SecretKey     : {secretKey.Substring(0, Math.Min(10, secretKey.Length))}... ({secretKey.Length} caractères)");
+
+// 6. Configurer l'authentification JWT
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -68,16 +127,22 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
+    options.RequireHttpsMetadata = false; // Pour le développement local
+    options.SaveToken = true;
+    
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
+        
+        ValidIssuer = issuer,
+        ValidAudience = audience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
-        ClockSkew = TimeSpan.Zero // Pas de tolérance sur l'expiration
+        
+        ClockSkew = TimeSpan.Zero,
+        LogValidationExceptions = true
     };
 
     options.Events = new JwtBearerEvents
@@ -85,12 +150,57 @@ builder.Services.AddAuthentication(options =>
         OnAuthenticationFailed = context =>
         {
             Console.WriteLine($"❌ Authentification échouée: {context.Exception.Message}");
+            
+            if (context.Exception is SecurityTokenExpiredException)
+            {
+                Console.WriteLine("   Raison: Token expiré");
+            }
+            else if (context.Exception is SecurityTokenInvalidAudienceException)
+            {
+                Console.WriteLine($"   Raison: Audience invalide");
+                Console.WriteLine($"   Audience attendue: '{audience}'");
+                
+                // Décoder le token pour voir son contenu
+                try
+                {
+                    var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+                    if (!string.IsNullOrEmpty(token))
+                    {
+                        var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+                        var jsonToken = handler.ReadToken(token) as System.IdentityModel.Tokens.Jwt.JwtSecurityToken;
+                        var aud = jsonToken?.Audiences?.FirstOrDefault();
+                        Console.WriteLine($"   Audience dans token: '{aud ?? "null"}'");
+                    }
+                }
+                catch { }
+            }
+            else if (context.Exception is SecurityTokenInvalidIssuerException)
+            {
+                Console.WriteLine($"   Raison: Issuer invalide");
+                Console.WriteLine($"   Issuer attendu: '{issuer}'");
+            }
+            
             return Task.CompletedTask;
         },
         OnTokenValidated = context =>
         {
             var username = context.Principal?.Identity?.Name;
-            Console.WriteLine($"✅ Token validé pour: {username}");
+            var role = context.Principal?.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            Console.WriteLine($"✅ Token validé pour: {username} (Rôle: {role})");
+            return Task.CompletedTask;
+        },
+        OnMessageReceived = context =>
+        {
+            var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            if (!string.IsNullOrEmpty(token))
+            {
+                Console.WriteLine($"🔍 Token reçu (longueur: {token.Length})");
+            }
+            return Task.CompletedTask;
+        },
+        OnChallenge = context =>
+        {
+            Console.WriteLine($"⚠️ Challenge: {context.Error} - {context.ErrorDescription}");
             return Task.CompletedTask;
         }
     };
@@ -98,7 +208,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-Console.WriteLine("✅ JWT Authentication configurée");
+Console.WriteLine("✅ JWT Authentication configurée avec succès");
 
 /// =======================================================
 /// SERVICES
