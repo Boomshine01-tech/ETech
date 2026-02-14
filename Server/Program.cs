@@ -300,7 +300,7 @@ using (var scope = app.Services.CreateScope())
         await context.Database.MigrateAsync();
         Console.WriteLine("✅ Migrations appliquées avec succès");
         
-        DbInitializer.Initialize(context);
+        await DbInitializer.Initialize(context);
         
         if (!await context.Users.AnyAsync())
         {
