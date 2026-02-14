@@ -24,7 +24,11 @@ public class AuthenticationService
     {
         try
         {
+            Console.WriteLine($"🔐 Tentative de connexion pour: {request.Username}");
+            
             var response = await _httpClient.PostAsJsonAsync("api/auth/login", request);
+            
+            Console.WriteLine($"   Status: {response.StatusCode}");
             
             if (response.IsSuccessStatusCode)
             {
@@ -32,22 +36,30 @@ public class AuthenticationService
                 
                 if (loginResponse != null && loginResponse.Success && loginResponse.Token != null)
                 {
-                    // Sauvegarder le token dans LocalStorage
+                    Console.WriteLine("✅ Connexion réussie");
+                    Console.WriteLine($"   Username: {loginResponse.Username}");
+                    Console.WriteLine($"   Role: {loginResponse.Role}");
+                    Console.WriteLine($"   Token (début): {loginResponse.Token.Substring(0, Math.Min(30, loginResponse.Token.Length))}...");
+                    
+                    // Sauvegarder le token
                     await _localStorage.SetItemAsync(TokenKey, loginResponse.Token);
+                    Console.WriteLine($"   Token sauvegardé dans LocalStorage");
                     
                     // Sauvegarder les infos utilisateur
-                    await _localStorage.SetItemAsync(UserKey, new
+                    var userData = new
                     {
                         loginResponse.Username,
                         loginResponse.Email,
                         loginResponse.Role
-                    });
+                    };
+                    await _localStorage.SetItemAsync(UserKey, userData);
+                    Console.WriteLine($"   User data sauvegardée");
 
-                    // Configurer le header Authorization pour les futures requêtes
+                    // Configurer le header Authorization
                     _httpClient.DefaultRequestHeaders.Authorization = 
                         new AuthenticationHeaderValue("Bearer", loginResponse.Token);
+                    Console.WriteLine($"   Header Authorization configuré");
 
-                    // Notifier le changement d'état
                     OnAuthStateChanged?.Invoke();
 
                     return loginResponse;
@@ -55,6 +67,7 @@ public class AuthenticationService
             }
 
             var errorResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
+            Console.WriteLine($"❌ Échec connexion: {errorResponse?.Message}");
             return errorResponse ?? new LoginResponse 
             { 
                 Success = false, 
@@ -63,7 +76,7 @@ public class AuthenticationService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erreur lors de la connexion: {ex.Message}");
+            Console.WriteLine($"❌ Exception lors de la connexion: {ex.Message}");
             return new LoginResponse 
             { 
                 Success = false, 
@@ -110,7 +123,7 @@ public class AuthenticationService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erreur lors de l'enregistrement: {ex.Message}");
+            Console.WriteLine($"❌ Erreur lors de l'enregistrement: {ex.Message}");
             return new LoginResponse 
             { 
                 Success = false, 
@@ -121,27 +134,62 @@ public class AuthenticationService
 
     public async Task LogoutAsync()
     {
+        Console.WriteLine("🚪 Déconnexion...");
         await _localStorage.RemoveItemAsync(TokenKey);
         await _localStorage.RemoveItemAsync(UserKey);
         _httpClient.DefaultRequestHeaders.Authorization = null;
+        Console.WriteLine("✅ Déconnexion réussie");
         OnAuthStateChanged?.Invoke();
     }
 
     public async Task<bool> IsAuthenticatedAsync()
     {
-        var token = await _localStorage.GetItemAsync<string>(TokenKey);
-        return !string.IsNullOrEmpty(token);
+        try
+        {
+            var token = await _localStorage.GetItemAsync<string>(TokenKey);
+            var isAuth = !string.IsNullOrEmpty(token);
+            Console.WriteLine($"🔍 IsAuthenticated: {isAuth}");
+            return isAuth;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Erreur IsAuthenticated: {ex.Message}");
+            return false;
+        }
     }
 
     public async Task<bool> IsAdminAsync()
     {
         try
         {
-            var user = await _localStorage.GetItemAsync<dynamic>(UserKey);
-            return user?.Role == "Admin";
+            var user = await _localStorage.GetItemAsync<System.Text.Json.JsonElement>(UserKey);
+            
+            if (user.ValueKind == System.Text.Json.JsonValueKind.Undefined || 
+                user.ValueKind == System.Text.Json.JsonValueKind.Null)
+            {
+                Console.WriteLine("⚠️ IsAdmin: Pas de données utilisateur");
+                return false;
+            }
+
+            string? role = null;
+            
+            if (user.TryGetProperty("Role", out var roleProperty))
+            {
+                role = roleProperty.GetString();
+            }
+            else if (user.TryGetProperty("role", out var roleLowerProperty))
+            {
+                role = roleLowerProperty.GetString();
+            }
+
+            var isAdmin = role == "Admin";
+            Console.WriteLine($"🔍 IsAdmin: {isAdmin} (Role: {role ?? "null"})");
+            
+            return isAdmin;
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine($"❌ Erreur IsAdmin: {ex.Message}");
             return false;
         }
     }
@@ -150,27 +198,73 @@ public class AuthenticationService
     {
         try
         {
-            var user = await _localStorage.GetItemAsync<dynamic>(UserKey);
-            return (user?.Username?.ToString(), user?.Email?.ToString(), user?.Role?.ToString());
+            var user = await _localStorage.GetItemAsync<System.Text.Json.JsonElement>(UserKey);
+            
+            if (user.ValueKind == System.Text.Json.JsonValueKind.Undefined || 
+                user.ValueKind == System.Text.Json.JsonValueKind.Null)
+            {
+                Console.WriteLine("⚠️ GetCurrentUser: Pas de données utilisateur");
+                return (null, null, null);
+            }
+
+            string? username = null, email = null, role = null;
+
+            if (user.TryGetProperty("Username", out var usernameProperty))
+                username = usernameProperty.GetString();
+            
+            if (user.TryGetProperty("Email", out var emailProperty))
+                email = emailProperty.GetString();
+            
+            if (user.TryGetProperty("Role", out var roleProperty))
+                role = roleProperty.GetString();
+            
+            Console.WriteLine($"👤 GetCurrentUser: {username} | {role}");
+            
+            return (username, email, role);
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine($"❌ Erreur GetCurrentUser: {ex.Message}");
             return (null, null, null);
         }
     }
 
     public async Task InitializeAsync()
     {
-        var token = await _localStorage.GetItemAsync<string>(TokenKey);
-        if (!string.IsNullOrEmpty(token))
+        try
         {
-            _httpClient.DefaultRequestHeaders.Authorization = 
-                new AuthenticationHeaderValue("Bearer", token);
+            Console.WriteLine("🔧 Initialisation AuthenticationService...");
+            
+            var token = await _localStorage.GetItemAsync<string>(TokenKey);
+            
+            if (!string.IsNullOrEmpty(token))
+            {
+                Console.WriteLine($"   Token trouvé (longueur: {token.Length})");
+                _httpClient.DefaultRequestHeaders.Authorization = 
+                    new AuthenticationHeaderValue("Bearer", token);
+                Console.WriteLine("   Header Authorization configuré");
+            }
+            else
+            {
+                Console.WriteLine("   Aucun token trouvé");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Erreur initialisation: {ex.Message}");
         }
     }
 
     public async Task<string?> GetTokenAsync()
     {
-        return await _localStorage.GetItemAsync<string>(TokenKey);
+        try
+        {
+            return await _localStorage.GetItemAsync<string>(TokenKey);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Erreur GetToken: {ex.Message}");
+            return null;
+        }
     }
 }
