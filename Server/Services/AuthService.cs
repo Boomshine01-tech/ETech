@@ -147,11 +147,8 @@ public class AuthService : IAuthService
 
     public string GenerateJwtToken(User user)
     {
-        var jwtSettings = _configuration.GetSection("JwtSettings");
-        var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey non configurée");
-        var issuer = jwtSettings["Issuer"] ?? "ETechEnergie";
-        var audience = jwtSettings["Audience"] ?? "ETechEnergieClient";
         
+        private readonly JwtConfiguration _jwtConfig;
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -165,8 +162,8 @@ public class AuthService : IAuthService
         };
 
         var token = new JwtSecurityToken(
-            issuer: issuer, 
-            audience: audience,
+            issuer: _jwtConfig.Issuer,  
+            audience: _jwtConfig.Audience
             claims: claims,
             expires: DateTime.UtcNow.AddHours(Convert.ToDouble(jwtSettings["ExpirationHours"] ?? "24")),
             signingCredentials: credentials
