@@ -14,11 +14,23 @@
     <div class="admin-header">
         <div class="container">
             <div class="header-content">
-                <h1><i class="fas fa-cog"></i> Gestion des Produits</h1>
+                <div class="header-left">
+                    <i class="fas fa-boxes"></i>
+                    <div>
+                        <h1>Gestion des Produits</h1>
+                        <p class="subtitle">Gérez votre catalogue de produits</p>
+                    </div>
+                </div>
                 <div class="user-info">
-                    <span>Connecté en tant que: <strong>@currentUsername</strong></span>
-                    <button class="btn btn-logout" @onclick="Logout">
-                        <i class="fas fa-sign-out-alt"></i> Déconnexion
+                    <div class="user-avatar">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="user-details">
+                        <span class="username">@currentUsername</span>
+                        <span class="role">Administrateur</span>
+                    </div>
+                    <button class="btn-logout" @onclick="Logout" title="Déconnexion">
+                        <i class="fas fa-sign-out-alt"></i>
                     </button>
                 </div>
             </div>
@@ -26,17 +38,101 @@
     </div>
 
     <div class="admin-container">
-        <div class="admin-actions">
-            <button class="btn btn-add" @onclick="ShowAddForm">
-                <i class="fas fa-plus"></i> Ajouter un Produit
+        <div class="toolbar">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Rechercher un produit..." @bind="searchQuery" @bind:event="oninput" />
+            </div>
+            <button class="btn-primary" @onclick="ShowAddForm">
+                <i class="fas fa-plus"></i>
+                <span>Nouveau Produit</span>
             </button>
         </div>
 
-        @if (showForm)
+        @if (products == null)
         {
-            <div class="product-form-card">
-                <div class="form-header">
-                    <h2>@(editingProduct?.Id > 0 ? "Modifier" : "Nouveau") Produit</h2>
+            <div class="loading-state">
+                <div class="spinner"></div>
+                <p>Chargement des produits...</p>
+            </div>
+        }
+        else if (FilteredProducts.Length == 0)
+        {
+            <div class="empty-state">
+                <i class="fas fa-box-open"></i>
+                <h3>Aucun produit trouvé</h3>
+                <p>@(string.IsNullOrEmpty(searchQuery) ? "Commencez par ajouter votre premier produit" : "Aucun produit ne correspond à votre recherche")</p>
+                @if (string.IsNullOrEmpty(searchQuery))
+                {
+                    <button class="btn-primary" @onclick="ShowAddForm">
+                        <i class="fas fa-plus"></i> Ajouter un Produit
+                    </button>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="products-grid">
+                @foreach (var product in FilteredProducts)
+                {
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="@product.ImageUrl" alt="@product.Name" />
+                            <div class="product-badges">
+                                @if (product.Stock == 0)
+                                {
+                                    <span class="badge badge-danger">Rupture</span>
+                                }
+                                else if (product.Stock < 10)
+                                {
+                                    <span class="badge badge-warning">Stock faible</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-success">En stock</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="product-content">
+                            <div class="product-category">@product.Category?.Name</div>
+                            <h3 class="product-name">@product.Name</h3>
+                            <p class="product-description">@product.Description</p>
+                            <div class="product-footer">
+                                <div class="product-info">
+                                    <div class="price">
+                                        <span class="price-label">Prix</span>
+                                        <span class="price-value">@product.Price.ToString("N0") FCFA</span>
+                                    </div>
+                                    <div class="stock">
+                                        <span class="stock-label">Stock</span>
+                                        <span class="stock-value">@product.Stock unités</span>
+                                    </div>
+                                </div>
+                                <div class="product-actions">
+                                    <button class="btn-icon btn-edit" @onclick="() => EditProduct(product)" title="Modifier">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn-icon btn-delete" @onclick="() => DeleteProduct(product)" title="Supprimer">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    @if (showForm)
+    {
+        <div class="modal-overlay" @onclick="CloseForm">
+            <div class="modal-content" @onclick:stopPropagation="true">
+                <div class="modal-header">
+                    <div>
+                        <h2>@(editingProduct?.Id > 0 ? "Modifier le produit" : "Nouveau produit")</h2>
+                        <p class="modal-subtitle">Remplissez tous les champs obligatoires (*)</p>
+                    </div>
                     <button class="btn-close" @onclick="CloseForm">
                         <i class="fas fa-times"></i>
                     </button>
@@ -44,152 +140,118 @@
                 
                 <EditForm Model="@editingProduct" OnValidSubmit="SaveProduct">
                     <DataAnnotationsValidator />
+                    
+                    <div class="modal-body">
+                        <div class="form-section">
+                            <h3 class="section-title">Informations générales</h3>
+                            
+                            <div class="form-group">
+                                <label>Nom du produit <span class="required">*</span></label>
+                                <InputText class="form-control" @bind-Value="editingProduct!.Name" placeholder="Ex: Panneau solaire 300W" />
+                                <ValidationMessage For="@(() => editingProduct.Name)" />
+                            </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Nom du produit *</label>
-                            <InputText class="form-control" @bind-Value="editingProduct!.Name" />
-                            <ValidationMessage For="@(() => editingProduct.Name)" />
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Catégorie <span class="required">*</span></label>
+                                    <InputSelect class="form-control" @bind-Value="editingProduct.CategoryId">
+                                        <option value="0">-- Sélectionner une catégorie --</option>
+                                        @if (categories != null)
+                                        {
+                                            @foreach (var cat in categories)
+                                            {
+                                                <option value="@cat.Id">@cat.Name</option>
+                                            }
+                                        }
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => editingProduct.CategoryId)" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Prix (FCFA) <span class="required">*</span></label>
+                                    <div class="input-group">
+                                        <InputNumber class="form-control" @bind-Value="editingProduct.Price" placeholder="0" />
+                                        <span class="input-suffix">FCFA</span>
+                                    </div>
+                                    <ValidationMessage For="@(() => editingProduct.Price)" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Stock <span class="required">*</span></label>
+                                    <InputNumber class="form-control" @bind-Value="editingProduct.Stock" placeholder="0" />
+                                    <ValidationMessage For="@(() => editingProduct.Stock)" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Description <span class="required">*</span></label>
+                                <InputTextArea class="form-control" @bind-Value="editingProduct.Description" 
+                                             rows="4" placeholder="Décrivez les caractéristiques du produit..." />
+                                <ValidationMessage For="@(() => editingProduct.Description)" />
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label>Prix (FCFA) *</label>
-                            <InputNumber class="form-control" @bind-Value="editingProduct.Price" />
-                            <ValidationMessage For="@(() => editingProduct.Price)" />
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Catégorie *</label>
-                            <InputSelect class="form-control" @bind-Value="editingProduct.CategoryId">
-                                <option value="0">-- Sélectionner --</option>
-                                @if (categories != null)
+                        <div class="form-section">
+                            <h3 class="section-title">Image du produit</h3>
+                            
+                            <div class="image-upload-zone">
+                                @if (string.IsNullOrEmpty(editingProduct.ImageUrl))
                                 {
-                                    @foreach (var cat in categories)
-                                    {
-                                        <option value="@cat.Id">@cat.Name</option>
-                                    }
+                                    <label for="imageUpload" class="upload-label">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p>Cliquez pour choisir une image</p>
+                                        <span class="upload-hint">PNG, JPG ou WEBP (max. 5MB)</span>
+                                    </label>
                                 }
-                            </InputSelect>
-                            <ValidationMessage For="@(() => editingProduct.CategoryId)" />
-                        </div>
-
-                        <div class="form-group">
-                            <label>Stock *</label>
-                            <InputNumber class="form-control" @bind-Value="editingProduct.Stock" />
-                            <ValidationMessage For="@(() => editingProduct.Stock)" />
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Description *</label>
-                        <InputTextArea class="form-control" @bind-Value="editingProduct.Description" rows="3" />
-                        <ValidationMessage For="@(() => editingProduct.Description)" />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Image du produit</label>
-                        <div class="image-upload-container">
-                            <InputFile OnChange="HandleImageSelected" class="file-input" id="imageUpload" accept="image/*" />
-                            <label for="imageUpload" class="file-label">
-                                <i class="fas fa-cloud-upload-alt"></i>
-                                Choisir une image
-                            </label>
-                            
-                            @if (isUploadingImage)
-                            {
-                                <div class="upload-progress">
-                                    <i class="fas fa-spinner fa-spin"></i> Upload en cours...
-                                </div>
-                            }
-                            
-                            @if (!string.IsNullOrEmpty(editingProduct.ImageUrl))
-                            {
-                                <div class="image-preview">
-                                    <img src="@editingProduct.ImageUrl" alt="Aperçu" />
-                                </div>
-                            }
+                                else
+                                {
+                                    <div class="image-preview-container">
+                                        <img src="@editingProduct.ImageUrl" alt="Aperçu" class="image-preview" />
+                                        <button type="button" class="btn-remove-image" @onclick="RemoveImage">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                        <label for="imageUpload" class="btn-change-image">
+                                            <i class="fas fa-sync-alt"></i> Changer l'image
+                                        </label>
+                                    </div>
+                                }
+                                
+                                <InputFile OnChange="HandleImageSelected" class="file-input" id="imageUpload" accept="image/*" />
+                                
+                                @if (isUploadingImage)
+                                {
+                                    <div class="upload-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill"></div>
+                                        </div>
+                                        <p>Upload en cours...</p>
+                                    </div>
+                                }
+                            </div>
                         </div>
                     </div>
 
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-save" disabled="@isSaving">
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary" @onclick="CloseForm" disabled="@isSaving">
+                            Annuler
+                        </button>
+                        <button type="submit" class="btn-primary" disabled="@isSaving">
                             @if (isSaving)
                             {
-                                <i class="fas fa-spinner fa-spin"></i> <text>Enregistrement...</text>
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <span>Enregistrement...</span>
                             }
                             else
                             {
-                                <i class="fas fa-save"></i> <text>Enregistrer</text>
+                                <i class="fas fa-save"></i>
+                                <span>Enregistrer</span>
                             }
-                        </button>
-                        <button type="button" class="btn btn-cancel" @onclick="CloseForm">
-                            Annuler
                         </button>
                     </div>
                 </EditForm>
             </div>
-        }
-
-        <div class="products-table-card">
-            @if (products == null)
-            {
-                <div class="loading">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <p>Chargement des produits...</p>
-                </div>
-            }
-            else if (products.Length == 0)
-            {
-                <div class="empty-state">
-                    <i class="fas fa-box-open fa-3x"></i>
-                    <p>Aucun produit pour le moment</p>
-                </div>
-            }
-            else
-            {
-                <table class="products-table">
-                    <thead>
-                        <tr>
-                            <th>Image</th>
-                            <th>Nom</th>
-                            <th>Catégorie</th>
-                            <th>Prix</th>
-                            <th>Stock</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var product in products)
-                        {
-                            <tr>
-                                <td>
-                                    <img src="@product.ImageUrl" alt="@product.Name" class="product-thumb" />
-                                </td>
-                                <td>@product.Name</td>
-                                <td>@product.Category?.Name</td>
-                                <td>@product.Price.ToString("N0") FCFA</td>
-                                <td>
-                                    <span class="stock-badge @(product.Stock > 0 ? "in-stock" : "out-of-stock")">
-                                        @product.Stock
-                                    </span>
-                                </td>
-                                <td>
-                                    <button class="btn-action btn-edit" @onclick="() => EditProduct(product)">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn-action btn-delete" @onclick="() => DeleteProduct(product)">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            }
         </div>
-    </div>
+    }
 </AuthGuard>
 
 @code {
@@ -200,6 +262,22 @@
     private bool isSaving = false;
     private bool isUploadingImage = false;
     private string? currentUsername;
+    private string searchQuery = "";
+
+    private Product[] FilteredProducts
+    {
+        get
+        {
+            if (products == null) return Array.Empty<Product>();
+            if (string.IsNullOrWhiteSpace(searchQuery)) return products;
+            
+            return products.Where(p => 
+                p.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                (p.Description?.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (p.Category?.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ?? false)
+            ).ToArray();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -217,14 +295,12 @@
     {
         try
         {
-            // Charger les produits
             var response = await Http.GetAsync("api/products");
             if (response.IsSuccessStatusCode)
             {
                 products = await response.Content.ReadFromJsonAsync<Product[]>();
             }
             
-            // Charger les catégories
             categories = await Http.GetFromJsonAsync<Category[]>("api/categories");
         }
         catch (Exception ex)
@@ -262,6 +338,14 @@
         showForm = false;
     }
 
+    private void RemoveImage()
+    {
+        if (editingProduct != null)
+        {
+            editingProduct.ImageUrl = null;
+        }
+    }
+
     private async Task HandleImageSelected(InputFileChangeEventArgs e)
     {
         isUploadingImage = true;
@@ -270,14 +354,12 @@
             var file = e.File;
             if (file != null)
             {
-                // Créer le contenu multipart
                 using var content = new MultipartFormDataContent();
-                using var fileStream = file.OpenReadStream(maxAllowedSize: 5_000_000); // 5MB max
+                using var fileStream = file.OpenReadStream(maxAllowedSize: 5_000_000);
                 using var streamContent = new StreamContent(fileStream);
                 streamContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
                 content.Add(streamContent, "file", file.Name);
 
-                // Upload l'image
                 var response = await Http.PostAsync("api/products/upload-image", content);
                 
                 if (response.IsSuccessStatusCode)
@@ -312,12 +394,10 @@
             
             if (editingProduct!.Id == 0)
             {
-                // Création
                 response = await Http.PostAsJsonAsync("api/products", editingProduct);
             }
             else
             {
-                // Modification
                 response = await Http.PutAsJsonAsync($"api/products/{editingProduct.Id}", editingProduct);
             }
 
@@ -346,7 +426,7 @@
 
     private async Task DeleteProduct(Product product)
     {
-        if (await JS.InvokeAsync<bool>("confirm", $"Supprimer le produit '{product.Name}' ?"))
+        if (await JS.InvokeAsync<bool>("confirm", $"Êtes-vous sûr de vouloir supprimer '{product.Name}' ?\n\nCette action est irréversible."))
         {
             try
             {
@@ -354,7 +434,7 @@
                 
                 if (response.IsSuccessStatusCode)
                 {
-                    NotificationService.ShowSuccess("Produit supprimé");
+                    NotificationService.ShowSuccess("Produit supprimé avec succès");
                     await LoadData();
                 }
                 else
@@ -377,43 +457,801 @@
     }
 }
 
-<!-- Styles restent les mêmes que l'original, on ajoute juste les styles pour le header -->
 <style>
-    .admin-header .header-content {
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    :root {
+        --primary: #3b82f6;
+        --primary-dark: #2563eb;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-400: #9ca3af;
+        --gray-500: #6b7280;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --gray-800: #1f2937;
+        --gray-900: #111827;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Header */
+    .admin-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem 0;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .header-content {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 2rem;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .header-left > i {
+        font-size: 2.5rem;
+        opacity: 0.9;
+    }
+
+    .header-left h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+
+    .subtitle {
+        font-size: 0.875rem;
+        opacity: 0.9;
     }
 
     .user-info {
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: 1rem;
     }
 
-    .user-info span {
-        color: white;
-        font-size: 0.9rem;
+    .user-avatar {
+        width: 45px;
+        height: 45px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
     }
 
-    .user-info strong {
-        color: #fbbf24;
+    .user-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.125rem;
+    }
+
+    .username {
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .role {
+        font-size: 0.75rem;
+        opacity: 0.8;
     }
 
     .btn-logout {
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.15);
         border: 1px solid rgba(255, 255, 255, 0.3);
-        padding: 8px 16px;
-        border-radius: 6px;
+        border-radius: 10px;
+        color: white;
         cursor: pointer;
-        transition: all 0.3s;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
     }
 
     .btn-logout:hover {
-        background: rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.25);
         transform: translateY(-2px);
     }
 
-    /* Tous les autres styles de l'Admin.razor original restent identiques */
+    /* Container */
+    .admin-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* Toolbar */
+    .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        flex: 1;
+        max-width: 400px;
+        position: relative;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray-400);
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.75rem;
+        border: 1px solid var(--gray-300);
+        border-radius: 10px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .search-box input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Buttons */
+    .btn-primary, .btn-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .btn-secondary {
+        background: var(--gray-100);
+        color: var(--gray-700);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+        background: var(--gray-200);
+    }
+
+    /* Products Grid */
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .product-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .product-image {
+        position: relative;
+        width: 100%;
+        height: 200px;
+        background: var(--gray-100);
+        overflow: hidden;
+    }
+
+    .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .product-badges {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .badge {
+        padding: 0.375rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        backdrop-filter: blur(10px);
+    }
+
+    .badge-success {
+        background: rgba(16, 185, 129, 0.9);
+        color: white;
+    }
+
+    .badge-warning {
+        background: rgba(245, 158, 11, 0.9);
+        color: white;
+    }
+
+    .badge-danger {
+        background: rgba(239, 68, 68, 0.9);
+        color: white;
+    }
+
+    .product-content {
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    .product-category {
+        font-size: 0.75rem;
+        color: var(--primary);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+    }
+
+    .product-name {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+    }
+
+    .product-description {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+        flex: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .product-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--gray-200);
+    }
+
+    .product-info {
+        display: flex;
+        gap: 1.5rem;
+        flex: 1;
+    }
+
+    .price, .stock {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .price-label, .stock-label {
+        font-size: 0.7rem;
+        color: var(--gray-500);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .price-value {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--gray-900);
+    }
+
+    .stock-value {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--gray-700);
+    }
+
+    .product-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+
+    .btn-edit {
+        background: var(--gray-100);
+        color: var(--gray-700);
+    }
+
+    .btn-edit:hover {
+        background: var(--primary);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-delete {
+        background: var(--gray-100);
+        color: var(--gray-700);
+    }
+
+    .btn-delete:hover {
+        background: var(--danger);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* Loading & Empty States */
+    .loading-state, .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+    }
+
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid var(--gray-200);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .loading-state p, .empty-state p {
+        color: var(--gray-600);
+        margin-top: 1rem;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--gray-300);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        color: var(--gray-900);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state .btn-primary {
+        margin-top: 1.5rem;
+    }
+
+    /* Modal */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 2rem;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 700px;
+        max-height: 90vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: var(--shadow-xl);
+        animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .modal-header {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--gray-200);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .modal-header h2 {
+        font-size: 1.5rem;
+        color: var(--gray-900);
+        margin-bottom: 0.25rem;
+    }
+
+    .modal-subtitle {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+    }
+
+    .btn-close {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: none;
+        background: var(--gray-100);
+        color: var(--gray-600);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .btn-close:hover {
+        background: var(--gray-200);
+        color: var(--gray-900);
+    }
+
+    .modal-body {
+        padding: 2rem;
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+    }
+
+    .form-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--gray-900);
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--gray-200);
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 0.5rem;
+    }
+
+    .required {
+        color: var(--danger);
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--gray-300);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+        font-family: inherit;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+    }
+
+    .input-group {
+        display: flex;
+        align-items: center;
+        gap: 0;
+    }
+
+    .input-group .form-control {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    .input-suffix {
+        padding: 0.75rem;
+        background: var(--gray-100);
+        border: 1px solid var(--gray-300);
+        border-left: none;
+        border-top-right-radius: 8px;
+        border-bottom-right-radius: 8px;
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        white-space: nowrap;
+    }
+
+    /* Image Upload */
+    .image-upload-zone {
+        position: relative;
+    }
+
+    .file-input {
+        display: none;
+    }
+
+    .upload-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 2rem;
+        border: 2px dashed var(--gray-300);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: var(--gray-50);
+    }
+
+    .upload-label:hover {
+        border-color: var(--primary);
+        background: rgba(59, 130, 246, 0.05);
+    }
+
+    .upload-label i {
+        font-size: 3rem;
+        color: var(--gray-400);
+        margin-bottom: 1rem;
+    }
+
+    .upload-label p {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-hint {
+        font-size: 0.875rem;
+        color: var(--gray-500);
+    }
+
+    .image-preview-container {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .image-preview {
+        width: 100%;
+        max-height: 300px;
+        object-fit: contain;
+        border-radius: 12px;
+        border: 1px solid var(--gray-200);
+    }
+
+    .btn-remove-image {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        width: 32px;
+        height: 32px;
+        background: rgba(239, 68, 68, 0.9);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-remove-image:hover {
+        background: var(--danger);
+        transform: scale(1.1);
+    }
+
+    .btn-change-image {
+        padding: 0.625rem 1.25rem;
+        background: var(--gray-100);
+        color: var(--gray-700);
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-change-image:hover {
+        background: var(--gray-200);
+    }
+
+    .upload-progress {
+        margin-top: 1rem;
+        text-align: center;
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: var(--gray-200);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: var(--primary);
+        animation: progress 1.5s ease-in-out infinite;
+    }
+
+    @keyframes progress {
+        0% { width: 0%; }
+        50% { width: 70%; }
+        100% { width: 100%; }
+    }
+
+    .upload-progress p {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+    }
+
+    .modal-footer {
+        padding: 1.5rem 2rem;
+        border-top: 1px solid var(--gray-200);
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
+
+    .validation-message {
+        color: var(--danger);
+        font-size: 0.875rem;
+        margin-top: 0.375rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .admin-container {
+            padding: 1rem;
+        }
+
+        .header-content {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .toolbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-box {
+            max-width: 100%;
+        }
+
+        .products-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .modal-content {
+            margin: 1rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
