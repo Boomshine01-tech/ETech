@@ -1,11 +1,8 @@
 @inject AuthenticationService AuthService
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
-@if (isAuthenticated && isAuthorized)
-{
-    @ChildContent
-}
-else if (isLoading)
+@if (isLoading)
 {
     <div class="auth-loading">
         <div class="spinner-border text-primary" role="status">
@@ -29,8 +26,13 @@ else if (!isAuthorized)
         <i class="fas fa-ban fa-3x"></i>
         <h3>Accès refusé</h3>
         <p>Vous n'avez pas les permissions nécessaires pour accéder à cette page.</p>
+        <p class="debug-info">Rôle requis: Admin | Votre rôle: @currentRole</p>
         <a href="/" class="btn btn-secondary">Retour à l'accueil</a>
     </div>
+}
+else
+{
+    @ChildContent
 }
 
 @code {
@@ -43,6 +45,7 @@ else if (!isAuthorized)
     private bool isAuthenticated = false;
     private bool isAuthorized = false;
     private bool isLoading = true;
+    private string? currentRole;
 
     protected override async Task OnInitializedAsync()
     {
@@ -55,40 +58,92 @@ else if (!isAuthorized)
 
         try
         {
-            isAuthenticated = await AuthService.IsAuthenticatedAsync();
-
-            if (isAuthenticated)
+            Console.WriteLine("🔍 AuthGuard - Vérification de l'authentification...");
+            
+            // 1. Vérifier si un token existe
+            var token = await AuthService.GetTokenAsync();
+            Console.WriteLine($"   Token présent: {!string.IsNullOrEmpty(token)}");
+            
+            if (string.IsNullOrEmpty(token))
             {
-                if (RequireAdmin)
+                Console.WriteLine("❌ Aucun token trouvé");
+                isAuthenticated = false;
+                isAuthorized = false;
+                isLoading = false;
+                
+                // Rediriger vers login
+                await Task.Delay(100); // Petit délai pour éviter les problèmes de navigation
+                Navigation.NavigateTo("/login", forceLoad: true);
+                return;
+            }
+
+            // 2. Vérifier l'authentification
+            isAuthenticated = await AuthService.IsAuthenticatedAsync();
+            Console.WriteLine($"   Authentifié: {isAuthenticated}");
+
+            if (!isAuthenticated)
+            {
+                Console.WriteLine("❌ Utilisateur non authentifié");
+                isAuthorized = false;
+                isLoading = false;
+                
+                // Rediriger vers login
+                await Task.Delay(100);
+                Navigation.NavigateTo("/login", forceLoad: true);
+                return;
+            }
+
+            // 3. Récupérer les infos utilisateur
+            var (username, email, role) = await AuthService.GetCurrentUserAsync();
+            currentRole = role;
+            Console.WriteLine($"   Username: {username}");
+            Console.WriteLine($"   Role: {role}");
+
+            // 4. Vérifier les permissions
+            if (RequireAdmin)
+            {
+                var isAdmin = await AuthService.IsAdminAsync();
+                Console.WriteLine($"   Admin requis: {RequireAdmin}");
+                Console.WriteLine($"   Est Admin: {isAdmin}");
+                isAuthorized = isAdmin;
+                
+                if (!isAuthorized)
                 {
-                    isAuthorized = await AuthService.IsAdminAsync();
+                    Console.WriteLine($"❌ Accès refusé - Rôle requis: Admin, Rôle actuel: {role}");
                 }
                 else
                 {
-                    isAuthorized = true;
+                    Console.WriteLine("✅ Accès autorisé - Utilisateur est Admin");
                 }
             }
-
-            // Rediriger si non authentifié
-            if (!isAuthenticated)
+            else
             {
-                Navigation.NavigateTo("/login");
+                isAuthorized = true;
+                Console.WriteLine("✅ Accès autorisé - Aucun rôle spécifique requis");
             }
-            // Rediriger si authentifié mais pas autorisé
-            else if (!isAuthorized)
+
+            // 5. NE PAS rediriger si autorisé
+            if (isAuthenticated && isAuthorized)
             {
-                Navigation.NavigateTo("/");
+                Console.WriteLine("✅ AuthGuard - Authentification et autorisation réussies");
+            }
+            else if (isAuthenticated && !isAuthorized)
+            {
+                Console.WriteLine("⚠️ AuthGuard - Authentifié mais pas autorisé");
+                // Afficher le message d'erreur, ne pas rediriger
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erreur lors de la vérification de l'authentification: {ex.Message}");
+            Console.WriteLine($"❌ Erreur AuthGuard: {ex.Message}");
+            Console.WriteLine($"   Stack: {ex.StackTrace}");
             isAuthenticated = false;
             isAuthorized = false;
         }
         finally
         {
             isLoading = false;
+            StateHasChanged();
         }
     }
 }
@@ -121,7 +176,16 @@ else if (!isAuthorized)
 
     .auth-error p {
         color: #6b7280;
-        margin-bottom: 30px;
+        margin-bottom: 20px;
+    }
+
+    .debug-info {
+        font-size: 0.9rem;
+        font-family: monospace;
+        background: #f3f4f6;
+        padding: 10px;
+        border-radius: 5px;
+        color: #dc2626;
     }
 
     .btn {
@@ -131,6 +195,8 @@ else if (!isAuthorized)
         font-weight: 600;
         display: inline-block;
         transition: all 0.3s;
+        border: none;
+        cursor: pointer;
     }
 
     .btn-primary {
@@ -150,5 +216,18 @@ else if (!isAuthorized)
 
     .btn-secondary:hover {
         background: #4b5563;
+    }
+
+    .spinner-border {
+        width: 50px;
+        height: 50px;
+        border: 4px solid #e5e7eb;
+        border-top-color: #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
     }
 </style>
