@@ -1,12 +1,11 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using ETechEnergie.Shared.Models;
-using ETechEnergie.Server.Data;
 using Microsoft.EntityFrameworkCore;
-
+using ETechEnergie.Server.Data;
+using ETechEnergie.Shared.Models;
+using System.Security.Cryptography;
 
 namespace ETechEnergie.Server.Services;
 
@@ -23,19 +22,18 @@ public interface IAuthService
 public class AuthService : IAuthService
 {
     private readonly AppDbContext _context;
-    private readonly IConfiguration _configuration;
+    private readonly JwtConfiguration _jwtConfig;
     private readonly ILogger<AuthService> _logger;
 
     public AuthService(
-        AppDbContext context, 
-        IConfiguration configuration,
+        AppDbContext context,
+        JwtConfiguration jwtConfig,
         ILogger<AuthService> logger)
     {
         _context = context;
-        _configuration = configuration;
+        _jwtConfig = jwtConfig;
         _logger = logger;
     }
-
 
     public async Task<LoginResponse> LoginAsync(LoginRequest request)
     {
@@ -89,7 +87,6 @@ public class AuthService : IAuthService
     {
         try
         {
-            // Vérifier si l'utilisateur existe déjà
             if (await _context.Users.AnyAsync(u => u.Username == request.Username))
             {
                 return new LoginResponse 
@@ -108,13 +105,12 @@ public class AuthService : IAuthService
                 };
             }
 
-            // Créer le nouvel utilisateur
             var user = new User
             {
                 Username = request.Username,
                 Email = request.Email,
                 PasswordHash = HashPassword(request.Password),
-                Role = "User", // Par défaut, rôle User (Admin doit être défini manuellement)
+                Role = "User",
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true
             };
@@ -147,29 +143,43 @@ public class AuthService : IAuthService
 
     public string GenerateJwtToken(User user)
     {
+        _logger.LogInformation(
+            "🔑 Génération token JWT | User: {Username} | Issuer: {Issuer} | Audience: {Audience}", 
+            user.Username, _jwtConfig.Issuer, _jwtConfig.Audience);
         
-        private readonly JwtConfiguration _jwtConfig;
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfig.SecretKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var claims = new[]
         {
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Name, user.Username),
             new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.Role, user.Role),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim("username", user.Username),
+            new Claim("role", user.Role)
         };
 
+        var expiration = DateTime.UtcNow.AddHours(_jwtConfig.ExpirationHours);
+
         var token = new JwtSecurityToken(
-            issuer: _jwtConfig.Issuer,  
-            audience: _jwtConfig.Audience
+            issuer: _jwtConfig.Issuer,
+            audience: _jwtConfig.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(Convert.ToDouble(jwtSettings["ExpirationHours"] ?? "24")),
+            notBefore: DateTime.UtcNow,
+            expires: expiration,
             signingCredentials: credentials
         );
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+        
+        _logger.LogInformation(
+            "✅ Token généré | User: {Username} | Expiration: {Expiration}", 
+            user.Username, expiration);
+
+        return tokenString;
     }
 
     public string HashPassword(string password)
@@ -186,11 +196,8 @@ public class AuthService : IAuthService
     {
         try
         {
-            var jwtSettings = _configuration.GetSection("JwtSettings");
-            var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey non configurée");
-            
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(secretKey);
+            var key = Encoding.UTF8.GetBytes(_jwtConfig.SecretKey);
 
             var validationParameters = new TokenValidationParameters
             {
@@ -198,8 +205,8 @@ public class AuthService : IAuthService
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = jwtSettings["Issuer"],
-                ValidAudience = jwtSettings["Audience"],
+                ValidIssuer = _jwtConfig.Issuer,
+                ValidAudience = _jwtConfig.Audience,
                 IssuerSigningKey = new SymmetricSecurityKey(key),
                 ClockSkew = TimeSpan.Zero
             };
