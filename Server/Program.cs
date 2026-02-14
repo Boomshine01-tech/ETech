@@ -14,13 +14,11 @@ var builder = WebApplication.CreateBuilder(args);
 /// =======================================================
 string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// Render fournit DATABASE_URL
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 
 if (!string.IsNullOrEmpty(databaseUrl))
 {
     Console.WriteLine("🌍 DATABASE_URL détectée (Render)");
-
     var uri = new Uri(databaseUrl);
     var userInfo = uri.UserInfo.Split(':');
     var port = uri.Port > 0 ? uri.Port : 5432;
@@ -52,9 +50,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 });
 
 /// =======================================================
-/// JWT AUTHENTICATION
+/// JWT AUTHENTICATION - LECTURE VARIABLES D'ENVIRONNEMENT
 /// =======================================================
-
 Console.WriteLine("🔐 Configuration JWT Authentication...");
 
 // 1. Lire depuis les variables d'environnement (PRIORITAIRE pour Render)
@@ -221,6 +218,17 @@ builder.Services.Configure<BrevoSettings>(
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+// Ajouter la configuration JWT comme singleton pour qu'AuthService puisse y accéder
+builder.Services.AddSingleton(new JwtConfiguration
+{
+    SecretKey = secretKey,
+    Issuer = issuer,
+    Audience = audience,
+    ExpirationHours = double.Parse(expirationHours)
+});
+
+Console.WriteLine("✅ Services enregistrés");
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -233,7 +241,6 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { Title = "ETech Energie API", Version = "v1" });
     
-    // Ajouter le support JWT dans Swagger
     c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
@@ -259,9 +266,11 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// CORS - SÉCURISÉ (à ajuster selon vos besoins)
+// CORS SÉCURISÉ
 var allowedOrigins = Environment.GetEnvironmentVariable("ALLOWED_ORIGINS")?.Split(',') 
-    ?? new[] { "https://etechenergie.onrender.com", "http://localhost:5000" };
+    ?? new[] { "https://etechenergie.onrender.com", "http://localhost:5000", "https://localhost:5001" };
+
+Console.WriteLine($"🌐 CORS Origins autorisées: {string.Join(", ", allowedOrigins)}");
 
 builder.Services.AddCors(options =>
 {
@@ -291,9 +300,8 @@ using (var scope = app.Services.CreateScope())
         await context.Database.MigrateAsync();
         Console.WriteLine("✅ Migrations appliquées avec succès");
         
-       await DbInitializer.Initialize(context);
+        DbInitializer.Initialize(context);
         
-        // Créer un utilisateur admin par défaut si aucun n'existe
         if (!await context.Users.AnyAsync())
         {
             Console.WriteLine("👤 Création de l'utilisateur admin par défaut...");
@@ -303,7 +311,7 @@ using (var scope = app.Services.CreateScope())
             {
                 Username = "admin",
                 Email = "admin@etechenergie.com",
-                PasswordHash = authService.HashPassword("Admin123!"), // À CHANGER EN PRODUCTION
+                PasswordHash = authService.HashPassword("Admin123!"),
                 Role = "Admin",
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
@@ -313,7 +321,9 @@ using (var scope = app.Services.CreateScope())
             await context.SaveChangesAsync();
             
             Console.WriteLine("✅ Utilisateur admin créé:");
-    
+            Console.WriteLine("   Username: admin");
+            Console.WriteLine("   Password: Admin123!");
+            Console.WriteLine("   ⚠️  CHANGEZ CE MOT DE PASSE EN PRODUCTION!");
         }
     }
     catch (Exception ex)
@@ -338,9 +348,9 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// IMPORTANT: L'ordre est crucial
 app.UseCors("SecureCors");
-app.UseAuthentication(); // ⬅️ AVANT UseAuthorization
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
@@ -357,6 +367,19 @@ Console.WriteLine("🚀 APPLICATION DÉMARRÉE");
 Console.WriteLine($"🌐 Environnement : {app.Environment.EnvironmentName}");
 Console.WriteLine($"🔗 Port          : {portEnv}");
 Console.WriteLine($"🔐 JWT Auth      : Activée");
+Console.WriteLine($"   Issuer        : {issuer}");
+Console.WriteLine($"   Audience      : {audience}");
 Console.WriteLine("==========================================");
 
 app.Run();
+
+/// <summary>
+/// Classe de configuration JWT pour injection
+/// </summary>
+public class JwtConfiguration
+{
+    public string SecretKey { get; set; } = string.Empty;
+    public string Issuer { get; set; } = string.Empty;
+    public string Audience { get; set; } = string.Empty;
+    public double ExpirationHours { get; set; }
+}
