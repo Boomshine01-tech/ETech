@@ -176,7 +176,6 @@
     {
         try
         {
-            // Préparer les données de la commande
             var cartItemsJson = JsonSerializer.Serialize(CartService.Items);
 
             var orderRequest = new OrderRequest
@@ -188,27 +187,21 @@
                 CartItemsJson = cartItemsJson
             };
 
-            // Envoyer la requête au serveur (endpoint spécifique pour les commandes)
             var response = await Http.PostAsJsonAsync("api/order", orderRequest);
 
             if (response.IsSuccessStatusCode)
             {
-                // Fermer le modal
                 showCheckoutModal = false;
 
-                // Afficher le message de succès
                 showSuccessMessage = true;
 
-                // Vider le panier
                 CartService.ClearCart();
 
-                // Cacher le message après 5 secondes
                 await Task.Delay(5000);
                 showSuccessMessage = false;
             }
             else
             {
-                // Gérer l'erreur
                 Console.WriteLine("Erreur lors de l'envoi de la commande");
             }
         }
