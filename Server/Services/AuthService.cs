@@ -144,7 +144,7 @@ public class AuthService : IAuthService
     public string GenerateJwtToken(User user)
     {
         _logger.LogInformation(
-            "🔑 Génération token JWT | User: {Username} | Issuer: {Issuer} | Audience: {Audience}", 
+            " Génération token JWT | User: {Username} | Issuer: {Issuer} | Audience: {Audience}", 
             user.Username, _jwtConfig.Issuer, _jwtConfig.Audience);
         
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfig.SecretKey));
