@@ -118,7 +118,6 @@
     {
         ErrorMessage = string.Empty;
 
-        // Validation
         if (string.IsNullOrWhiteSpace(Nom))
         {
             ErrorMessage = "Le nom est requis";
@@ -143,7 +142,6 @@
             return;
         }
 
-        // Validation basique de l'email
         if (!Email.Contains("@") || !Email.Contains("."))
         {
             ErrorMessage = "Format d'email invalide";
