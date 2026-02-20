@@ -9,24 +9,23 @@ using ETechEnergie.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-/// =======================================================
-/// CONFIGURATION POSTGRESQL (RENDER / LOCAL)
-/// =======================================================
+// CONFIGURATION POSTGRESQL (RENDER / LOCAL)
+
 string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 
 if (!string.IsNullOrEmpty(databaseUrl))
 {
-    Console.WriteLine("🌍 DATABASE_URL détectée (Render)");
+    Console.WriteLine(" DATABASE_URL détectée (Render)");
     var uri = new Uri(databaseUrl);
     var userInfo = uri.UserInfo.Split(':');
     var port = uri.Port > 0 ? uri.Port : 5432;
 
-    Console.WriteLine($"📦 PostgreSQL Host     : {uri.Host}");
-    Console.WriteLine($"📦 PostgreSQL Port     : {port}");
-    Console.WriteLine($"📦 PostgreSQL Database : {uri.AbsolutePath.Trim('/')}");
-    Console.WriteLine($"📦 PostgreSQL User     : {userInfo[0]}");
+    Console.WriteLine($" PostgreSQL Host     : {uri.Host}");
+    Console.WriteLine($" PostgreSQL Port     : {port}");
+    Console.WriteLine($" PostgreSQL Database : {uri.AbsolutePath.Trim('/')}");
+    Console.WriteLine($" PostgreSQL User     : {userInfo[0]}");
 
     connectionString =
         $"Host={uri.Host};" +
@@ -42,25 +41,22 @@ else
     Console.WriteLine("⚠️ DATABASE_URL absente → utilisation appsettings");
 }
 
-Console.WriteLine("🔌 Chaîne de connexion PostgreSQL prête");
+Console.WriteLine(" Chaîne de connexion PostgreSQL prête");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseNpgsql(connectionString);
 });
 
-/// =======================================================
-/// JWT AUTHENTICATION - LECTURE VARIABLES D'ENVIRONNEMENT
-/// =======================================================
-Console.WriteLine("🔐 Configuration JWT Authentication...");
+// JWT AUTHENTICATION - LECTURE VARIABLES D'ENVIRONNEMENT
 
-// 1. Lire depuis les variables d'environnement (PRIORITAIRE pour Render)
+Console.WriteLine(" Configuration JWT Authentication...");
+
 var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
 var issuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
 var audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
 var expirationHours = Environment.GetEnvironmentVariable("JWT_EXPIRATION_HOURS");
 
-// 2. Si absent, lire depuis appsettings.json (pour développement local)
 if (string.IsNullOrEmpty(secretKey))
 {
     var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -68,24 +64,23 @@ if (string.IsNullOrEmpty(secretKey))
     issuer = jwtSettings["Issuer"];
     audience = jwtSettings["Audience"];
     expirationHours = jwtSettings["ExpirationHours"];
-    Console.WriteLine("📝 JWT Config depuis appsettings.json");
+    Console.WriteLine(" JWT Config depuis appsettings.json");
 }
 else
 {
-    Console.WriteLine("🌍 JWT Config depuis variables d'environnement Render");
+    Console.WriteLine(" JWT Config depuis variables d'environnement Render");
 }
 
-// 3. Valeurs par défaut si toujours vides
 if (string.IsNullOrEmpty(issuer))
 {
     issuer = "ETechEnergie";
-    Console.WriteLine($"⚠️ JWT_ISSUER absent, utilisation par défaut: {issuer}");
+    Console.WriteLine($" JWT_ISSUER absent, utilisation par défaut: {issuer}");
 }
 
 if (string.IsNullOrEmpty(audience))
 {
     audience = "ETechEnergieClient";
-    Console.WriteLine($"⚠️ JWT_AUDIENCE absent, utilisation par défaut: {audience}");
+    Console.WriteLine($" JWT_AUDIENCE absent, utilisation par défaut: {audience}");
 }
 
 if (string.IsNullOrEmpty(expirationHours))
@@ -93,7 +88,6 @@ if (string.IsNullOrEmpty(expirationHours))
     expirationHours = "24";
 }
 
-// 4. Validation finale
 if (string.IsNullOrEmpty(secretKey))
 {
     throw new InvalidOperationException(
@@ -109,14 +103,12 @@ if (secretKey.Length < 32)
         "La clé doit faire au moins 32 caractères.");
 }
 
-// 5. Afficher la configuration (pour debug)
 Console.WriteLine("✅ Configuration JWT:");
 Console.WriteLine($"   Issuer        : {issuer}");
 Console.WriteLine($"   Audience      : {audience}");
 Console.WriteLine($"   Expiration    : {expirationHours}h");
 Console.WriteLine($"   SecretKey     : {secretKey.Substring(0, Math.Min(10, secretKey.Length))}... ({secretKey.Length} caractères)");
 
-// 6. Configurer l'authentification JWT
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -157,7 +149,7 @@ builder.Services.AddAuthentication(options =>
                 Console.WriteLine($"   Raison: Audience invalide");
                 Console.WriteLine($"   Audience attendue: '{audience}'");
                 
-                // Décoder le token pour voir son contenu
+                // Décoder le token
                 try
                 {
                     var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
@@ -191,7 +183,7 @@ builder.Services.AddAuthentication(options =>
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             if (!string.IsNullOrEmpty(token))
             {
-                Console.WriteLine($"🔍 Token reçu (longueur: {token.Length})");
+                Console.WriteLine($" Token reçu (longueur: {token.Length})");
             }
             return Task.CompletedTask;
         },
@@ -207,9 +199,8 @@ builder.Services.AddAuthorization();
 
 Console.WriteLine("✅ JWT Authentication configurée avec succès");
 
-/// =======================================================
-/// SERVICES
-/// =======================================================
+// SERVICES
+
 builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection("EmailSettings"));
 builder.Services.Configure<BrevoSettings>(
@@ -218,7 +209,6 @@ builder.Services.Configure<BrevoSettings>(
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// Ajouter la configuration JWT comme singleton pour qu'AuthService puisse y accéder
 builder.Services.AddSingleton(new JwtConfiguration
 {
     SecretKey = secretKey,
@@ -266,7 +256,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// CORS SÉCURISÉ
 var allowedOrigins = Environment.GetEnvironmentVariable("ALLOWED_ORIGINS")?.Split(',') 
     ?? new[] { "https://etechenergie.onrender.com", "http://localhost:5000", "https://localhost:5001" };
 
@@ -283,48 +272,21 @@ builder.Services.AddCors(options =>
     });
 });
 
-/// =======================================================
-/// BUILD APP
-/// =======================================================
+// BUILD APP
 var app = builder.Build();
 
-/// =======================================================
-/// MIGRATIONS AUTOMATIQUES & SEED ADMIN
-/// =======================================================
+// MIGRATIONS AUTOMATIQUES & SEED ADMIN
 using (var scope = app.Services.CreateScope())
 {
     try
     {
-        Console.WriteLine("⏳ Application des migrations EF Core...");
+        Console.WriteLine(" Application des migrations EF Core...");
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await context.Database.MigrateAsync();
         Console.WriteLine("✅ Migrations appliquées avec succès");
         
         await DbInitializer.Initialize(context);
         
-        if (!await context.Users.AnyAsync())
-        {
-            Console.WriteLine("👤 Création de l'utilisateur admin par défaut...");
-            var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
-            
-            var adminUser = new ETechEnergie.Shared.Models.User
-            {
-                Username = "admin",
-                Email = "admin@etechenergie.com",
-                PasswordHash = authService.HashPassword("Admin123!"),
-                Role = "Admin",
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow
-            };
-            
-            context.Users.Add(adminUser);
-            await context.SaveChangesAsync();
-            
-            Console.WriteLine("✅ Utilisateur admin créé:");
-            Console.WriteLine("   Username: admin");
-            Console.WriteLine("   Password: Admin123!");
-            Console.WriteLine("   ⚠️  CHANGEZ CE MOT DE PASSE EN PRODUCTION!");
-        }
     }
     catch (Exception ex)
     {
@@ -334,9 +296,8 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-/// =======================================================
-/// MIDDLEWARE
-/// =======================================================
+// MIDDLEWARE
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -356,9 +317,8 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
 
-/// =======================================================
-/// PORT RENDER
-/// =======================================================
+// PORT RENDER
+
 var portEnv = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 app.Urls.Add($"http://0.0.0.0:{portEnv}");
 
@@ -373,9 +333,8 @@ Console.WriteLine("==========================================");
 
 app.Run();
 
-/// <summary>
-/// Classe de configuration JWT pour injection
-/// </summary>
+// Classe de configuration JWT pour injection
+
 public class JwtConfiguration
 {
     public string SecretKey { get; set; } = string.Empty;
