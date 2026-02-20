@@ -1,5 +1,3 @@
-// Server/ETechEnergie.Server/Data/DbInitializer.cs
-
 using ETechEnergie.Shared.Models;
 
 namespace ETechEnergie.Server.Data;
@@ -13,9 +11,6 @@ public static class DbInitializer
         if (context.Services.Any())
             return;
 
-        // ===================================
-        // 1. SERVICES
-        // ===================================
         var services = new Service[]
         {
             new Service
@@ -88,29 +83,21 @@ public static class DbInitializer
         await context.SaveChangesAsync();
         Console.WriteLine($"✅ {services.Length} services ajoutés");
 
-        // ===================================
-        // 2. CATÉGORIES
-        // ===================================
-        // ✅ CORRECTION : Ajout de la 5ème catégorie pour les cartes de développement
         var categories = new Category[]
         {
             new Category { Name = "Capteurs électroniques", Description = "Capteurs et détecteurs pour applications électroniques" },
             new Category { Name = "Câbles et connectique", Description = "Câbles électriques et réseau de qualité professionnelle" },
             new Category { Name = "Équipements réseau", Description = "Matériel pour réseaux informatiques et télécommunications" },
             new Category { Name = "Énergies renouvelables", Description = "Panneaux solaires et équipements pour énergie verte" },
-            new Category { Name = "Cartes de développement", Description = "Arduino, ESP32, Raspberry Pi pour projets électroniques" } // ✅ AJOUTÉ
+            new Category { Name = "Cartes de développement", Description = "Arduino, ESP32, Raspberry Pi pour projets électroniques" }
         };
 
         context.Categories.AddRange(categories);
         await context.SaveChangesAsync();
         Console.WriteLine($"✅ {categories.Length} catégories ajoutées");
 
-        // ===================================
-        // 3. PRODUITS
-        // ===================================
         var products = new Product[]
         {
-            // Catégorie 1 : Capteurs électroniques
             new Product
             {
                 Name = "Capteur d'empreinte digitale",
@@ -152,7 +139,6 @@ public static class DbInitializer
                 IsAvailable = true
             },
 
-            // Catégorie 2 : Câbles et connectique
             new Product
             {
                 Name = "Câble électrique 2.5 mm²",
@@ -184,7 +170,6 @@ public static class DbInitializer
                 IsAvailable = true
             },
 
-            // Catégorie 3 : Équipements réseau
             new Product
             {
                 Name = "Câble Ethernet RJ45",
@@ -206,7 +191,6 @@ public static class DbInitializer
                 IsAvailable = true
             },
 
-            // Catégorie 4 : Énergies renouvelables
             new Product
             {
                 Name = "Panneau solaire 300W",
@@ -218,14 +202,13 @@ public static class DbInitializer
                 IsAvailable = true
             },
 
-            // Catégorie 5 : Cartes de développement (✅ CORRIGÉ)
             new Product
             {
                 Name = "Arduino Uno R3",
                 Description = "Carte de développement Arduino Uno idéale pour projets électroniques et éducatifs",
                 Price = 8000,
                 ImageUrl = "/images/products/arduino-uno.jpg",
-                CategoryId = 5, // ✅ Maintenant valide car CategoryId 5 existe
+                CategoryId = 5, 
                 Stock = 35,
                 IsAvailable = true
             },
@@ -255,52 +238,6 @@ public static class DbInitializer
         await context.SaveChangesAsync();
         Console.WriteLine($"✅ {products.Length} produits ajoutés");
 
-        // ===================================
-        // 4. MEMBRES DE L'ÉQUIPE
-        // ===================================
-        var teamMembers = new TeamMember[]
-        {
-            new TeamMember
-            {
-                Name = "Demba Diol",
-                Position = "Directeur Général",
-                Bio = "Expert en gestion d'entreprise avec plus de 10 ans d'expérience dans le secteur de l'électricité.",
-                ImageUrl = "/images/team/ceo.png",
-                DisplayOrder = 1,
-                
-            },
-            new TeamMember
-            {
-                Name = "Papa Gueye",
-                Position = "Responsable Technique",
-                Bio = "Ingénieur électricien, spécialisé en énergies renouvelables et installations domestiques.",
-                ImageUrl = "/images/team/technical-lead.png",
-                DisplayOrder = 2,
-                
-            },
-            new TeamMember
-            {
-                Name = "Demba Diol",
-                Position = "Chef de Projet",
-                Bio = "Gestion de projets techniques complexes avec une expertise en coordination d'équipes.",
-                ImageUrl = "/images/team/project-manager.png",
-                DisplayOrder = 3,
-                
-            },
-            new TeamMember
-            {
-                Name = "Adama Ndao",
-                Position = "Responsable Support Client",
-                Bio = "Spécialiste en relation client et support technique, garantissant votre satisfaction.",
-                ImageUrl = "/images/team/support-lead.png",
-                DisplayOrder = 4,
-                
-            }
-        };
-
-        context.TeamMembers.AddRange(teamMembers);
-        await context.SaveChangesAsync();
-        Console.WriteLine($"✅ {teamMembers.Length} membres d'équipe ajoutés");
 
         Console.WriteLine("");
         Console.WriteLine("╔═══════════════════════════════════════════════╗");
