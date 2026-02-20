@@ -58,9 +58,8 @@ else
 
         try
         {
-            Console.WriteLine("🔍 AuthGuard - Vérification de l'authentification...");
+            Console.WriteLine(" AuthGuard - Vérification de l'authentification...");
             
-            // 1. Vérifier si un token existe
             var token = await AuthService.GetTokenAsync();
             Console.WriteLine($"   Token présent: {!string.IsNullOrEmpty(token)}");
             
@@ -71,13 +70,11 @@ else
                 isAuthorized = false;
                 isLoading = false;
                 
-                // Rediriger vers login
-                await Task.Delay(100); // Petit délai pour éviter les problèmes de navigation
+                await Task.Delay(100); // éviter navigation probleme
                 Navigation.NavigateTo("/login", forceLoad: true);
                 return;
             }
 
-            // 2. Vérifier l'authentification
             isAuthenticated = await AuthService.IsAuthenticatedAsync();
             Console.WriteLine($"   Authentifié: {isAuthenticated}");
 
@@ -87,19 +84,16 @@ else
                 isAuthorized = false;
                 isLoading = false;
                 
-                // Rediriger vers login
                 await Task.Delay(100);
                 Navigation.NavigateTo("/login", forceLoad: true);
                 return;
             }
 
-            // 3. Récupérer les infos utilisateur
             var (username, email, role) = await AuthService.GetCurrentUserAsync();
             currentRole = role;
             Console.WriteLine($"   Username: {username}");
             Console.WriteLine($"   Role: {role}");
 
-            // 4. Vérifier les permissions
             if (RequireAdmin)
             {
                 var isAdmin = await AuthService.IsAdminAsync();
@@ -122,7 +116,6 @@ else
                 Console.WriteLine("✅ Accès autorisé - Aucun rôle spécifique requis");
             }
 
-            // 5. NE PAS rediriger si autorisé
             if (isAuthenticated && isAuthorized)
             {
                 Console.WriteLine("✅ AuthGuard - Authentification et autorisation réussies");
