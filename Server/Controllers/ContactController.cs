@@ -16,10 +16,7 @@ namespace ETechEnergie.Server.Controllers
             _emailService = emailService;
             _logger = logger;
         }
-
-        /// <summary>
-        /// Endpoint pour les messages de contact simple (sans panier)
-        /// </summary>
+        
         [HttpPost("contact")]
         public async Task<IActionResult> SendContact([FromBody] ContactRequest request)
         {
@@ -32,7 +29,6 @@ namespace ETechEnergie.Server.Controllers
             {
                 _logger.LogInformation("Réception d'une demande de contact de {Email}", request.Email);
 
-                // Envoi des emails de contact (sans panier)
                 await _emailService.SendContactNotificationAsync(request);
                 await _emailService.SendContactConfirmationAsync(request);
 
@@ -47,9 +43,7 @@ namespace ETechEnergie.Server.Controllers
             }
         }
 
-        /// <summary>
-        /// Endpoint pour les commandes (avec panier)
-        /// </summary>
+       
         [HttpPost("order")]
         public async Task<IActionResult> SendOrder([FromBody] OrderRequest request)
         {
@@ -67,7 +61,6 @@ namespace ETechEnergie.Server.Controllers
             {
                 _logger.LogInformation("Réception d'une commande de {Email}", request.Email);
 
-                // Envoi des emails de commande (avec panier)
                 await _emailService.SendOrderNotificationAsync(request);
                 await _emailService.SendOrderConfirmationAsync(request);
 
