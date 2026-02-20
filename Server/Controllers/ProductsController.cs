@@ -24,9 +24,7 @@ public class ProductsController : ControllerBase
         _logger = logger;
     }
 
-    /// <summary>
-    /// GET /api/products - Accessible à tous
-    /// </summary>
+    
     [HttpGet]
     [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
@@ -37,9 +35,6 @@ public class ProductsController : ControllerBase
             .ToListAsync();
     }
 
-    /// <summary>
-    /// GET /api/products/{id} - Accessible à tous
-    /// </summary>
     [HttpGet("{id}")]
     [AllowAnonymous]
     public async Task<ActionResult<Product>> GetProduct(int id)
@@ -54,9 +49,7 @@ public class ProductsController : ControllerBase
         return product;
     }
 
-    /// <summary>
-    /// GET /api/products/category/{categoryId} - Accessible à tous
-    /// </summary>
+   
     [HttpGet("category/{categoryId}")]
     [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<Product>>> GetProductsByCategory(int categoryId)
@@ -67,9 +60,7 @@ public class ProductsController : ControllerBase
             .ToListAsync();
     }
 
-    /// <summary>
-    /// POST /api/products - RÉSERVÉ AUX ADMINS
-    /// </summary>
+    
     [HttpPost]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Product>> CreateProduct(Product product)
@@ -83,9 +74,7 @@ public class ProductsController : ControllerBase
         return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
     }
 
-    /// <summary>
-    /// PUT /api/products/{id} - RÉSERVÉ AUX ADMINS
-    /// </summary>
+   
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateProduct(int id, Product product)
@@ -112,9 +101,7 @@ public class ProductsController : ControllerBase
         return NoContent();
     }
 
-    /// <summary>
-    /// POST /api/products/upload-image - RÉSERVÉ AUX ADMINS
-    /// </summary>
+    
     [HttpPost("upload-image")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UploadImage(IFormFile file)
@@ -122,14 +109,12 @@ public class ProductsController : ControllerBase
         if (file == null || file.Length == 0)
             return BadRequest("Aucun fichier fourni");
 
-        // Validation du type de fichier
         var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp", "image/jpg" };
         if (!allowedTypes.Contains(file.ContentType.ToLower()))
         {
             return BadRequest("Format de fichier non supporté. Utilisez JPG, PNG ou WebP.");
         }
 
-        // Validation de la taille (max 5MB)
         if (file.Length > 5_000_000)
         {
             return BadRequest("Le fichier est trop volumineux. Taille maximale: 5MB");
@@ -165,9 +150,7 @@ public class ProductsController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// DELETE /api/products/{id} - RÉSERVÉ AUX ADMINS
-    /// </summary>
+   
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteProduct(int id)
