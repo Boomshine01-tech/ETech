@@ -11,6 +11,8 @@ public class AuthenticationService
     private readonly ILocalStorageService _localStorage;
     private const string TokenKey = "authToken";
     private const string UserKey = "currentUser";
+    private const string RememberMeKey = "rememberMe";
+    private const string TokenExpirationKey = "tokenExpiration";
 
     public event Action? OnAuthStateChanged;
 
@@ -24,7 +26,7 @@ public class AuthenticationService
     {
         try
         {
-            Console.WriteLine($" Tentative de connexion pour: {request.Username}");
+            Console.WriteLine($"🔐 Tentative de connexion | User: {request.Username} | RememberMe: {request.RememberMe}");
             
             var response = await _httpClient.PostAsJsonAsync("api/auth/login", request);
             
@@ -36,13 +38,15 @@ public class AuthenticationService
                 
                 if (loginResponse != null && loginResponse.Success && loginResponse.Token != null)
                 {
-                    Console.WriteLine(" Connexion réussie");
+                    Console.WriteLine("✅ Connexion réussie");
                     Console.WriteLine($"   Username: {loginResponse.Username}");
                     Console.WriteLine($"   Role: {loginResponse.Role}");
+                    Console.WriteLine($"   RememberMe: {loginResponse.RememberMe}");
+                    Console.WriteLine($"   ExpiresAt: {loginResponse.ExpiresAt}");
                     Console.WriteLine($"   Token (début): {loginResponse.Token.Substring(0, Math.Min(30, loginResponse.Token.Length))}...");
                     
                     await _localStorage.SetItemAsync(TokenKey, loginResponse.Token);
-                    Console.WriteLine($"   Token sauvegardé dans LocalStorage");
+                    Console.WriteLine($"   ✓ Token sauvegardé");
                     
                     var userData = new
                     {
@@ -51,11 +55,20 @@ public class AuthenticationService
                         loginResponse.Role
                     };
                     await _localStorage.SetItemAsync(UserKey, userData);
-                    Console.WriteLine($"   User data sauvegardée");
+                    Console.WriteLine($"   ✓ User data sauvegardée");
+
+                    await _localStorage.SetItemAsync(RememberMeKey, loginResponse.RememberMe);
+                    Console.WriteLine($"   ✓ RememberMe sauvegardé: {loginResponse.RememberMe}");
+
+                    if (loginResponse.ExpiresAt.HasValue)
+                    {
+                        await _localStorage.SetItemAsync(TokenExpirationKey, loginResponse.ExpiresAt.Value);
+                        Console.WriteLine($"   ✓ Expiration sauvegardée: {loginResponse.ExpiresAt.Value}");
+                    }
 
                     _httpClient.DefaultRequestHeaders.Authorization = 
                         new AuthenticationHeaderValue("Bearer", loginResponse.Token);
-                    Console.WriteLine($"   Header Authorization configuré");
+                    Console.WriteLine($"   ✓ Header Authorization configuré");
 
                     OnAuthStateChanged?.Invoke();
 
@@ -101,6 +114,12 @@ public class AuthenticationService
                         loginResponse.Email,
                         loginResponse.Role
                     });
+                    await _localStorage.SetItemAsync(RememberMeKey, false); 
+                    
+                    if (loginResponse.ExpiresAt.HasValue)
+                    {
+                        await _localStorage.SetItemAsync(TokenExpirationKey, loginResponse.ExpiresAt.Value);
+                    }
 
                     _httpClient.DefaultRequestHeaders.Authorization = 
                         new AuthenticationHeaderValue("Bearer", loginResponse.Token);
@@ -131,11 +150,16 @@ public class AuthenticationService
 
     public async Task LogoutAsync()
     {
-        Console.WriteLine(" Déconnexion...");
+        Console.WriteLine("🚪 Déconnexion...");
+        
         await _localStorage.RemoveItemAsync(TokenKey);
         await _localStorage.RemoveItemAsync(UserKey);
+        await _localStorage.RemoveItemAsync(RememberMeKey);
+        await _localStorage.RemoveItemAsync(TokenExpirationKey);
+        
         _httpClient.DefaultRequestHeaders.Authorization = null;
-        Console.WriteLine("✅ Déconnexion réussie");
+        
+        Console.WriteLine("✅ Déconnexion réussie (toutes les données supprimées)");
         OnAuthStateChanged?.Invoke();
     }
 
@@ -144,13 +168,74 @@ public class AuthenticationService
         try
         {
             var token = await _localStorage.GetItemAsync<string>(TokenKey);
-            var isAuth = !string.IsNullOrEmpty(token);
-            Console.WriteLine($" IsAuthenticated: {isAuth}");
-            return isAuth;
+            
+            if (string.IsNullOrEmpty(token))
+            {
+                Console.WriteLine($"🔍 IsAuthenticated: false (pas de token)");
+                return false;
+            }
+
+            var isExpired = await IsTokenExpiredAsync();
+            
+            if (isExpired)
+            {
+                Console.WriteLine($"🔍 IsAuthenticated: false (token expiré)");
+                
+                await LogoutAsync();
+                return false;
+            }
+
+            Console.WriteLine($"🔍 IsAuthenticated: true");
+            return true;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"❌ Erreur IsAuthenticated: {ex.Message}");
+            return false;
+        }
+    }
+
+    public async Task<bool> IsTokenExpiredAsync()
+    {
+        try
+        {
+            var expiration = await _localStorage.GetItemAsync<DateTime?>(TokenExpirationKey);
+            
+            if (!expiration.HasValue)
+            {
+                Console.WriteLine("⚠️ Pas de date d'expiration stockée");
+                return false; 
+            }
+
+            var isExpired = DateTime.UtcNow >= expiration.Value;
+            
+            if (isExpired)
+            {
+                Console.WriteLine($"⏰ Token expiré depuis: {(DateTime.UtcNow - expiration.Value).TotalHours:F1}h");
+            }
+            else
+            {
+                var timeLeft = expiration.Value - DateTime.UtcNow;
+                Console.WriteLine($"⏰ Token expire dans: {timeLeft.TotalDays:F1} jours ({timeLeft.TotalHours:F1}h)");
+            }
+            
+            return isExpired;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Erreur IsTokenExpired: {ex.Message}");
+            return false;
+        }
+    }
+
+    public async Task<bool> IsRememberedAsync()
+    {
+        try
+        {
+            return await _localStorage.GetItemAsync<bool>(RememberMeKey);
+        }
+        catch
+        {
             return false;
         }
     }
@@ -179,8 +264,8 @@ public class AuthenticationService
                 role = roleLowerProperty.GetString();
             }
 
-            var isAdmin = role == "Admin";
-            Console.WriteLine($" IsAdmin: {isAdmin} (Role: {role ?? "null"})");
+            var isAdmin = role?.Equals("Admin", StringComparison.OrdinalIgnoreCase) ?? false;
+            Console.WriteLine($"🔍 IsAdmin: {isAdmin} (Role: {role ?? "null"})");
             
             return isAdmin;
         }
@@ -215,7 +300,7 @@ public class AuthenticationService
             if (user.TryGetProperty("Role", out var roleProperty))
                 role = roleProperty.GetString();
             
-            Console.WriteLine($" GetCurrentUser: {username} | {role}");
+            Console.WriteLine($"👤 GetCurrentUser: {username} | {role}");
             
             return (username, email, role);
         }
@@ -230,16 +315,30 @@ public class AuthenticationService
     {
         try
         {
-            Console.WriteLine(" Initialisation AuthenticationService...");
+            Console.WriteLine("🔧 Initialisation AuthenticationService...");
             
             var token = await _localStorage.GetItemAsync<string>(TokenKey);
             
             if (!string.IsNullOrEmpty(token))
             {
                 Console.WriteLine($"   Token trouvé (longueur: {token.Length})");
-                _httpClient.DefaultRequestHeaders.Authorization = 
-                    new AuthenticationHeaderValue("Bearer", token);
-                Console.WriteLine("   Header Authorization configuré");
+                
+                var isExpired = await IsTokenExpiredAsync();
+                
+                if (isExpired)
+                {
+                    Console.WriteLine("   ⚠️ Token expiré - Suppression");
+                    await LogoutAsync();
+                }
+                else
+                {
+                    _httpClient.DefaultRequestHeaders.Authorization = 
+                        new AuthenticationHeaderValue("Bearer", token);
+                    Console.WriteLine("   ✓ Header Authorization configuré");
+                    
+                    var isRemembered = await IsRememberedAsync();
+                    Console.WriteLine($"   RememberMe: {isRemembered}");
+                }
             }
             else
             {
@@ -261,6 +360,18 @@ public class AuthenticationService
         catch (Exception ex)
         {
             Console.WriteLine($"❌ Erreur GetToken: {ex.Message}");
+            return null;
+        }
+    }
+
+    public async Task<DateTime?> GetTokenExpirationAsync()
+    {
+        try
+        {
+            return await _localStorage.GetItemAsync<DateTime?>(TokenExpirationKey);
+        }
+        catch
+        {
             return null;
         }
     }
