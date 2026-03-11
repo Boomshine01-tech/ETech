@@ -18,11 +18,17 @@ public class NotificationService
     {
         OnNotification?.Invoke(message, NotificationType.Info);
     }
+
+    public void ShowWarning(string message)
+    {
+        OnNotification?.Invoke(message, NotificationType.Warning);
+    }
 }
 
 public enum NotificationType
 {
     Success,
     Error,
-    Info
+    Info,
+    Warning
 }
