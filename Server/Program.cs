@@ -48,8 +48,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString);
 });
 
-// JWT AUTHENTICATION - LECTURE VARIABLES D'ENVIRONNEMENT
-
 Console.WriteLine(" Configuration JWT Authentication...");
 
 var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
@@ -149,7 +147,6 @@ builder.Services.AddAuthentication(options =>
                 Console.WriteLine($"   Raison: Audience invalide");
                 Console.WriteLine($"   Audience attendue: '{audience}'");
                 
-                // Décoder le token
                 try
                 {
                     var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
@@ -199,7 +196,6 @@ builder.Services.AddAuthorization();
 
 Console.WriteLine("✅ JWT Authentication configurée avec succès");
 
-// SERVICES
 
 builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection("EmailSettings"));
@@ -255,6 +251,7 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+builder.Services.AddMemoryCache();
 
 var allowedOrigins = Environment.GetEnvironmentVariable("ALLOWED_ORIGINS")?.Split(',') 
     ?? new[] { "https://etechenergie.onrender.com", "http://localhost:5000", "https://localhost:5001" };
@@ -270,12 +267,10 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
               .AllowCredentials();
     });
-});
+}); 
 
-// BUILD APP
 var app = builder.Build();
 
-// MIGRATIONS AUTOMATIQUES & SEED ADMIN
 using (var scope = app.Services.CreateScope())
 {
     try
@@ -296,7 +291,6 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// MIDDLEWARE
 
 if (app.Environment.IsDevelopment())
 {
@@ -317,7 +311,6 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
 
-// PORT RENDER
 
 var portEnv = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 app.Urls.Add($"http://0.0.0.0:{portEnv}");
@@ -333,7 +326,6 @@ Console.WriteLine("==========================================");
 
 app.Run();
 
-// Classe de configuration JWT pour injection
 
 public class JwtConfiguration
 {
