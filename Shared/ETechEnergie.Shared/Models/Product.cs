@@ -32,3 +32,24 @@ public class Product
     public bool IsAvailable { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
+public class PagedResult<T>
+{
+
+    public List<T> Items { get; set; } = new();
+
+    public int Page { get; set; }
+
+    public int PageSize { get; set; }
+
+    public int TotalItems { get; set; }
+
+    public int TotalPages { get; set; }
+
+    public bool HasPreviousPage { get; set; }
+
+    public bool HasNextPage { get; set; }
+
+    public int FirstItemIndex => (Page - 1) * PageSize + 1;
+
+    public int LastItemIndex => Math.Min(Page * PageSize, TotalItems);
+}
