@@ -31,7 +31,7 @@ public class ProductsController : ControllerBase
         _cache = cache;
     }
 
-    [HttpGet("category")]
+    [HttpGet]
     [AllowAnonymous]
     [ResponseCache(Duration = 300)] 
     public async Task<ActionResult<PagedResult<Product>>> GetProducts(
