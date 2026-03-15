@@ -1,4 +1,4 @@
-@page "/products"
+@page "/produits"
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @inject CartService CartService
@@ -18,6 +18,7 @@
     </div>
 
     <div class="container">
+        <!-- Filtres et recherche -->
         <div class="filters-section">
             <div class="search-box">
                 <input type="text" 
@@ -57,6 +58,7 @@
             </div>
         </div>
 
+        <!-- Grille de produits compacte -->
         @if (isLoading)
         {
             <div class="loading-container">
@@ -89,15 +91,13 @@
                             <p class="description-preview">@GetShortDescription(product.Description)</p>
                             <div class="product-footer">
                                 <span class="price">@product.Price.ToString("N0") FCFA</span>
-                                <button class="btn-view-details" @onclick:stopPropagation="true" @onclick="() => ShowProductDetails(product)">
-                                    <i class="fas fa-eye"></i> Voir
-                                </button>
                             </div>
                         </div>
                     </div>
                 }
             </div>
 
+            <!-- Pagination compacte -->
             <div class="pagination-container">
                 <div class="pagination">
                     <button class="btn-page" 
@@ -158,6 +158,7 @@
     </div>
 </div>
 
+<!-- Modal de détails du produit -->
 @if (showModal && selectedProduct != null)
 {
     <div class="modal-overlay" @onclick="CloseModal">
@@ -273,13 +274,14 @@
     private bool isLoading = true;
     
     private int currentPage = 1;
-    private int pageSize = 20; 
+    private int pageSize = 20; // ← FIXÉ À 20 PRODUITS PAR PAGE
     private string selectedCategoryId = "";
     private string searchQuery = "";
     private int pageJump = 1;
     
     private System.Threading.Timer? searchDebounceTimer;
 
+    // Modal
     private bool showModal = false;
     private Product? selectedProduct;
     private int modalQuantity = 1;
@@ -344,7 +346,8 @@
         pageJump = newPage;
         await LoadProducts();
         
-        Navigation.NavigateTo(Navigation.Uri, forceLoad: false); 
+        // Scroll vers le haut de la page
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: false);
     }
 
     private async Task NextPage()
@@ -403,6 +406,7 @@
         await LoadProducts();
     }
 
+    // Méthodes du modal
     private void ShowProductDetails(Product product)
     {
         selectedProduct = product;
@@ -462,6 +466,7 @@
 }
 
 <style>
+    /* Page principale */
     .products-page {
         min-height: 100vh;
         background: #f9fafb;
@@ -554,6 +559,7 @@
         white-space: nowrap;
     }
 
+    /* Grille de produits compacte */
     .products-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -574,8 +580,12 @@
     }
 
     .product-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        transform: translateY(-8px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+    }
+
+    .product-card:active {
+        transform: translateY(-4px);
     }
 
     .product-image {
@@ -595,13 +605,15 @@
 
     .stock-badge {
         position: absolute;
-        top: 10px;
+        bottom: 10px;
+        left: 10px;
         right: 10px;
-        padding: 4px 10px;
-        border-radius: 15px;
-        font-size: 0.75rem;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.8rem;
         font-weight: 600;
         backdrop-filter: blur(10px);
+        text-align: center;
     }
 
     .stock-badge.out-of-stock {
@@ -618,8 +630,8 @@
         padding: 15px;
         display: flex;
         flex-direction: column;
-        flex: 1;
-        height: 180px;
+        height: 180px; /* Hauteur fixe pour la section info */
+        position: relative;
     }
 
     .product-info h3 {
@@ -640,48 +652,32 @@
     .description-preview {
         color: #4b5563;
         font-size: 0.85rem;
-        margin-bottom: auto;
         line-height: 1.4;
         overflow: hidden;
         display: -webkit-box;
         -webkit-line-clamp: 2;
-        min-height: 0;
-        flex: 1;
         -webkit-box-orient: vertical;
+        flex: 1;
+        min-height: 0; /* Important pour éviter le débordement */
     }
 
     .product-footer {
         display: flex;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
         margin-top: auto;
         padding-top: 10px;
-        flex-shrink: 0;
         border-top: 1px solid #e5e7eb;
+        flex-shrink: 0; /* Empêche le footer d'être compressé */
     }
 
     .price {
-        font-size: 1.1rem;
+        font-size: 1.2rem;
         font-weight: bold;
         color: #1e3a8a;
     }
 
-    .btn-view-details {
-        padding: 8px 16px;
-        background: #3b82f6;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: 600;
-        font-size: 0.85rem;
-        transition: all 0.3s;
-    }
-
-    .btn-view-details:hover {
-        background: #2563eb;
-    }
-
+    /* Pagination */
     .pagination-container {
         display: flex;
         justify-content: space-between;
@@ -740,6 +736,7 @@
         font-weight: 600;
     }
 
+    /* Modal */
     .modal-overlay {
         position: fixed;
         top: 0;
@@ -1003,6 +1000,7 @@
         cursor: not-allowed;
     }
 
+    /* Animations */
     @@keyframes fadeIn {
         from { opacity: 0; }
         to { opacity: 1; }
@@ -1043,6 +1041,7 @@
         margin-bottom: 20px;
     }
 
+    /* Responsive */
     @@media (max-width: 1024px) {
         .modal-body {
             grid-template-columns: 1fr;
