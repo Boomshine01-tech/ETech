@@ -141,15 +141,13 @@ Ajouter au panier
 
 @code {
 
-List<Product>? products;
+private PagedResult<Product>? pagedProducts;
 
-bool isLoading=true;
+private bool isLoading = true;
 
-string searchQuery="";
+private string searchQuery = "";
 
-bool showModal=false;
-
-Product? selectedProduct;
+private Product? selectedProduct;
 
 protected override async Task OnInitializedAsync()
 {
@@ -158,47 +156,71 @@ await LoadProducts();
 
 async Task LoadProducts()
 {
-isLoading=true;
+isLoading = true;
 
-products=await Http.GetFromJsonAsync<List<Product>>("api/products");
-
-isLoading=false;
-}
-async Task HandleSearch(ChangeEventArgs e)
+try
 {
-    searchQuery = e.Value?.ToString() ?? "";
 
-    await SearchProducts();
+var url = "api/products?page=1&pageSize=20";
+
+if(!string.IsNullOrWhiteSpace(searchQuery))
+{
+url += $"&search={searchQuery}";
 }
+
+pagedProducts = await Http.GetFromJsonAsync<PagedResult<Product>>(url);
+
+}
+catch(Exception ex)
+{
+Console.WriteLine(ex.Message);
+}
+
+isLoading = false;
+
+}
+
 async Task SearchProducts()
 {
-if(string.IsNullOrWhiteSpace(searchQuery))
-{
 await LoadProducts();
-return;
 }
 
-products=await Http.GetFromJsonAsync<List<Product>>
-($"api/products?search={searchQuery}");
-}
-
-void AddToCart(Product p)
+async Task HandleSearch(ChangeEventArgs e)
 {
-CartService.AddToCart(p);
 
-NotificationService.ShowSuccess($"{p.Name} ajouté au panier");
+searchQuery = e.Value?.ToString() ?? "";
+
+await LoadProducts();
+
 }
 
-void ShowProduct(Product p)
+void AddToCart(Product product)
 {
-selectedProduct=p;
 
-showModal=true;
+CartService.AddToCart(product);
+
+NotificationService.ShowSuccess($"{product.Name} ajouté au panier");
+
 }
 
-void CloseModal()
+void ShowProduct(Product product)
 {
-showModal=false;
+
+selectedProduct = product;
+
+}
+
+string GetShortDescription(string? description)
+{
+
+if(string.IsNullOrEmpty(description))
+return "";
+
+if(description.Length > 60)
+return description.Substring(0,60) + "...";
+
+return description;
+
 }
 
 }
