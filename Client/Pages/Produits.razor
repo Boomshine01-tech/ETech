@@ -1,4 +1,4 @@
-@page "/produits"
+@page "/products"
 @inject HttpClient Http
 @inject CartService CartService
 @inject NotificationService NotificationService
@@ -19,9 +19,8 @@
 
         <input class="search-input"
                placeholder="Rechercher un produit..."
-               @bind="searchQuery"
-               @bind:event="oninput"
-               @oninput="SearchProducts" />
+               value="@searchQuery"
+               @oninput="HandleSearch"/>
 
     </div>
 
@@ -165,7 +164,12 @@ products=await Http.GetFromJsonAsync<List<Product>>("api/products");
 
 isLoading=false;
 }
+async Task HandleSearch(ChangeEventArgs e)
+{
+    searchQuery = e.Value?.ToString() ?? "";
 
+    await SearchProducts();
+}
 async Task SearchProducts()
 {
 if(string.IsNullOrWhiteSpace(searchQuery))
@@ -402,7 +406,7 @@ border-radius:12px;
 animation:skeleton 1.2s infinite;
 }
 
-@keyframes skeleton{
+@@keyframes skeleton{
 0%{background-position:-200px 0}
 100%{background-position:200px 0}
 }
