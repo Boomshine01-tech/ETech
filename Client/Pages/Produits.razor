@@ -9,772 +9,557 @@
 
 <div class="products-page">
 
-<div class="page-header">
-<div class="container">
-<h1>Nos Produits</h1>
-<p>Découvrez notre catalogue de produits</p>
-</div>
-</div>
+    <div class="page-header">
+        <div class="container">
+            <h1>Nos Produits</h1>
+            <p>Découvrez notre catalogue de produits</p>
+        </div>
+    </div>
 
-<div class="container">
+    <div class="container">
 
-<!-- BARRE RECHERCHE -->
+        <!-- BARRE RECHERCHE -->
+        <div class="filters-section">
+            <div class="search-box">
+                <input class="search-input"
+                       placeholder="Rechercher un produit..."
+                       value="@searchQuery"
+                       @oninput="HandleSearch" />
+                <button class="btn-search" @onclick="SearchProducts">
+                    Rechercher
+                </button>
+            </div>
 
-<div class="filters-section">
+            <div class="results-info">
+                @if (pagedProducts != null)
+                {
+                    <span>@pagedProducts.TotalItems produits trouvés</span>
+                }
+            </div>
+        </div>
 
-<div class="search-box">
+        @if (isLoading)
+        {
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <p>Chargement des produits...</p>
+            </div>
+        }
+        else if (pagedProducts?.Items?.Count > 0)
+        {
+            <div class="products-grid">
+                @foreach (var product in pagedProducts.Items)
+                {
+                    <div class="product-card">
 
-<input class="search-input"
-placeholder="Rechercher un produit..."
-value="@searchQuery"
-@oninput="HandleSearch" />
+                        <div class="product-image" @onclick="() => ShowProduct(product)">
+                            <img src="@product.ImageUrl" alt="@product.Name" />
 
-<button class="btn-search" @onclick="SearchProducts">
-Rechercher
-</button>
+                            @if (product.Stock == 0)
+                            {
+                                <span class="stock-badge out-of-stock">Rupture</span>
+                            }
+                            else if (product.Stock < 5)
+                            {
+                                <span class="stock-badge low-stock">@product.Stock restants</span>
+                            }
+                        </div>
 
-</div>
+                        <div class="product-info">
 
-<div class="results-info">
+                            <h3>@product.Name</h3>
 
-@if(pagedProducts != null)
-{
-<span>
-@pagedProducts.TotalItems produits trouvés
-</span>
-}
+                            <div class="category">@product.Category?.Name</div>
 
-</div>
+                            <div class="description-preview">
+                                @GetShortDescription(product.Description)
+                            </div>
 
-</div>
+                            <div class="product-footer">
+                                <span class="price">@product.Price.ToString("N0") FCFA</span>
 
-@if(isLoading)
-{
-<div class="loading-container">
+                                <!-- ✅ BOUTON COMMANDER -->
+                                <button class="btn-add-cart"
+                                        disabled="@(product.Stock == 0)"
+                                        @onclick="() => AddToCart(product)"
+                                        @onclick:stopPropagation="true">
+                                    @if (product.Stock == 0)
+                                    {
+                                        <span>Indisponible</span>
+                                    }
+                                    else
+                                    {
+                                        <span>🛒 Commander</span>
+                                    }
+                                </button>
+                            </div>
 
-<div class="spinner"></div>
+                        </div>
 
-<p>Chargement des produits...</p>
+                    </div>
+                }
+            </div>
 
-</div>
-}
+            <!-- ✅ PAGINATION -->
+            @if (TotalPages > 1)
+            {
+                <div class="pagination-container">
 
-else if(pagedProducts?.Items?.Count > 0)
-{
+                    <span class="page-info">
+                        Page @currentPage sur @TotalPages
+                        (@pagedProducts.TotalItems produits)
+                    </span>
 
-<div class="products-grid">
+                    <div class="pagination">
 
-@foreach(var product in pagedProducts.Items)
-{
+                        <button class="btn-page"
+                                disabled="@(currentPage == 1)"
+                                @onclick="GoToFirstPage">
+                            «
+                        </button>
 
-<div class="product-card">
+                        <button class="btn-page"
+                                disabled="@(currentPage == 1)"
+                                @onclick="PreviousPage">
+                            ‹
+                        </button>
 
-<div class="product-image"
-@click="() => ShowProduct(product)">
+                        @foreach (var pageNum in GetPageNumbers())
+                        {
+                            <button class="btn-page @(pageNum == currentPage ? "active" : "")"
+                                    @onclick="() => GoToPage(pageNum)">
+                                @pageNum
+                            </button>
+                        }
 
-<img src="@product.ImageUrl" />
+                        <button class="btn-page"
+                                disabled="@(currentPage == TotalPages)"
+                                @onclick="NextPage">
+                            ›
+                        </button>
 
-@if(product.Stock == 0)
-{
-<span class="stock-badge out-of-stock">Rupture</span>
-}
-else if(product.Stock < 5)
-{
-<span class="stock-badge low-stock">@product.Stock restants</span>
-}
+                        <button class="btn-page"
+                                disabled="@(currentPage == TotalPages)"
+                                @onclick="GoToLastPage">
+                            »
+                        </button>
 
-</div>
+                    </div>
 
-<div class="product-info">
+                </div>
+            }
+        }
+        else
+        {
+            <div class="empty-state">
+                <h3>Aucun produit trouvé</h3>
+            </div>
+        }
 
-<h3>@product.Name</h3>
-
-<div class="category">
-@product.Category?.Name
-</div>
-
-<div class="description-preview">
-@GetShortDescription(product.Description)
-</div>
-
-<div class="product-footer">
-
-<span class="price">
-@product.Price.ToString("N0") FCFA
-</span>
-
-</div>
-
-</div>
-
-</div>
-
-}
-
-</div>
-
-}
-
-else
-{
-
-<div class="empty-state">
-
-<h3>Aucun produit trouvé</h3>
-
-</div>
-
-}
-
-</div>
+    </div>
 
 </div>
 
 @code {
 
-private PagedResult<Product>? pagedProducts;
+    private PagedResult<Product>? pagedProducts;
+    private bool isLoading = true;
+    private string searchQuery = "";
+    private Product? selectedProduct;
 
-private bool isLoading = true;
+    // ✅ PAGINATION
+    private int currentPage = 1;
+    private const int PageSize = 20;
 
-private string searchQuery = "";
+    private int TotalPages =>
+        pagedProducts == null || pagedProducts.TotalItems == 0
+            ? 1
+            : (int)Math.Ceiling(pagedProducts.TotalItems / (double)PageSize);
 
-private Product? selectedProduct;
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProducts();
+    }
 
-protected override async Task OnInitializedAsync()
-{
-await LoadProducts();
-}
+    async Task LoadProducts()
+    {
+        isLoading = true;
 
-async Task LoadProducts()
-{
-isLoading = true;
+        try
+        {
+            var url = $"api/products?page={currentPage}&pageSize={PageSize}";
 
-try
-{
+            if (!string.IsNullOrWhiteSpace(searchQuery))
+                url += $"&search={Uri.EscapeDataString(searchQuery)}";
 
-var url = "api/products?page=1&pageSize=20";
+            pagedProducts = await Http.GetFromJsonAsync<PagedResult<Product>>(url);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
 
-if(!string.IsNullOrWhiteSpace(searchQuery))
-{
-url += $"&search={searchQuery}";
-}
+        isLoading = false;
+    }
 
-pagedProducts = await Http.GetFromJsonAsync<PagedResult<Product>>(url);
+    // ── Recherche ──────────────────────────────────────────────
+    async Task SearchProducts()
+    {
+        currentPage = 1;
+        await LoadProducts();
+    }
 
-}
-catch(Exception ex)
-{
-Console.WriteLine(ex.Message);
-}
+    async Task HandleSearch(ChangeEventArgs e)
+    {
+        searchQuery = e.Value?.ToString() ?? "";
+        currentPage = 1;
+        await LoadProducts();
+    }
 
-isLoading = false;
+    // ── Navigation pagination ──────────────────────────────────
+    async Task GoToPage(int page)
+    {
+        if (page < 1 || page > TotalPages) return;
+        currentPage = page;
+        await LoadProducts();
+    }
 
-}
+    async Task PreviousPage()   => await GoToPage(currentPage - 1);
+    async Task NextPage()       => await GoToPage(currentPage + 1);
+    async Task GoToFirstPage()  => await GoToPage(1);
+    async Task GoToLastPage()   => await GoToPage(TotalPages);
 
-async Task SearchProducts()
-{
-await LoadProducts();
-}
+    // Affiche au max 5 numéros autour de la page courante
+    IEnumerable<int> GetPageNumbers()
+    {
+        int start = Math.Max(1, currentPage - 2);
+        int end   = Math.Min(TotalPages, currentPage + 2);
+        return Enumerable.Range(start, end - start + 1);
+    }
 
-async Task HandleSearch(ChangeEventArgs e)
-{
+    // ── Panier ─────────────────────────────────────────────────
+    void AddToCart(Product product)
+    {
+        CartService.AddToCart(product);
+        NotificationService.ShowSuccess($"{product.Name} ajouté au panier");
+    }
 
-searchQuery = e.Value?.ToString() ?? "";
+    void ShowProduct(Product product) => selectedProduct = product;
 
-await LoadProducts();
-
-}
-
-void AddToCart(Product product)
-{
-
-CartService.AddToCart(product);
-
-NotificationService.ShowSuccess($"{product.Name} ajouté au panier");
-
-}
-
-void ShowProduct(Product product)
-{
-
-selectedProduct = product;
-
-}
-
-string GetShortDescription(string? description)
-{
-
-if(string.IsNullOrEmpty(description))
-return "";
-
-if(description.Length > 60)
-return description.Substring(0,60) + "...";
-
-return description;
-
-}
-
+    string GetShortDescription(string? description)
+    {
+        if (string.IsNullOrEmpty(description)) return "";
+        return description.Length > 60 ? description.Substring(0, 60) + "..." : description;
+    }
 }
 
 <style>
 /* PAGE PRODUITS */
-
-.products-page{
-min-height:100vh;
-background:#f9fafb;
+.products-page {
+    min-height: 100vh;
+    background: #f9fafb;
 }
 
 /* HEADER */
-
-.page-header{
-background:linear-gradient(135deg,#1e3a8a,#3b82f6);
-color:white;
-padding:60px 20px;
-text-align:center;
+.page-header {
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    color: white;
+    padding: 60px 20px;
+    text-align: center;
 }
 
-.page-header h1{
-font-size:2.4rem;
-margin-bottom:10px;
+.page-header h1 {
+    font-size: 2.4rem;
+    margin-bottom: 10px;
 }
 
-.container{
-max-width:1400px;
-margin:auto;
-padding:40px 20px;
+.container {
+    max-width: 1400px;
+    margin: auto;
+    padding: 40px 20px;
 }
 
 /* FILTRES */
-
-.filters-section{
-background:white;
-padding:20px;
-border-radius:12px;
-margin-bottom:30px;
-
-display:grid;
-grid-template-columns:2fr auto auto;
-gap:20px;
-align-items:center;
-
-box-shadow:0 2px 8px rgba(0,0,0,0.08);
+.filters-section {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    display: grid;
+    grid-template-columns: 2fr auto;
+    gap: 20px;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
-.search-box{
-display:flex;
-gap:10px;
+.search-box {
+    display: flex;
+    gap: 10px;
 }
 
-.search-input{
-flex:1;
-padding:12px 14px;
-border:2px solid #e5e7eb;
-border-radius:8px;
-font-size:.95rem;
+.search-input {
+    flex: 1;
+    padding: 12px 14px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: .95rem;
 }
 
-.search-input:focus{
-outline:none;
-border-color:#3b82f6;
+.search-input:focus {
+    outline: none;
+    border-color: #3b82f6;
 }
 
-.btn-search{
-padding:12px 20px;
-border:none;
-border-radius:8px;
-background:#3b82f6;
-color:white;
-cursor:pointer;
-font-weight:600;
+.btn-search {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #3b82f6;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
 }
 
-.btn-search:hover{
-background:#2563eb;
+.btn-search:hover {
+    background: #2563eb;
 }
 
-.category-select{
-padding:12px 14px;
-border-radius:8px;
-border:2px solid #e5e7eb;
-min-width:200px;
+/* GRILLE */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
 }
 
-/* GRILLE PRODUITS */
-
-.products-grid{
-
-display:grid;
-
-grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-
-gap:20px;
-
+/* CARD */
+.product-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    transition: .25s;
+    cursor: pointer;
 }
 
-/* CARD PRODUIT */
-
-.product-card{
-
-background:white;
-
-border-radius:12px;
-
-overflow:hidden;
-
-display:flex;
-flex-direction:column;
-
-height:360px;
-
-box-shadow:0 2px 10px rgba(0,0,0,0.08);
-
-transition:.25s;
-
-cursor:pointer;
-
+.product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 28px rgba(0,0,0,0.15);
 }
 
-.product-card:hover{
-
-transform:translateY(-6px);
-
-box-shadow:0 14px 28px rgba(0,0,0,0.15);
-
+/* IMAGE */
+.product-image {
+    width: 100%;
+    aspect-ratio: 1/1;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
 }
 
-/* IMAGE PRODUIT */
-
-.product-image{
-
-width:100%;
-
-aspect-ratio:1/1;
-
-background:#f3f4f6;
-
-display:flex;
-align-items:center;
-justify-content:center;
-
-position:relative;
-
-overflow:hidden;
-
+.product-image img {
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+    transition: transform .3s;
 }
 
-.product-image img{
-
-width:90%;
-height:90%;
-
-object-fit:contain;
-
-transition:transform .3s;
-
-}
-
-.product-card:hover img{
-
-transform:scale(1.08);
-
+.product-card:hover img {
+    transform: scale(1.08);
 }
 
 /* BADGE STOCK */
-
-.stock-badge{
-
-position:absolute;
-
-top:8px;
-left:8px;
-
-padding:4px 8px;
-
-border-radius:6px;
-
-font-size:.75rem;
-
-font-weight:600;
-
-color:white;
-
+.stock-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: .75rem;
+    font-weight: 600;
+    color: white;
 }
 
-.stock-badge.out-of-stock{
+.stock-badge.out-of-stock { background: #dc2626; }
+.stock-badge.low-stock    { background: #f59e0b; }
 
-background:#dc2626;
-
+/* INFO */
+.product-info {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 }
 
-.stock-badge.low-stock{
-
-background:#f59e0b;
-
+.product-info h3 {
+    font-size: .9rem;
+    font-weight: 600;
+    color: #1e3a8a;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: 36px;
+    margin-bottom: 6px;
 }
 
-/* INFO PRODUIT */
-
-.product-info{
-
-padding:14px;
-
-display:flex;
-flex-direction:column;
-
-flex:1;
-
+.category {
+    font-size: .75rem;
+    color: #6b7280;
+    margin-bottom: 8px;
 }
 
-/* TITRE PRODUIT */
-
-.product-info h3{
-
-font-size:.9rem;
-
-font-weight:600;
-
-color:#1e3a8a;
-
-line-height:1.3;
-
-display:-webkit-box;
--webkit-line-clamp:2;
--webkit-box-orient:vertical;
-
-overflow:hidden;
-
-height:36px;
-
-margin-bottom:6px;
-
+.description-preview {
+    font-size: .8rem;
+    color: #4b5563;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 10px;
 }
 
-/* CATEGORIE */
-
-.category{
-
-font-size:.75rem;
-
-color:#6b7280;
-
-margin-bottom:8px;
-
+/* FOOTER CARD */
+.product-footer {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px solid #e5e7eb;
+    gap: 8px;
 }
 
-/* DESCRIPTION */
-
-.description-preview{
-
-font-size:.8rem;
-
-color:#4b5563;
-
-line-height:1.4;
-
-display:-webkit-box;
--webkit-line-clamp:2;
--webkit-box-orient:vertical;
-
-overflow:hidden;
-
-margin-bottom:10px;
-
+.price {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #1e3a8a;
+    white-space: nowrap;
 }
 
-/* FOOTER PRODUIT */
-
-.product-footer{
-
-margin-top:auto;
-
-display:flex;
-align-items:center;
-justify-content:center;
-
-padding-top:10px;
-
-border-top:1px solid #e5e7eb;
-
+/* ✅ BOUTON COMMANDER */
+.btn-add-cart {
+    padding: 7px 12px;
+    border: none;
+    border-radius: 8px;
+    background: #10b981;
+    color: white;
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .2s, transform .15s;
 }
 
-/* PRIX */
-
-.price{
-
-font-size:1.15rem;
-
-font-weight:bold;
-
-color:#1e3a8a;
-
+.btn-add-cart:hover:not(:disabled) {
+    background: #059669;
+    transform: scale(1.05);
 }
 
-/* PAGINATION */
-
-.pagination-container{
-
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-margin-top:40px;
-
-flex-wrap:wrap;
-
-gap:20px;
-
+.btn-add-cart:disabled {
+    background: #d1d5db;
+    color: #9ca3af;
+    cursor: not-allowed;
 }
 
-.pagination{
-
-display:flex;
-
-gap:10px;
-
+/* ✅ PAGINATION */
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 40px;
+    flex-wrap: wrap;
+    gap: 16px;
 }
 
-.btn-page{
-
-padding:10px 14px;
-
-border-radius:8px;
-
-border:2px solid #e5e7eb;
-
-background:white;
-
-cursor:pointer;
-
-font-weight:600;
-
-color:#1e3a8a;
-
+.page-info {
+    padding: 10px 18px;
+    background: #eff6ff;
+    border-radius: 8px;
+    color: #1e3a8a;
+    font-weight: 600;
+    font-size: .9rem;
 }
 
-.btn-page:hover:not(:disabled){
-
-background:#f3f4f6;
-
-border-color:#3b82f6;
-
+.pagination {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
 }
 
-.btn-page:disabled{
-
-opacity:.4;
-
-cursor:not-allowed;
-
+.btn-page {
+    min-width: 40px;
+    height: 40px;
+    padding: 0 10px;
+    border-radius: 8px;
+    border: 2px solid #e5e7eb;
+    background: white;
+    cursor: pointer;
+    font-weight: 600;
+    color: #1e3a8a;
+    transition: .2s;
 }
 
-.page-info{
-
-padding:10px 18px;
-
-background:#f3f4f6;
-
-border-radius:8px;
-
-color:#1e3a8a;
-
-font-weight:600;
-
+.btn-page:hover:not(:disabled) {
+    background: #eff6ff;
+    border-color: #3b82f6;
 }
 
-.page-jump-input{
+.btn-page.active {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: white;
+}
 
-width:70px;
-
-padding:8px;
-
-border-radius:8px;
-
-border:2px solid #e5e7eb;
-
-text-align:center;
-
+.btn-page:disabled {
+    opacity: .4;
+    cursor: not-allowed;
 }
 
 /* LOADING */
-
-.loading-container{
-
-text-align:center;
-
-padding:80px 20px;
-
+.loading-container {
+    text-align: center;
+    padding: 80px 20px;
 }
 
-.spinner{
-
-width:50px;
-height:50px;
-
-border:4px solid #e5e7eb;
-border-top-color:#3b82f6;
-
-border-radius:50%;
-
-animation:spin 1s linear infinite;
-
-margin:auto;
-
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #e5e7eb;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: auto;
 }
 
-@@keyframes spin{
+@@keyframes spin { to { transform: rotate(360deg); } }
 
-to{transform:rotate(360deg)}
-
-}
-
-/* EMPTY STATE */
-
-.empty-state{
-
-text-align:center;
-
-padding:80px;
-
-color:#6b7280;
-
-}
-
-/* MODAL */
-
-.modal-overlay{
-
-position:fixed;
-
-top:0;
-left:0;
-right:0;
-bottom:0;
-
-background:rgba(0,0,0,.7);
-
-display:flex;
-
-align-items:center;
-justify-content:center;
-
-z-index:1000;
-
-padding:20px;
-
-}
-
-.modal-content{
-
-background:white;
-
-border-radius:18px;
-
-max-width:900px;
-width:100%;
-
-overflow:hidden;
-
-animation:modalIn .25s ease;
-
-}
-
-.modal-body{
-
-display:grid;
-
-grid-template-columns:1fr 1fr;
-
-gap:30px;
-
-padding:30px;
-
-}
-
-.modal-image-container{
-
-background:#f3f4f6;
-
-border-radius:12px;
-
-overflow:hidden;
-
-display:flex;
-align-items:center;
-justify-content:center;
-
-}
-
-.modal-image-container img{
-
-width:90%;
-
-object-fit:contain;
-
-}
-
-.modal-title{
-
-font-size:1.6rem;
-
-color:#1e3a8a;
-
-margin-bottom:10px;
-
-}
-
-.modal-price{
-
-font-size:1.8rem;
-
-font-weight:bold;
-
-color:#1e3a8a;
-
-margin-bottom:20px;
-
+/* EMPTY */
+.empty-state {
+    text-align: center;
+    padding: 80px;
+    color: #6b7280;
 }
 
 /* RESPONSIVE */
+@@media (max-width: 768px) {
+    .filters-section {
+        grid-template-columns: 1fr;
+    }
 
-@@media(max-width:1024px){
+    .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 15px;
+    }
 
-.products-grid{
-
-grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
-
-}
-
-.modal-body{
-
-grid-template-columns:1fr;
-
-}
-
-}
-
-@@media(max-width:768px){
-
-.filters-section{
-
-grid-template-columns:1fr;
-
-}
-
-.products-grid{
-
-grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
-
-gap:15px;
-
-}
-
-.product-card{
-
-height:320px;
-
-}
-
+    .pagination-container {
+        flex-direction: column;
+        align-items: center;
+    }
 }
 </style>
