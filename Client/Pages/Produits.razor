@@ -3,133 +3,105 @@
 @inject CartService CartService
 @inject NotificationService NotificationService
 @using System.Net.Http.Json
+@using ETechEnergie.Shared.Models
 
 <PageTitle>Nos Produits</PageTitle>
 
-<div class="products-container">
+<div class="products-page">
 
-    <!-- HEADER -->
-    <div class="products-header">
-        <h1>Nos Produits</h1>
-        <p>Découvrez notre catalogue de matériel électronique et énergie</p>
-    </div>
+<div class="page-header">
+<div class="container">
+<h1>Nos Produits</h1>
+<p>Découvrez notre catalogue de produits</p>
+</div>
+</div>
 
-    <!-- SEARCH -->
-    <div class="products-toolbar">
+<div class="container">
 
-        <input class="search-input"
-               placeholder="Rechercher un produit..."
-               value="@searchQuery"
-               @oninput="HandleSearch"/>
+<!-- BARRE RECHERCHE -->
 
-    </div>
+<div class="filters-section">
 
-    <!-- LOADING -->
-    @if (isLoading)
-    {
-        <div class="products-grid">
-            @for (int i = 0; i < 12; i++)
-            {
-                <div class="skeleton-card"></div>
-            }
-        </div>
-    }
+<div class="search-box">
 
-    <!-- PRODUCTS -->
-    else if (products?.Count > 0)
-    {
+<input class="search-input"
+placeholder="Rechercher un produit..."
+value="@searchQuery"
+@oninput="HandleSearch" />
 
-        <div class="products-grid">
-
-            @foreach (var product in products)
-            {
-                <div class="product-card">
-
-                    <div class="product-image"
-                         @onclick="() => ShowProduct(product)">
-
-                        <img src="@product.ImageUrl" />
-
-                        @if (product.Stock == 0)
-                        {
-                            <span class="badge out">Rupture</span>
-                        }
-                        else if (product.Stock < 5)
-                        {
-                            <span class="badge low">@product.Stock restants</span>
-                        }
-
-                    </div>
-
-                    <div class="product-info">
-
-                        <div class="product-title">
-                            @product.Name
-                        </div>
-
-                        <div class="product-category">
-                            @product.Category?.Name
-                        </div>
-
-                        <div class="product-price">
-                            @product.Price.ToString("N0") FCFA
-                        </div>
-
-                        <button class="btn-cart"
-                                disabled="@(product.Stock==0)"
-                                @onclick="() => AddToCart(product)">
-
-                            🛒 Ajouter
-
-                        </button>
-
-                    </div>
-
-                </div>
-            }
-
-        </div>
-
-    }
-    else
-    {
-        <div class="empty">
-            Aucun produit trouvé
-        </div>
-    }
+<button class="btn-search" @onclick="SearchProducts">
+Rechercher
+</button>
 
 </div>
 
+<div class="results-info">
 
-@if (showModal && selectedProduct != null)
+@if(pagedProducts != null)
+{
+<span>
+@pagedProducts.TotalItems produits trouvés
+</span>
+}
+
+</div>
+
+</div>
+
+@if(isLoading)
+{
+<div class="loading-container">
+
+<div class="spinner"></div>
+
+<p>Chargement des produits...</p>
+
+</div>
+}
+
+else if(pagedProducts?.Items?.Count > 0)
 {
 
-<div class="modal-overlay" @onclick="CloseModal">
+<div class="products-grid">
 
-<div class="modal" @onclick:stopPropagation>
+@foreach(var product in pagedProducts.Items)
+{
 
-<div class="modal-left">
-<img src="@selectedProduct.ImageUrl"/>
+<div class="product-card">
+
+<div class="product-image"
+@click="() => ShowProduct(product)">
+
+<img src="@product.ImageUrl" />
+
+@if(product.Stock == 0)
+{
+<span class="stock-badge out-of-stock">Rupture</span>
+}
+else if(product.Stock < 5)
+{
+<span class="stock-badge low-stock">@product.Stock restants</span>
+}
+
 </div>
 
-<div class="modal-right">
+<div class="product-info">
 
-<h2>@selectedProduct.Name</h2>
+<h3>@product.Name</h3>
 
-<div class="modal-price">
-@selectedProduct.Price.ToString("N0") FCFA
+<div class="category">
+@product.Category?.Name
 </div>
 
-<p class="modal-desc">
-@selectedProduct.Description
-</p>
+<div class="description-preview">
+@GetShortDescription(product.Description)
+</div>
 
-<button class="btn-cart-large"
-@click="AddToCart(selectedProduct)">
+<div class="product-footer">
 
-Ajouter au panier
-
-</button>
+<span class="price">
+@product.Price.ToString("N0") FCFA
+</span>
 
 </div>
 
@@ -138,6 +110,25 @@ Ajouter au panier
 </div>
 
 }
+
+</div>
+
+}
+
+else
+{
+
+<div class="empty-state">
+
+<h3>Aucun produit trouvé</h3>
+
+</div>
+
+}
+
+</div>
+
+</div>
 
 @code {
 
