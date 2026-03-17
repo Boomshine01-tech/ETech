@@ -18,7 +18,7 @@
 
     <div class="container">
 
-        <!-- BARRE RECHERCHE -->
+        <!-- BARRE RECHERCHE ET FILTRES -->
         <div class="filters-section">
             <div class="search-box">
                 <input class="search-input"
@@ -28,6 +28,20 @@
                 <button class="btn-search" @onclick="SearchProducts">
                     Rechercher
                 </button>
+            </div>
+
+            <div class="category-filter">
+                <label>Catégorie :</label>
+                <select class="category-select" @bind="selectedCategoryId" @bind:after="FilterByCategory">
+                    <option value="">Toutes les catégories</option>
+                    @if (categories != null)
+                    {
+                        @foreach (var category in categories)
+                        {
+                            <option value="@category.Id">@category.Name</option>
+                        }
+                    }
+                </select>
             </div>
 
             <div class="results-info">
@@ -265,8 +279,10 @@
 @code {
 
     private PagedResult<Product>? pagedProducts;
+    private Category[]? categories;
     private bool isLoading = true;
     private string searchQuery = "";
+    private string selectedCategoryId = "";
     private Product? selectedProduct;
 
     // ✅ PAGINATION
@@ -284,7 +300,20 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadCategories();
         await LoadProducts();
+    }
+
+    async Task LoadCategories()
+    {
+        try
+        {
+            categories = await Http.GetFromJsonAsync<Category[]>("api/categories");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur chargement catégories: {ex.Message}");
+        }
     }
 
     async Task LoadProducts()
@@ -298,6 +327,9 @@
             if (!string.IsNullOrWhiteSpace(searchQuery))
                 url += $"&search={Uri.EscapeDataString(searchQuery)}";
 
+            if (!string.IsNullOrWhiteSpace(selectedCategoryId))
+                url += $"&categoryId={selectedCategoryId}";
+
             pagedProducts = await Http.GetFromJsonAsync<PagedResult<Product>>(url);
         }
         catch (Exception ex)
@@ -306,6 +338,13 @@
         }
 
         isLoading = false;
+    }
+
+    // ── Filtres ────────────────────────────────────────────
+    async Task FilterByCategory()
+    {
+        currentPage = 1;
+        await LoadProducts();
     }
 
     // ── Recherche ──────────────────────────────────────────────
@@ -435,7 +474,7 @@
     border-radius: 12px;
     margin-bottom: 30px;
     display: grid;
-    grid-template-columns: 2fr auto;
+    grid-template-columns: 2fr auto auto;
     gap: 20px;
     align-items: center;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
@@ -467,10 +506,48 @@
     color: white;
     cursor: pointer;
     font-weight: 600;
+    white-space: nowrap;
 }
 
 .btn-search:hover {
     background: #2563eb;
+}
+
+/* FILTRE CATÉGORIE */
+.category-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+}
+
+.category-filter label {
+    font-weight: 600;
+    color: #1e3a8a;
+    font-size: .9rem;
+}
+
+.category-select {
+    padding: 12px 14px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: .95rem;
+    cursor: pointer;
+    background: white;
+    color: #1e3a8a;
+    font-weight: 500;
+    min-width: 180px;
+}
+
+.category-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.results-info {
+    font-size: .9rem;
+    color: #6b7280;
+    white-space: nowrap;
 }
 
 /* GRILLE */
@@ -977,6 +1054,10 @@
 
     .modal-image-container {
         min-height: 300px;
+    }
+
+    .filters-section {
+        grid-template-columns: 1fr;
     }
 }
 
