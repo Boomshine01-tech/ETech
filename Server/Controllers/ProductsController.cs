@@ -298,12 +298,7 @@ public class ProductsController : ControllerBase
                 uniqueFileName,
                 file.Length / 1024);
 
-            return Ok(new 
-            { 
-                url = imageUrl,
-                fileName = uniqueFileName,
-                size = file.Length
-            });
+            return Ok(imageUrl);
         }
         catch (Exception ex)
         {
