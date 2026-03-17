@@ -160,6 +160,108 @@
 
 </div>
 
+<!-- ✅ MODAL DÉTAILS PRODUIT -->
+@if (showModal && selectedProduct != null)
+{
+    <div class="modal-overlay" @onclick="CloseModal">
+        <div class="modal-content" @onclick:stopPropagation="true">
+            
+            <button class="modal-close" @onclick="CloseModal">
+                ✕
+            </button>
+
+            <div class="modal-body">
+                
+                <!-- GAUCHE : IMAGE -->
+                <div class="modal-image-section">
+                    <div class="modal-image-container">
+                        <img src="@selectedProduct.ImageUrl" alt="@selectedProduct.Name" />
+                    </div>
+                </div>
+
+                <!-- DROITE : DÉTAILS -->
+                <div class="modal-details-section">
+                    
+                    <div class="modal-category">
+                        @selectedProduct.Category?.Name
+                    </div>
+
+                    <h2 class="modal-title">@selectedProduct.Name</h2>
+
+                    <div class="modal-price">
+                        @selectedProduct.Price.ToString("N0") FCFA
+                    </div>
+
+                    <div class="modal-description">
+                        <h3>📋 Description</h3>
+                        <p>@selectedProduct.Description</p>
+                    </div>
+
+                    <div class="modal-specs">
+                        <div class="spec-item">
+                            <div class="spec-icon">📦</div>
+                            <div>
+                                <strong>Stock disponible</strong>
+                                <span>
+                                    @if (selectedProduct.Stock == 0)
+                                    {
+                                        <span class="text-danger">Rupture de stock</span>
+                                    }
+                                    else if (selectedProduct.Stock < 5)
+                                    {
+                                        <span class="text-warning">Plus que @selectedProduct.Stock unités</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-success">@selectedProduct.Stock unités disponibles</span>
+                                    }
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="spec-item">
+                            <div class="spec-icon">🏷️</div>
+                            <div>
+                                <strong>Référence</strong>
+                                <span>#PROD-@selectedProduct.Id.ToString("D4")</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        @if (selectedProduct.Stock > 0)
+                        {
+                            <div class="quantity-selector">
+                                <button class="qty-btn" @onclick="DecreaseQuantity" disabled="@(modalQuantity <= 1)">
+                                    −
+                                </button>
+                                <input type="number" 
+                                       @bind="modalQuantity" 
+                                       min="1" 
+                                       max="@selectedProduct.Stock" 
+                                       class="qty-input" />
+                                <button class="qty-btn" @onclick="IncreaseQuantity" disabled="@(modalQuantity >= selectedProduct.Stock)">
+                                    +
+                                </button>
+                            </div>
+
+                            <button class="btn-add-to-cart-large" @onclick="AddToCartFromModal">
+                                🛒 Ajouter au panier
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn-out-of-stock-large" disabled>
+                                ✕ Produit indisponible
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
 
     private PagedResult<Product>? pagedProducts;
@@ -175,6 +277,10 @@
         pagedProducts == null || pagedProducts.TotalItems == 0
             ? 1
             : (int)Math.Ceiling(pagedProducts.TotalItems / (double)PageSize);
+
+    // ✅ MODAL
+    private bool showModal = false;
+    private int modalQuantity = 1;
 
     protected override async Task OnInitializedAsync()
     {
@@ -244,7 +350,50 @@
         NotificationService.ShowSuccess($"{product.Name} ajouté au panier");
     }
 
-    void ShowProduct(Product product) => selectedProduct = product;
+    // ── Modal ──────────────────────────────────────────────────
+    void ShowProduct(Product product)
+    {
+        selectedProduct = product;
+        modalQuantity = 1;
+        showModal = true;
+    }
+
+    void CloseModal()
+    {
+        showModal = false;
+        selectedProduct = null;
+        modalQuantity = 1;
+    }
+
+    void IncreaseQuantity()
+    {
+        if (selectedProduct != null && modalQuantity < selectedProduct.Stock)
+        {
+            modalQuantity++;
+        }
+    }
+
+    void DecreaseQuantity()
+    {
+        if (modalQuantity > 1)
+        {
+            modalQuantity--;
+        }
+    }
+
+    void AddToCartFromModal()
+    {
+        if (selectedProduct != null)
+        {
+            for (int i = 0; i < modalQuantity; i++)
+            {
+                CartService.AddToCart(selectedProduct);
+            }
+            
+            NotificationService.ShowSuccess($"{modalQuantity} x {selectedProduct.Name} ajouté(s) au panier");
+            CloseModal();
+        }
+    }
 
     string GetShortDescription(string? description)
     {
@@ -340,7 +489,6 @@
     flex-direction: column;
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     transition: .25s;
-    cursor: pointer;
 }
 
 .product-card:hover {
@@ -358,6 +506,7 @@
     justify-content: center;
     position: relative;
     overflow: hidden;
+    cursor: pointer;
 }
 
 .product-image img {
@@ -521,6 +670,280 @@
     cursor: not-allowed;
 }
 
+/* ✅ MODAL */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.25s;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    max-width: 900px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: slideUp 0.3s;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.4rem;
+    color: #6b7280;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.2s;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    background: #f3f4f6;
+    color: #1e3a8a;
+    transform: rotate(90deg);
+}
+
+.modal-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    padding: 30px;
+}
+
+/* IMAGE SECTION */
+.modal-image-section {
+    position: relative;
+}
+
+.modal-image-container {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+}
+
+.modal-image-container img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    max-height: 450px;
+}
+
+/* DETAILS SECTION */
+.modal-details-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-category {
+    display: inline-block;
+    color: #3b82f6;
+    font-weight: 600;
+    font-size: .9rem;
+    margin-bottom: 8px;
+}
+
+.modal-title {
+    font-size: 1.6rem;
+    color: #1e3a8a;
+    margin-bottom: 12px;
+    line-height: 1.3;
+}
+
+.modal-price {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #1e3a8a;
+    margin-bottom: 20px;
+}
+
+.modal-description {
+    margin-bottom: 20px;
+}
+
+.modal-description h3 {
+    font-size: 1rem;
+    color: #1e3a8a;
+    margin-bottom: 10px;
+}
+
+.modal-description p {
+    color: #4b5563;
+    line-height: 1.6;
+}
+
+.modal-specs {
+    background: #f9fafb;
+    padding: 16px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.spec-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.spec-item:last-child {
+    border-bottom: none;
+}
+
+.spec-icon {
+    font-size: 1.3rem;
+    width: 28px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.spec-item div {
+    flex: 1;
+}
+
+.spec-item strong {
+    display: block;
+    color: #1e3a8a;
+    font-size: .9rem;
+    margin-bottom: 2px;
+}
+
+.spec-item span {
+    color: #6b7280;
+    font-size: .85rem;
+}
+
+.text-danger  { color: #dc2626; font-weight: 600; }
+.text-warning { color: #f59e0b; font-weight: 600; }
+.text-success { color: #10b981; font-weight: 600; }
+
+.modal-actions {
+    margin-top: auto;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.quantity-selector {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: #f3f4f6;
+    padding: 4px;
+    border-radius: 10px;
+}
+
+.qty-btn {
+    width: 38px;
+    height: 38px;
+    background: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #1e3a8a;
+    font-weight: bold;
+    font-size: 1.2rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qty-btn:hover:not(:disabled) {
+    background: #3b82f6;
+    color: white;
+}
+
+.qty-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.qty-input {
+    width: 60px;
+    height: 38px;
+    border: none;
+    background: white;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 8px;
+    color: #1e3a8a;
+}
+
+.btn-add-to-cart-large {
+    flex: 1;
+    padding: 14px 26px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.btn-add-to-cart-large:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+.btn-out-of-stock-large {
+    flex: 1;
+    padding: 14px 26px;
+    background: #d1d5db;
+    color: #6b7280;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: not-allowed;
+}
+
+/* ANIMATIONS */
+@@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* LOADING */
 .loading-container {
     text-align: center;
@@ -547,6 +970,16 @@
 }
 
 /* RESPONSIVE */
+@@media (max-width: 1024px) {
+    .modal-body {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-image-container {
+        min-height: 300px;
+    }
+}
+
 @@media (max-width: 768px) {
     .filters-section {
         grid-template-columns: 1fr;
@@ -560,6 +993,18 @@
     .pagination-container {
         flex-direction: column;
         align-items: center;
+    }
+
+    .modal-content {
+        margin: 10px;
+    }
+
+    .modal-title {
+        font-size: 1.3rem;
+    }
+
+    .modal-price {
+        font-size: 1.5rem;
     }
 }
 </style>
