@@ -18,7 +18,6 @@
 
     <div class="container">
 
-        <!-- BARRE RECHERCHE ET FILTRES -->
         <div class="filters-section">
             <div class="search-box">
                 <input class="search-input"
@@ -92,7 +91,6 @@
                             <div class="product-footer">
                                 <span class="price">@product.Price.ToString("N0") FCFA</span>
 
-                                <!-- ✅ BOUTON COMMANDER -->
                                 <button class="btn-add-cart"
                                         disabled="@(product.Stock == 0)"
                                         @onclick="() => AddToCart(product)"
@@ -114,7 +112,6 @@
                 }
             </div>
 
-            <!-- ✅ PAGINATION -->
             @if (TotalPages > 1)
             {
                 <div class="pagination-container">
@@ -174,7 +171,6 @@
 
 </div>
 
-<!-- ✅ MODAL DÉTAILS PRODUIT -->
 @if (showModal && selectedProduct != null)
 {
     <div class="modal-overlay" @onclick="CloseModal">
@@ -186,14 +182,12 @@
 
             <div class="modal-body">
                 
-                <!-- GAUCHE : IMAGE -->
                 <div class="modal-image-section">
                     <div class="modal-image-container">
                         <img src="@selectedProduct.ImageUrl" alt="@selectedProduct.Name" />
                     </div>
                 </div>
 
-                <!-- DROITE : DÉTAILS -->
                 <div class="modal-details-section">
                     
                     <div class="modal-category">
@@ -285,7 +279,6 @@
     private string selectedCategoryId = "";
     private Product? selectedProduct;
 
-    // ✅ PAGINATION
     private int currentPage = 1;
     private const int PageSize = 20;
 
@@ -294,7 +287,6 @@
             ? 1
             : (int)Math.Ceiling(pagedProducts.TotalItems / (double)PageSize);
 
-    // ✅ MODAL
     private bool showModal = false;
     private int modalQuantity = 1;
 
@@ -340,14 +332,12 @@
         isLoading = false;
     }
 
-    // ── Filtres ────────────────────────────────────────────
     async Task FilterByCategory()
     {
         currentPage = 1;
         await LoadProducts();
     }
 
-    // ── Recherche ──────────────────────────────────────────────
     async Task SearchProducts()
     {
         currentPage = 1;
@@ -361,7 +351,6 @@
         await LoadProducts();
     }
 
-    // ── Navigation pagination ──────────────────────────────────
     async Task GoToPage(int page)
     {
         if (page < 1 || page > TotalPages) return;
@@ -374,7 +363,6 @@
     async Task GoToFirstPage()  => await GoToPage(1);
     async Task GoToLastPage()   => await GoToPage(TotalPages);
 
-    // Affiche au max 5 numéros autour de la page courante
     IEnumerable<int> GetPageNumbers()
     {
         int start = Math.Max(1, currentPage - 2);
@@ -382,14 +370,12 @@
         return Enumerable.Range(start, end - start + 1);
     }
 
-    // ── Panier ─────────────────────────────────────────────────
     void AddToCart(Product product)
     {
         CartService.AddToCart(product);
         NotificationService.ShowSuccess($"{product.Name} ajouté au panier");
     }
 
-    // ── Modal ──────────────────────────────────────────────────
     void ShowProduct(Product product)
     {
         selectedProduct = product;
@@ -442,13 +428,11 @@
 }
 
 <style>
-/* PAGE PRODUITS */
 .products-page {
     min-height: 100vh;
     background: #f9fafb;
 }
 
-/* HEADER */
 .page-header {
     background: linear-gradient(135deg, #1e3a8a, #3b82f6);
     color: white;
@@ -467,7 +451,6 @@
     padding: 40px 20px;
 }
 
-/* FILTRES */
 .filters-section {
     background: white;
     padding: 20px;
@@ -513,7 +496,6 @@
     background: #2563eb;
 }
 
-/* FILTRE CATÉGORIE */
 .category-filter {
     display: flex;
     align-items: center;
@@ -550,14 +532,12 @@
     white-space: nowrap;
 }
 
-/* GRILLE */
 .products-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 20px;
 }
 
-/* CARD */
 .product-card {
     background: white;
     border-radius: 12px;
@@ -573,7 +553,6 @@
     box-shadow: 0 14px 28px rgba(0,0,0,0.15);
 }
 
-/* IMAGE */
 .product-image {
     width: 100%;
     aspect-ratio: 1/1;
@@ -597,7 +576,6 @@
     transform: scale(1.08);
 }
 
-/* BADGE STOCK */
 .stock-badge {
     position: absolute;
     top: 8px;
@@ -612,7 +590,6 @@
 .stock-badge.out-of-stock { background: #dc2626; }
 .stock-badge.low-stock    { background: #f59e0b; }
 
-/* INFO */
 .product-info {
     padding: 14px;
     display: flex;
@@ -650,7 +627,6 @@
     margin-bottom: 10px;
 }
 
-/* FOOTER CARD */
 .product-footer {
     margin-top: auto;
     display: flex;
@@ -668,7 +644,6 @@
     white-space: nowrap;
 }
 
-/* ✅ BOUTON COMMANDER */
 .btn-add-cart {
     padding: 7px 12px;
     border: none;
@@ -693,7 +668,6 @@
     cursor: not-allowed;
 }
 
-/* ✅ PAGINATION */
 .pagination-container {
     display: flex;
     justify-content: space-between;
@@ -747,7 +721,6 @@
     cursor: not-allowed;
 }
 
-/* ✅ MODAL */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -810,7 +783,6 @@
     padding: 30px;
 }
 
-/* IMAGE SECTION */
 .modal-image-section {
     position: relative;
 }
@@ -832,7 +804,6 @@
     max-height: 450px;
 }
 
-/* DETAILS SECTION */
 .modal-details-section {
     display: flex;
     flex-direction: column;
@@ -1004,7 +975,6 @@
     cursor: not-allowed;
 }
 
-/* ANIMATIONS */
 @@keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -1021,7 +991,6 @@
     }
 }
 
-/* LOADING */
 .loading-container {
     text-align: center;
     padding: 80px 20px;
@@ -1039,14 +1008,12 @@
 
 @@keyframes spin { to { transform: rotate(360deg); } }
 
-/* EMPTY */
 .empty-state {
     text-align: center;
     padding: 80px;
     color: #6b7280;
 }
 
-/* RESPONSIVE */
 @@media (max-width: 1024px) {
     .modal-body {
         grid-template-columns: 1fr;
