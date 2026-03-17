@@ -295,12 +295,12 @@
     {
         try
         {
-            var response = await Http.GetAsync("api/products");
-            if (response.IsSuccessStatusCode)
+            var pagedResult = await Http.GetFromJsonAsync<PagedResult<Product>>("api/products?pageSize=1000");
+            if (pagedResult != null)
             {
-                products = await response.Content.ReadFromJsonAsync<Product[]>();
+                products = pagedResult.Items.ToArray();
             }
-            
+        
             categories = await Http.GetFromJsonAsync<Category[]>("api/categories");
         }
         catch (Exception ex)
