@@ -1,0 +1,1082 @@
+@page "/"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@using ETechEnergie.Shared.Models
+
+<PageTitle>e-Tech Energie+ | L'expertise technique et énergétique au service de Thiès</PageTitle>
+<HeadContent>
+    <meta name="description" content="Découvrez e-Tech Energie+, une entreprise dont la mission est de créer, implémenter et maintenir des systèmes alliant sécurité, performance et durabilité." />
+    <meta name="keywords" content="Presentation, Accueil" />
+    <meta property="og:title" content="Accueil | e-Tech Energie+" />
+    <meta property="og:description" content="Présentation d'une Startup sénégalaise innovante dans le secteur de l'électricité et du bâtiment, située à Thiès." />
+    <meta property="og:url" content="https://etechenergie.onrender.com/" />
+</HeadContent>
+
+<!-- ===== HERO SLIDER ===== -->
+<section class="hero">
+
+    <!-- Slides — remplacer les URLs par les vraies photos quand disponibles -->
+    <div class="slide @(currentSlide == 0 ? "active" : "")" style="background-image: url('https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1600')">
+        <div class="slide-label"><i class="fas fa-solar-panel"></i>&nbsp; Énergies Renouvelables</div>
+    </div>
+    <div class="slide @(currentSlide == 1 ? "active" : "")" style="background-image: url('https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=1600')">
+        <div class="slide-label"><i class="fas fa-bolt"></i>&nbsp; Installation Électrique</div>
+    </div>
+    <div class="slide @(currentSlide == 2 ? "active" : "")" style="background-image: url('https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1600')">
+        <div class="slide-label"><i class="fas fa-hard-hat"></i>&nbsp; Génie Civil & BTP</div>
+    </div>
+    <div class="slide @(currentSlide == 3 ? "active" : "")" style="background-image: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600')">
+        <div class="slide-label"><i class="fas fa-network-wired"></i>&nbsp; Réseaux & Télécoms</div>
+    </div>
+    <div class="slide @(currentSlide == 4 ? "active" : "")" style="background-image: url('https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1600')">
+        <div class="slide-label"><i class="fas fa-industry"></i>&nbsp; Maintenance Industrielle</div>
+    </div>
+    <div class="slide @(currentSlide == 5 ? "active" : "")" style="background-image: url('https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?w=1600')">
+        <div class="slide-label"><i class="fas fa-globe"></i>&nbsp; Commerce International</div>
+    </div>
+
+    <div class="hero-grid"></div>
+
+    <!-- Particules décoratives -->
+    <div class="particle" style="width:5px;height:5px;left:8%;animation-duration:9s;animation-delay:0s"></div>
+    <div class="particle" style="width:4px;height:4px;left:22%;animation-duration:13s;animation-delay:2s"></div>
+    <div class="particle" style="width:7px;height:7px;left:48%;animation-duration:11s;animation-delay:4s"></div>
+    <div class="particle" style="width:5px;height:5px;left:68%;animation-duration:8s;animation-delay:1s"></div>
+    <div class="particle" style="width:6px;height:6px;left:83%;animation-duration:10s;animation-delay:3s"></div>
+
+    <!-- Contenu principal -->
+    <div class="hero-content">
+        <div class="hero-badge"><i class="fas fa-bolt"></i> Thiès, Sénégal</div>
+        <h1>e-Tech <span>Energie+</span></h1>
+        <p class="tagline">L'expertise technique et énergétique au service de Thiès</p>
+        <p class="subtitle">Performance, fiabilité et évolutivité des solutions technologiques pour votre entreprise</p>
+        <div class="hero-actions">
+            <a href="/services" class="btn btn-primary">
+                <i class="fas fa-cogs"></i> Nos Services
+            </a>
+            <a href="/contact" class="btn btn-secondary">
+                <i class="fas fa-envelope"></i> Contactez-nous
+            </a>
+        </div>
+    </div>
+
+    <!-- Dots de navigation -->
+    <div class="slider-dots">
+        @for (int i = 0; i < totalSlides; i++)
+        {
+            var index = i;
+            <button class="dot @(currentSlide == index ? "active" : "")" @onclick="() => GoToSlide(index)"></button>
+        }
+    </div>
+
+    <!-- Barre de progression -->
+    <div class="slide-progress">
+        <div class="slide-progress-bar" style="transition: width @(slideDuration)ms linear; width: @(progressWidth)%"></div>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="hero-stats">
+        <div class="stat-item">
+            <span class="stat-number">200+</span>
+            <span class="stat-label">Clients satisfaits</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">5+</span>
+            <span class="stat-label">Années d'expérience</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">50+</span>
+            <span class="stat-label">Projets réalisés</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">24/7</span>
+            <span class="stat-label">Support disponible</span>
+        </div>
+    </div>
+</section>
+
+<!-- ===== NOS RÉALISATIONS ===== -->
+<section class="realisations-section">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag"><i class="fas fa-images"></i> Notre travail</div>
+            <h2>Nos Réalisations</h2>
+            <p class="section-subtitle">Découvrez quelques-uns de nos projets réalisés avec passion et expertise</p>
+        </div>
+
+        <div class="realisations-grid">
+            <!-- Photo 1 — remplacer src par la vraie photo -->
+            <div class="realisation-card big">
+                <div class="realisation-img-wrap">
+                    <div class="photo-placeholder">
+                        <i class="fas fa-solar-panel"></i>
+                        <span>Photo chantier solaire</span>
+                    </div>
+                    <div class="realisation-overlay">
+                        <span class="realisation-tag"><i class="fas fa-solar-panel"></i> Énergies Renouvelables</span>
+                        <h3>Installation panneaux solaires</h3>
+                        <p>Résidence, Thiès</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Photo 2 -->
+            <div class="realisation-card">
+                <div class="realisation-img-wrap">
+                    <div class="photo-placeholder">
+                        <i class="fas fa-bolt"></i>
+                        <span>Photo installation électrique</span>
+                    </div>
+                    <div class="realisation-overlay">
+                        <span class="realisation-tag"><i class="fas fa-bolt"></i> Électrique</span>
+                        <h3>Câblage industriel</h3>
+                        <p>Usine, Thiès</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Photo 3 -->
+            <div class="realisation-card">
+                <div class="realisation-img-wrap">
+                    <div class="photo-placeholder">
+                        <i class="fas fa-hard-hat"></i>
+                        <span>Photo chantier BTP</span>
+                    </div>
+                    <div class="realisation-overlay">
+                        <span class="realisation-tag"><i class="fas fa-hard-hat"></i> Génie Civil</span>
+                        <h3>Construction bâtiment</h3>
+                        <p>Quartier Médina Fall, Thiès</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Photo 4 -->
+            <div class="realisation-card">
+                <div class="realisation-img-wrap">
+                    <div class="photo-placeholder">
+                        <i class="fas fa-network-wired"></i>
+                        <span>Photo réseau informatique</span>
+                    </div>
+                    <div class="realisation-overlay">
+                        <span class="realisation-tag"><i class="fas fa-network-wired"></i> Réseaux</span>
+                        <h3>Infrastructure réseau</h3>
+                        <p>Entreprise, Dakar</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Photo 5 -->
+            <div class="realisation-card">
+                <div class="realisation-img-wrap">
+                    <div class="photo-placeholder">
+                        <i class="fas fa-industry"></i>
+                        <span>Photo maintenance industrielle</span>
+                    </div>
+                    <div class="realisation-overlay">
+                        <span class="realisation-tag"><i class="fas fa-industry"></i> Industriel</span>
+                        <h3>Maintenance équipements</h3>
+                        <p>Site industriel, Thiès</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="/contact" class="btn btn-outline">
+                <i class="fas fa-paper-plane"></i> Demander un devis
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ===== TÉMOIGNAGES ===== -->
+<section class="testimonials-section">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag"><i class="fas fa-quote-left"></i> Ils nous font confiance</div>
+            <h2>Ce que disent nos clients</h2>
+        </div>
+
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <div class="stars">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                </div>
+                <p>"e-Tech Energie+ a installé nos panneaux solaires en un temps record. Travail propre, équipe sérieuse et prix compétitif. Je recommande vivement !"</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar"><i class="fas fa-user"></i></div>
+                    <div>
+                        <strong>Moussa Diop</strong>
+                        <span>Propriétaire résidentiel, Thiès</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="stars">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                </div>
+                <p>"Très satisfait de l'installation électrique de notre usine. L'équipe est professionnelle, ponctuelle et respectueuse des normes de sécurité."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar"><i class="fas fa-user"></i></div>
+                    <div>
+                        <strong>Fatou Ndiaye</strong>
+                        <span>Directrice, PME Thiès</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="stars">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                </div>
+                <p>"Excellent service de maintenance industrielle. Réactifs, compétents et disponibles même en urgence. Notre partenaire technique de confiance !"</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar"><i class="fas fa-user"></i></div>
+                    <div>
+                        <strong>Ibrahima Sarr</strong>
+                        <span>Responsable technique, Industrie</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== POURQUOI NOUS ===== -->
+<section class="why-choose-us">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-tag"><i class="fas fa-check-circle"></i> Nos atouts</div>
+            <h2>Pourquoi Choisir e-Tech Energie+ ?</h2>
+        </div>
+        <div class="features-grid">
+            <div class="feature">
+                <i class="fas fa-certificate"></i>
+                <h3>Expertise Reconnue</h3>
+                <p>Des techniciens qualifiés et expérimentés dans tous les domaines techniques</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-shield-alt"></i>
+                <h3>Qualité Garantie</h3>
+                <p>Respect des normes internationales et garantie sur tous nos travaux</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-leaf"></i>
+                <h3>Solutions Écologiques</h3>
+                <p>Engagement pour les énergies renouvelables et le développement durable</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-headset"></i>
+                <h3>Support 24/7</h3>
+                <p>Une équipe à votre écoute pour tous vos besoins techniques</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section class="cta-section">
+    <div class="container">
+        <h2>Prêt à Démarrer Votre Projet ?</h2>
+        <p>Contactez-nous dès aujourd'hui pour une consultation gratuite</p>
+        <a href="/contact" class="btn btn-primary btn-lg">
+            <i class="fas fa-paper-plane"></i> Demander un Devis
+        </a>
+    </div>
+</section>
+
+@code {
+    private Service[]? services;
+
+    // Slider
+    private int currentSlide = 0;
+    private int totalSlides = 6;
+    private int slideDuration = 4000;
+    private double progressWidth = 0;
+    private System.Threading.Timer? sliderTimer;
+    private bool progressAnimating = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            services = await Http.GetFromJsonAsync<Service[]>("api/services");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur lors du chargement des services: {ex.Message}");
+        }
+
+        StartSlider();
+    }
+
+    private void StartSlider()
+    {
+        progressWidth = 0;
+        StateHasChanged();
+
+        // Lancer la barre de progression après un court délai
+        Task.Delay(50).ContinueWith(_ =>
+        {
+            progressWidth = 100;
+            InvokeAsync(StateHasChanged);
+        });
+
+        sliderTimer = new System.Threading.Timer(async _ =>
+        {
+            await InvokeAsync(() =>
+            {
+                currentSlide = (currentSlide + 1) % totalSlides;
+                progressWidth = 0;
+                StateHasChanged();
+
+                Task.Delay(50).ContinueWith(__ =>
+                {
+                    progressWidth = 100;
+                    InvokeAsync(StateHasChanged);
+                });
+            });
+        }, null, slideDuration, slideDuration);
+    }
+
+    private void GoToSlide(int index)
+    {
+        sliderTimer?.Dispose();
+        currentSlide = index;
+        StartSlider();
+    }
+
+    public void Dispose()
+    {
+        sliderTimer?.Dispose();
+    }
+}
+
+<style>
+    /* ===== HERO ===== */
+    .hero {
+        min-height: 100vh;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .slide {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        transition: opacity 1.2s ease-in-out;
+        background-size: cover;
+        background-position: center;
+    }
+    .slide.active { opacity: 1; }
+    .slide::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            135deg,
+            rgba(30,58,138,0.86) 0%,
+            rgba(37,99,235,0.65) 55%,
+            rgba(59,130,246,0.45) 100%
+        );
+    }
+
+    .slide-label {
+        position: absolute;
+        bottom: 180px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 5;
+        background: rgba(251,191,36,0.15);
+        border: 1px solid rgba(251,191,36,0.5);
+        color: #fbbf24;
+        padding: 0.4rem 1.4rem;
+        border-radius: 50px;
+        font-size: 0.83rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        opacity: 0;
+        transition: opacity 0.6s 0.7s ease;
+    }
+    .slide.active .slide-label { opacity: 1; }
+
+    .hero-grid {
+        position: absolute; inset: 0; z-index: 1;
+        background-image:
+            linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+        background-size: 60px 60px;
+        pointer-events: none;
+    }
+
+    .particle {
+        position: absolute; z-index: 2;
+        border-radius: 50%; background: #fbbf24;
+        animation: floatUp linear infinite;
+        opacity: 0.4; pointer-events: none;
+    }
+    @@keyframes floatUp {
+        0%   { transform: translateY(110vh); opacity: 0; }
+        10%  { opacity: 0.4; }
+        90%  { opacity: 0.4; }
+        100% { transform: translateY(-80px); opacity: 0; }
+    }
+
+    .hero-content {
+        position: relative; z-index: 4;
+        text-align: center; padding: 2rem;
+        max-width: 860px;
+        animation: fadeUp 1s ease both;
+    }
+
+    .hero-badge {
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        background: rgba(251,191,36,0.15);
+        border: 1px solid rgba(251,191,36,0.45);
+        color: #fbbf24;
+        padding: 0.4rem 1.2rem; border-radius: 50px;
+        font-size: 0.82rem; font-weight: 600;
+        margin-bottom: 1.5rem;
+        letter-spacing: 0.08em; text-transform: uppercase;
+    }
+
+    .hero h1 {
+        font-size: clamp(2.8rem, 6vw, 4.8rem);
+        font-weight: 700; color: white;
+        line-height: 1.1; margin-bottom: 1rem;
+    }
+    .hero h1 span { color: #fbbf24; }
+
+    .hero .tagline {
+        font-size: 1.2rem;
+        color: rgba(255,255,255,0.85);
+        margin-bottom: 0.6rem;
+    }
+    .hero .subtitle {
+        font-size: 0.98rem;
+        color: rgba(255,255,255,0.6);
+        margin-bottom: 2.5rem;
+    }
+
+    .hero-actions {
+        display: flex; gap: 1rem;
+        justify-content: center; flex-wrap: wrap;
+    }
+
+    /* Dots */
+    .slider-dots {
+        position: absolute; bottom: 84px;
+        left: 50%; transform: translateX(-50%);
+        z-index: 5; display: flex; gap: 8px;
+    }
+    .dot {
+        width: 9px; height: 9px; border-radius: 50%;
+        background: rgba(255,255,255,0.35);
+        border: none; cursor: pointer;
+        transition: all 0.3s; padding: 0;
+    }
+    .dot.active {
+        background: #fbbf24;
+        width: 26px; border-radius: 5px;
+    }
+
+    /* Barre de progression */
+    .slide-progress {
+        position: absolute; bottom: 70px;
+        left: 50%; transform: translateX(-50%);
+        width: 200px; height: 2px;
+        background: rgba(255,255,255,0.15);
+        z-index: 5; border-radius: 2px; overflow: hidden;
+    }
+    .slide-progress-bar {
+        height: 100%; width: 0%;
+        background: #fbbf24;
+        border-radius: 2px;
+    }
+
+    /* Stats */
+    .hero-stats {
+        position: absolute; bottom: 0; left: 0; right: 0;
+        background: rgba(15,30,80,0.6);
+        backdrop-filter: blur(16px);
+        border-top: 1px solid rgba(255,255,255,0.1);
+        display: flex; justify-content: center; z-index: 5;
+    }
+    .stat-item {
+        padding: 1.1rem 2.5rem; text-align: center;
+        border-right: 1px solid rgba(255,255,255,0.08);
+        color: white;
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-number {
+        font-size: 1.7rem; font-weight: 700;
+        color: #fbbf24; display: block;
+    }
+    .stat-label {
+        font-size: 0.72rem; color: rgba(255,255,255,0.55);
+        text-transform: uppercase; letter-spacing: 0.06em;
+    }
+
+    /* ===== RÉALISATIONS ===== */
+    .realisations-section {
+        padding: 80px 20px;
+        background: #f9fafb;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    .section-subtitle {
+        color: #6b7280;
+        font-size: 1rem;
+        margin-top: 0.5rem;
+    }
+    .section-tag {
+        display: inline-block;
+        background: rgba(59,130,246,0.1);
+        color: #3b82f6;
+        padding: 0.3rem 1rem; border-radius: 50px;
+        font-size: 0.78rem; font-weight: 600;
+        text-transform: uppercase; letter-spacing: 0.1em;
+        margin-bottom: 0.75rem;
+    }
+
+    h2 {
+        text-align: center;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        color: #1e3a8a;
+    }
+
+    .section-header h2 { margin-bottom: 0; }
+
+    .realisations-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: auto auto;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .realisation-card {
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+        cursor: pointer;
+    }
+    .realisation-card.big {
+        grid-column: span 2;
+        grid-row: span 2;
+    }
+
+    .realisation-img-wrap {
+        position: relative;
+        height: 220px;
+        overflow: hidden;
+    }
+    .realisation-card.big .realisation-img-wrap {
+        height: 100%;
+        min-height: 455px;
+    }
+
+    .photo-placeholder {
+        width: 100%; height: 100%;
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        gap: 0.8rem; color: rgba(255,255,255,0.5);
+        border: 2px dashed rgba(255,255,255,0.2);
+        transition: all 0.3s;
+    }
+    .photo-placeholder i { font-size: 2.5rem; }
+    .photo-placeholder span { font-size: 0.8rem; text-align: center; padding: 0 1rem; }
+    .realisation-card.big .photo-placeholder i { font-size: 4rem; }
+
+    .realisation-overlay {
+        position: absolute; bottom: 0; left: 0; right: 0;
+        background: linear-gradient(transparent, rgba(15,30,80,0.9));
+        padding: 2rem 1.2rem 1.2rem;
+        transform: translateY(60px);
+        transition: transform 0.3s ease;
+    }
+    .realisation-card:hover .realisation-overlay { transform: translateY(0); }
+    .realisation-card:hover .photo-placeholder { filter: brightness(1.1); }
+
+    .realisation-tag {
+        display: inline-block;
+        background: #fbbf24; color: #1e3a8a;
+        padding: 0.2rem 0.7rem; border-radius: 50px;
+        font-size: 0.72rem; font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .realisation-overlay h3 {
+        color: white; font-size: 1rem;
+        margin: 0.3rem 0 0.2rem; text-align: left;
+    }
+    .realisation-overlay p {
+        color: rgba(255,255,255,0.6);
+        font-size: 0.82rem; margin: 0; text-align: left;
+    }
+
+    /* ===== TÉMOIGNAGES ===== */
+    .testimonials-section {
+        padding: 80px 20px;
+        background: white;
+    }
+
+    .testimonials-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+    }
+
+    .testimonial-card {
+        background: #f9fafb;
+        border-radius: 12px;
+        padding: 2rem;
+        border-left: 4px solid #3b82f6;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .testimonial-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(30,58,138,0.1);
+    }
+
+    .stars { color: #fbbf24; margin-bottom: 1rem; font-size: 1rem; }
+
+    .testimonial-card p {
+        color: #4b5563; font-style: italic;
+        line-height: 1.7; margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+    }
+
+    .testimonial-author {
+        display: flex; align-items: center; gap: 1rem;
+    }
+    .author-avatar {
+        width: 45px; height: 45px; border-radius: 50%;
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+        display: flex; align-items: center; justify-content: center;
+        color: white; font-size: 1.1rem; flex-shrink: 0;
+    }
+    .testimonial-author strong {
+        display: block; color: #1e3a8a; font-size: 0.95rem;
+    }
+    .testimonial-author span {
+        color: #9ca3af; font-size: 0.8rem;
+    }
+
+    /* ===== POURQUOI NOUS ===== */
+    .why-choose-us {
+        padding: 80px 20px;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+    }
+
+    .feature {
+        text-align: center;
+        padding: 1.5rem;
+        border-radius: 10px;
+        background: #f9fafb;
+        transition: all 0.3s;
+    }
+    .feature:hover {
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        transform: translateY(-4px);
+    }
+
+    .feature i {
+        font-size: 3rem;
+        color: #fbbf24;
+        margin-bottom: 1rem;
+    }
+
+    .feature h3 {
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+        color: #1e3a8a;
+    }
+
+    /* ===== CTA ===== */
+    .cta-section {
+        background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+        color: white;
+        padding: 80px 20px;
+        text-align: center;
+    }
+
+    .cta-section h2 { color: white; }
+
+    .cta-section p {
+        font-size: 1.1rem;
+        color: rgba(255,255,255,0.8);
+        margin-bottom: 2rem;
+    }
+
+    /* ===== BOUTONS ===== */
+    .btn {
+        padding: 12px 30px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: 2px solid transparent;
+    }
+
+    .btn-primary {
+        background: #fbbf24;
+        color: #1e3a8a;
+    }
+    .btn-primary:hover {
+        background: #f59e0b;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(251,191,36,0.4);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: white;
+        border-color: white;
+    }
+    .btn-secondary:hover {
+        background: white;
+        color: #1e3a8a;
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: #1e3a8a;
+        border-color: #1e3a8a;
+    }
+    .btn-outline:hover {
+        background: #1e3a8a;
+        color: white;
+    }
+
+    .btn-lg {
+        padding: 15px 40px;
+        font-size: 1.2rem;
+    }
+
+    /* ===== UTILITAIRES ===== */
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 2rem; }
+
+    @@keyframes fadeUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @@media (max-width: 768px) {
+        .hero-stats { display: none; }
+        .slide-progress { display: none; }
+        .slide-label { font-size: 0.75rem; bottom: 100px; }
+        .slider-dots { bottom: 60px; }
+    }
+</style>
+
+
+@* @page "/"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@using ETechEnergie.Shared.Models
+
+<PageTitle>e-Tech Energie+ | L'expertise technique et énergétique au service de Thiès</PageTitle>
+<HeadContent>
+    <meta name="Découvrez e-Tech Energie+, une entreprise dont la mission est de créer, implémenter et maintenir des systèmes alliant sécurité, performance et durabilité." />
+    <meta name="keywords" content="Presentation, Accueil" />
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Accueil | e-Tech Energie+" />
+    <meta property="og:description" content="Présentation d'une Startup sénégalaise innovante dans le secteur de l'électricité et du bâtiment, située à Thiès." />
+    <meta property="og:url" content="https://etechenergie.onrender.com/" />
+</HeadContent>
+
+<section class="hero">
+    <div class="hero-content">
+        <h1>e-Tech Energie+</h1>
+        <p class="tagline">L'expertise technique et énergétique au service de Thiès</p>
+        <p class="subtitle">Performance, fiabilité et évolutivité des solutions technologiques pour votre entreprise</p>
+        <div class="hero-actions">
+            <a href="/services" class="btn btn-primary">Nos Services</a>
+            <a href="/contact" class="btn btn-secondary">Contactez-nous</a>
+        </div>
+    </div>
+</section>
+
+<section class="services-preview">
+    <div class="container">
+        <h2>Nos Domaines d'Expertise</h2>
+        <div class="services-grid">
+            @if (services == null)
+            {
+                <p><em>Chargement des services...</em></p>
+            }
+            else
+            {
+                @foreach (var service in services.Take(4))
+                {
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas @service.IconClass"></i>
+                        </div>
+                        <h3>@service.Name</h3>
+                        <p>@service.Description</p>
+                    </div>
+                }
+            }
+        </div>
+        <div class="text-center mt-4">
+            <a href="/services" class="btn btn-outline">Voir tous nos services</a>
+        </div>
+    </div>
+</section>
+
+<section class="why-choose-us">
+    <div class="container">
+        <h2>Pourquoi Choisir e-Tech Energie+ ?</h2>
+        <div class="features-grid">
+            <div class="feature">
+                <i class="fas fa-certificate"></i>
+                <h3>Expertise Reconnue</h3>
+                <p>Des techniciens qualifiés et expérimentés dans tous les domaines techniques</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-shield-alt"></i>
+                <h3>Qualité Garantie</h3>
+                <p>Respect des normes internationales et garantie sur tous nos travaux</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-leaf"></i>
+                <h3>Solutions Écologiques</h3>
+                <p>Engagement pour les énergies renouvelables et le développement durable</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-headset"></i>
+                <h3>Support 24/7</h3>
+                <p>Une équipe à votre écoute pour tous vos besoins techniques</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="container">
+        <h2>Prêt à Démarrer Votre Projet ?</h2>
+        <p>Contactez-nous dès aujourd'hui pour une consultation gratuite</p>
+        <a href="/contact" class="btn btn-primary btn-lg">Demander un Devis</a>
+    </div>
+</section>
+
+@code {
+    private Service[]? services;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            services = await Http.GetFromJsonAsync<Service[]>("api/services");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur lors du chargement des services: {ex.Message}");
+        }
+    }
+}
+
+<style>
+    .hero {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        padding: 100px 20px;
+        text-align: center;
+    }
+
+    .hero-content h1 {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        font-weight: bold;
+    }
+
+    .tagline {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #fbbf24;
+    }
+
+    .subtitle {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .services-preview {
+        padding: 80px 20px;
+        background: #f9fafb;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    h2 {
+        text-align: center;
+        font-size: 2.5rem;
+        margin-bottom: 3rem;
+        color: #1e3a8a;
+    }
+
+    .services-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .service-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .service-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+    }
+
+    .service-icon {
+        font-size: 3rem;
+        color: #3b82f6;
+        margin-bottom: 1rem;
+    }
+
+    .service-card h3 {
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+        color: #1e3a8a;
+    }
+
+    .why-choose-us {
+        padding: 80px 20px;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+    }
+
+    .feature {
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .feature i {
+        font-size: 3rem;
+        color: #fbbf24;
+        margin-bottom: 1rem;
+    }
+
+    .feature h3 {
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+        color: #1e3a8a;
+    }
+
+    .cta-section {
+        background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+        color: white;
+        padding: 80px 20px;
+        text-align: center;
+    }
+
+    .cta-section h2 {
+        color: white;
+    }
+
+    .btn {
+        padding: 12px 30px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+        display: inline-block;
+        border: 2px solid transparent;
+    }
+
+    .btn-primary {
+        background: #fbbf24;
+        color: #1e3a8a;
+    }
+
+    .btn-primary:hover {
+        background: #f59e0b;
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: white;
+        border-color: white;
+    }
+
+    .btn-secondary:hover {
+        background: white;
+        color: #1e3a8a;
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: #1e3a8a;
+        border-color: #1e3a8a;
+    }
+
+    .btn-outline:hover {
+        background: #1e3a8a;
+        color: white;
+    }
+
+    .btn-lg {
+        padding: 15px 40px;
+        font-size: 1.2rem;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .mt-4 {
+        margin-top: 2rem;
+    }
+</style>
+ *@

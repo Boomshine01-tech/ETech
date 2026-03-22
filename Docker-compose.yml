@@ -1,0 +1,61 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  # Service PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: etechenergie-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: etechenergie
+      POSTGRES_USER: etechuser
+      POSTGRES_PASSWORD: EtechSecure2024!
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - etechenergie-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U etechuser -d etechenergie"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Service Application Web
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: etechenergie-web
+    restart: always
+    ports:
+      - "8080:80"
+      - "8081:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=etechenergie;Username=etechenergie;Password=postgres
+      - EmailSettings__SmtpServer=smtp.gmail.com
+      - EmailSettings__SmtpPort=587
+      - EmailSettings__SenderName=e-Tech Energie+
+      - EmailSettings__SenderEmail=mamecdiop1@gmail.com
+      - EmailSettings__Username=mamecdiop1@gmail.com
+      - EmailSettings__Password=ocjiohwsatuglyks
+      - EmailSettings__AdminEmail=mamecdiop1@gmail.com
+      - EmailSettings__EnableSsl=true
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - etechenergie-network
+
+networks:
+  etechenergie-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
