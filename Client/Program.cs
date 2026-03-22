@@ -15,7 +15,11 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient
 {
-    BaseAddress = new Uri("http://localhost:8080/")
+    BaseAddress = new Uri(
+        builder.HostEnvironment.IsDevelopment()
+            ? "http://localhost:8080/"
+            : builder.HostEnvironment.BaseAddress
+    )
 });
 
 // Services 
