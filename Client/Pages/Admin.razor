@@ -37,35 +37,16 @@
         </div>
     </div>
 
-    <div class="stats-bar">
-        <div class="stat-card">
-            <span class="stat-value">@products?.Length</span>
-            <span class="stat-label">Produits</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-value">@products?.Count(p => p.Stock == 0)</span>
-            <span class="stat-label">Ruptures</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-value">@products?.Count(p => p.Stock < 10 && p.Stock > 0)</span>
-            <span class="stat-label">Stock faible</span>
-        </div>
-    </div>
-
     <div class="admin-container">
         <div class="toolbar">
-            <div class="left-tools">
-                <div class="search-box">
-                    <input type="text" placeholder="Rechercher..." @bind="searchQuery" @bind:event="oninput" />
-                </div>
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Rechercher un produit..." @bind="searchQuery" @bind:event="oninput" />
             </div>
-
-            <div class="right-tools">
-                <button class="btn-filter">Filtrer</button>
-                <button class="btn-primary" @onclick="ShowAddForm">
-                    + Nouveau
-                </button>
-            </div>
+            <button class="btn-primary" @onclick="ShowAddForm">
+                <i class="fas fa-plus"></i>
+                <span>Nouveau Produit</span>
+            </button>
         </div>
 
         @if (products == null)
@@ -95,14 +76,6 @@
                 @foreach (var product in FilteredProducts)
                 {
                     <div class="product-card">
-                        <div class="product-actions-overlay">
-                            <button class="btn-icon btn-edit" @onclick="() => EditProduct(product)">
-                                ✏️
-                            </button>
-                            <button class="btn-icon btn-delete" @onclick="() => DeleteProduct(product)">
-                                🗑️
-                            </button>
-                        </div>
                         <div class="product-image">
                             <img src="@product.ImageUrl" alt="@product.Name" />
                             <div class="product-badges">
@@ -265,10 +238,12 @@
                         <button type="submit" class="btn-primary" disabled="@isSaving">
                             @if (isSaving)
                             {
-                                <span class="loader"></span>
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <span>Enregistrement...</span>
                             }
                             else
                             {
+                                <i class="fas fa-save"></i>
                                 <span>Enregistrer</span>
                             }
                         </button>
@@ -614,20 +589,7 @@
         margin: 0 auto;
         padding: 2rem;
     }
-   
-    /* Focus UX */
-    button:focus {
-        outline: 2px solid var(--primary);
-    }
-    /* Loader */
-    .loader {
-        width: 18px;
-        height: 18px;
-        border: 2px solid white;
-        border-top: transparent;
-        border-radius: 50%;
-        animation: spin 0.6s linear infinite;
-    }
+
     /* Toolbar */
     .toolbar {
         display: flex;
@@ -722,28 +684,11 @@
         transition: all 0.3s ease;
         display: flex;
         flex-direction: column;
-        position: relative;
     }
 
-
-    .product-card:hover .product-actions-overlay {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    .product-actions-overlay {
-        position: absolute;
-        bottom: 10px;
-        right: 10px;
-        display: flex;
-        gap: 0.5rem;
-        opacity: 0;
-        transform: translateY(10px);
-        transition: 0.3s;
-    }
-
-    .product-card:hover img {
-        transform: scale(1.05);
+    .product-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-xl);
     }
 
     .product-image {
@@ -758,7 +703,6 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.4s ease;
     }
 
     .product-badges {
@@ -793,7 +737,7 @@
     }
 
     .product-content {
-        padding: 1.5rem;
+        padding: 1.25rem;
         display: flex;
         flex-direction: column;
         flex: 1;
@@ -906,30 +850,6 @@
         background: var(--danger);
         color: white;
         transform: translateY(-2px);
-    }
-
-    .stats-bar {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-
-    .stat-card {
-        background: white;
-        padding: 1.2rem;
-        border-radius: 12px;
-        box-shadow: var(--shadow);
-    }
-
-    .stat-value {
-        font-size: 1.5rem;
-        font-weight: 700;
-    }
-
-    .stat-label {
-        font-size: 0.8rem;
-        color: var(--gray-500);
     }
 
     /* Loading & Empty States */
@@ -1063,9 +983,10 @@
     }
 
     .modal-body {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
+        padding: 2rem;
+        overflow-y: auto;
+        flex: 1;
+        max-height: calc(90vh - 180px);
     }
 
     /* Custom scrollbar pour le modal */
