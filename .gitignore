@@ -7,6 +7,10 @@
 ## Fichiers de configuration sensibles
 appsettings.Development.json
 appsettings.Production.json
+<<<<<<< HEAD
+=======
+appsettings.json
+>>>>>>> d62865136b1b9bf641420ffeaff1c213275159e6
 
 ## Clés et secrets
 jwt_secret*.txt

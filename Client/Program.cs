@@ -22,6 +22,10 @@ builder.Services.AddScoped(sp => new HttpClient
     )
 });
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> d62865136b1b9bf641420ffeaff1c213275159e6
 // Services 
 builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<NotificationService>();

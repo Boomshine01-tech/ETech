@@ -16,4 +16,15 @@
     <ProjectReference Include="..\Shared\ETechEnergie.Shared\ETechEnergie.Shared.csproj" />
   </ItemGroup>
 
+<<<<<<< HEAD
+=======
+  <ItemGroup>
+    <Folder Include="wwwroot\images\categories\" />
+    <Folder Include="wwwroot\images\formations\" />
+    <Folder Include="wwwroot\images\equipe\" />
+    <Folder Include="wwwroot\images\partenaires\" />
+    <Folder Include="wwwroot\images\realisations\" />
+  </ItemGroup>
+
+>>>>>>> d62865136b1b9bf641420ffeaff1c213275159e6
 </Project>

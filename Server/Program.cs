@@ -254,7 +254,11 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddMemoryCache();
 
 var allowedOrigins = Environment.GetEnvironmentVariable("ALLOWED_ORIGINS")?.Split(',') 
+<<<<<<< HEAD
     ?? new[] { "https://etechenergie.onrender.com", "http://localhost:5000", "https://localhost:5001" };
+=======
+    ?? new[] { "https://etechenergie.onrender.com", "http://localhost:5000", "https://localhost:5001", "https://localhost:58534" };
+>>>>>>> d62865136b1b9bf641420ffeaff1c213275159e6
 
 Console.WriteLine($"🌐 CORS Origins autorisées: {string.Join(", ", allowedOrigins)}");
 
