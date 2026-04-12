@@ -1,0 +1,617 @@
+﻿@page "/Realisations"
+
+<PageTitle>Nos Réalisations - e-Tech Energie+</PageTitle>
+<HeadContent>
+    <meta name="description" content="Découvrez les réalisations de e-Tech Energie+ : chantiers BTP, installations électriques, partenariats et projets réalisés à Thiès et au Sénégal." />
+    <meta name="keywords" content="réalisations, chantiers, installations électriques, Thiès, Sénégal" />
+    <meta property="og:title" content="Réalisations | e-Tech Energie+" />
+    <meta property="og:url" content="https://etechenergie.onrender.com/realisations" />
+</HeadContent>
+
+<!-- HEADER -->
+<div class="page-header">
+    <div class="container">
+        <div class="header-badge"><i class="fas fa-hard-hat"></i> Notre Travail</div>
+        <h1>Nos Réalisations</h1>
+        <p>Découvrez nos projets réalisés avec passion et expertise à Thiès et au Sénégal</p>
+        <div class="header-stats">
+            <div class="stat"><span>28+</span> Projets réalisés</div>
+            <div class="stat"><span>5+</span> Années d'expérience</div>
+            <div class="stat"><span>1</span> Partenaire international</div>
+        </div>
+    </div>
+</div>
+
+<!-- FILTRES -->
+<section class="filter-section">
+    <div class="container">
+        <div class="filter-buttons">
+            <button class="filter-btn @(activeFilter == "tous" ? "active" : "")" @onclick='() => SetFilter("tous")'>
+                <i class="fas fa-border-all"></i> Tous (@realisations.Count)
+            </button>
+            <button class="filter-btn @(activeFilter == "btp" ? "active" : "")" @onclick='() => SetFilter("btp")'>
+                <i class="fas fa-hard-hat"></i> Génie Civil (@realisations.Count(r => r.Categorie == "btp"))
+            </button>
+            <button class="filter-btn @(activeFilter == "electrique" ? "active" : "")" @onclick='() => SetFilter("electrique")'>
+                <i class="fas fa-bolt"></i> Électrique (@realisations.Count(r => r.Categorie == "electrique"))
+            </button>
+            <button class="filter-btn @(activeFilter == "partenaire" ? "active" : "")" @onclick='() => SetFilter("partenaire")'>
+                <i class="fas fa-handshake"></i> Partenariats (@realisations.Count(r => r.Categorie == "partenaire"))
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- GALERIE -->
+<section class="galerie-section">
+    <div class="container">
+        <div class="galerie-grid">
+            @foreach (var item in FilteredRealisations)
+            {
+                <div class="galerie-card" @onclick="() => OpenModal(item)">
+                    <div class="galerie-img-wrap">
+                        <img src="images/realisations/@(item.Image)" alt="@item.Titre" loading="lazy" />
+                        <div class="galerie-overlay">
+                            <div class="overlay-content">
+                                <span class="overlay-tag">
+                                    <i class="fas @GetCategorieIcon(item.Categorie)"></i>
+                                    @GetCategorieName(item.Categorie)
+                                </span>
+                                <h3>@item.Titre</h3>
+                                @if (!string.IsNullOrEmpty(item.Lieu))
+                                {
+                                    <p><i class="fas fa-map-marker-alt"></i> @item.Lieu</p>
+                                }
+                                <span class="voir-plus"><i class="fas fa-expand"></i> Voir en grand</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- MODAL -->
+@if (showModal && selectedItem != null)
+{
+    <div class="modal-overlay" @onclick="CloseModal">
+        <div class="modal-content" @onclick:stopPropagation="true">
+            <button class="modal-close" @onclick="CloseModal">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <!-- Navigation -->
+            <button class="modal-nav modal-prev" @onclick="PrevImage" disabled="@(currentIndex == 0)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="modal-nav modal-next" @onclick="NextImage" disabled="@(currentIndex == FilteredRealisations.Count - 1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+
+            <div class="modal-img-wrap">
+                <img src="images/realisations/@(selectedItem.Image)" alt="@selectedItem.Titre" />
+            </div>
+            <div class="modal-info">
+                <span class="modal-tag">
+                    <i class="fas @GetCategorieIcon(selectedItem.Categorie)"></i>
+                    @GetCategorieName(selectedItem.Categorie)
+                </span>
+                <h2>@selectedItem.Titre</h2>
+                @if (!string.IsNullOrEmpty(selectedItem.Lieu))
+                {
+                    <p class="modal-lieu"><i class="fas fa-map-marker-alt"></i> @selectedItem.Lieu</p>
+                }
+                @if (!string.IsNullOrEmpty(selectedItem.Description))
+                {
+                    <p class="modal-desc">@selectedItem.Description</p>
+                }
+                <span class="modal-counter">@(currentIndex + 1) / @FilteredRealisations.Count</span>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private string activeFilter = "tous";
+    private bool showModal = false;
+    private RealisationItem? selectedItem;
+    private int currentIndex = 0;
+
+    private List<RealisationItem> realisations = new()
+    {
+        // ===== GÉNIE CIVIL / BTP =====
+        new("ChantierBTP1.jpeg",        "btp",        "Chantier BTP",               "Thiès, Sénégal",   ""),
+        new("ChantierBTP2.jpeg",        "btp",        "Chantier BTP",               "Thiès, Sénégal",   ""),
+        new("ChantierBTP3.jpeg",        "btp",        "Chantier BTP",               "Thiès, Sénégal",   ""),
+        new("ChantierBTP4.jpeg",        "btp",        "Chantier BTP",               "Thiès, Sénégal",   ""),
+
+        // ===== PARTENARIATS =====
+        new("ChantierPartenaire1.jpeg", "partenaire", "Projet avec ARLA France",    "Thiès, Sénégal",   "Travaux réalisés en partenariat avec ARLA (France)"),
+        new("ChantierPartenaire2.jpeg", "partenaire", "Projet avec ARLA France",    "Thiès, Sénégal",   ""),
+        new("ChantierPartenaire3.jpeg", "partenaire", "Projet avec ARLA France",    "Thiès, Sénégal",   ""),
+        new("ChantierPartenaire4.jpeg", "partenaire", "Projet avec ARLA France",    "Thiès, Sénégal",   ""),
+        new("ChantierPartenaire5.jpeg", "partenaire", "Projet avec ARLA France",    "Thiès, Sénégal",   ""),
+        new("ChantierPartenaire6.jpeg", "partenaire", "Projet avec ARLA France",    "Thiès, Sénégal",   ""),
+        new("ChantierPartenaire7.jpeg", "partenaire", "Projet avec ARLA France",    "Thiès, Sénégal",   ""),
+        new("ChantierPartenaire8.jpeg", "partenaire", "Projet avec ARLA France",    "Thiès, Sénégal",   ""),
+        new("ChantierPartenaire9.jpeg", "partenaire", "Projet avec ARLA France",    "Thiès, Sénégal",   ""),
+
+        // ===== INSTALLATION ÉLECTRIQUE =====
+        new("InstallationPanneau1.jpeg",  "electrique", "Installation panneaux solaires", "Thiès, Sénégal", ""),
+        new("InstallationPanneau2.jpeg",  "electrique", "Installation panneaux solaires", "Thiès, Sénégal", ""),
+        new("InstallationPanneau11.jpeg", "electrique", "Installation panneaux solaires", "Thiès, Sénégal", ""),
+        new("Restaurant.jpeg",            "electrique", "Installation électrique Restaurant", "Thiès, Sénégal", "Éclairage LED et faux plafond"),
+        new("Restaurant1.jpeg",           "electrique", "Installation électrique Restaurant", "Thiès, Sénégal", ""),
+        new("SpotsSolCotéUniversité.jpeg","electrique", "Spots sol côté université",     "Thiès, Sénégal", "Installation de spots au sol"),
+
+        // ===== SIÈGE SAES =====
+        new("PetiteSalledeRéunionSAES1.jpeg", "electrique", "Petite Salle de Réunion SAES", "Siège SAES, Thiès", "Aménagement et éclairage"),
+        new("PetiteSalledeRéunionSAES2.jpeg", "electrique", "Petite Salle de Réunion SAES", "Siège SAES, Thiès", ""),
+        new("PetiteSalledeRéunionSAES3.jpeg", "electrique", "Petite Salle de Réunion SAES", "Siège SAES, Thiès", ""),
+
+        // ===== SIÈGE 3FPT =====
+        new("Siège3fptThies1.jpeg", "electrique", "Siège 3fpt de Thiès", "3fpt, Thiès", "Installation électrique et éclairage LED"),
+        new("Siège3fptThies2.jpeg", "electrique", "Siège 3fpt de Thiès", "3fpt, Thiès", ""),
+        new("Siège3fptThies3.jpeg", "electrique", "Siège 3fpt de Thiès", "3fpt, Thiès", ""),
+        new("Siège3fptThies4.jpeg", "electrique", "Siège 3fpt de Thiès", "3fpt, Thiès", ""),
+
+    };
+
+    private List<RealisationItem> FilteredRealisations =>
+        activeFilter == "tous"
+            ? realisations
+            : realisations.Where(r => r.Categorie == activeFilter).ToList();
+
+    private void SetFilter(string filter)
+    {
+        activeFilter = filter;
+        showModal = false;
+    }
+
+    private void OpenModal(RealisationItem item)
+    {
+        selectedItem = item;
+        currentIndex = FilteredRealisations.IndexOf(item);
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+        selectedItem = null;
+    }
+
+    private void PrevImage()
+    {
+        if (currentIndex > 0)
+        {
+            currentIndex--;
+            selectedItem = FilteredRealisations[currentIndex];
+        }
+    }
+
+    private void NextImage()
+    {
+        if (currentIndex < FilteredRealisations.Count - 1)
+        {
+            currentIndex++;
+            selectedItem = FilteredRealisations[currentIndex];
+        }
+    }
+
+    private string GetCategorieIcon(string cat) => cat switch
+    {
+        "btp" => "fa-hard-hat",
+        "electrique" => "fa-bolt",
+        "partenaire" => "fa-handshake",
+        _ => "fa-image"
+    };
+
+    private string GetCategorieName(string cat) => cat switch
+    {
+        "btp" => "Génie Civil",
+        "electrique" => "Installation Électrique",
+        "partenaire" => "Partenariat",
+        _ => "Réalisation"
+    };
+
+    private record RealisationItem(string Image, string Categorie, string Titre, string Lieu, string Description);
+}
+
+<style>
+    /* ===== HEADER ===== */
+    .page-header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        padding: 80px 20px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+    .header-badge {
+        display: inline-block;
+        background: rgba(251,191,36,0.2);
+        border: 1px solid rgba(251,191,36,0.5);
+        color: #fbbf24;
+        padding: 0.4rem 1.2rem;
+        border-radius: 50px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .page-header h1 {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        margin-bottom: 1rem;
+        position: relative;
+    }
+
+    .page-header p {
+        font-size: 1.1rem;
+        opacity: 0.85;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .header-stats {
+        display: flex;
+        justify-content: center;
+        gap: 3rem;
+        flex-wrap: wrap;
+        position: relative;
+    }
+
+    .stat {
+        text-align: center;
+    }
+
+        .stat span {
+            display: block;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fbbf24;
+        }
+
+    .stat {
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.7);
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    /* ===== FILTRES ===== */
+    .filter-section {
+        background: white;
+        padding: 1.5rem 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .filter-buttons {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .filter-btn {
+        padding: 0.6rem 1.4rem;
+        border-radius: 50px;
+        border: 2px solid #e5e7eb;
+        background: white;
+        color: #6b7280;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .filter-btn:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .filter-btn.active {
+            background: #1e3a8a;
+            border-color: #1e3a8a;
+            color: white;
+        }
+
+    /* ===== GALERIE ===== */
+    .galerie-section {
+        padding: 60px 20px;
+        background: #f9fafb;
+    }
+
+    .galerie-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.2rem;
+    }
+
+    .galerie-card {
+        border-radius: 12px;
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .galerie-img-wrap {
+        position: relative;
+        height: 220px;
+        overflow: hidden;
+    }
+
+        .galerie-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+    .galerie-card:hover img {
+        transform: scale(1.08);
+    }
+
+    .galerie-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(transparent 30%, rgba(15,30,80,0.92) 100%);
+        display: flex;
+        align-items: flex-end;
+        padding: 1.2rem;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .galerie-card:hover .galerie-overlay {
+        opacity: 1;
+    }
+
+    .overlay-content {
+        color: white;
+        width: 100%;
+    }
+
+    .overlay-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: #fbbf24;
+        color: #1e3a8a;
+        padding: 0.2rem 0.7rem;
+        border-radius: 50px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .overlay-content h3 {
+        font-size: 0.95rem;
+        margin: 0.2rem 0;
+    }
+
+    .overlay-content p {
+        font-size: 0.78rem;
+        color: rgba(255,255,255,0.7);
+        margin: 0.2rem 0;
+    }
+
+    .voir-plus {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.75rem;
+        color: rgba(255,255,255,0.6);
+        margin-top: 0.4rem;
+    }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.92);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 20px;
+        animation: fadeIn 0.2s ease;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 16px;
+        max-width: 900px;
+        width: 100%;
+        overflow: hidden;
+        position: relative;
+        animation: slideUp 0.3s ease;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(0,0,0,0.5);
+        border: none;
+        color: white;
+        font-size: 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        transition: background 0.2s;
+    }
+
+        .modal-close:hover {
+            background: #ef4444;
+        }
+
+    .modal-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(0,0,0,0.5);
+        border: none;
+        color: white;
+        font-size: 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        transition: background 0.2s;
+    }
+
+        .modal-nav:hover:not(:disabled) {
+            background: #3b82f6;
+        }
+
+        .modal-nav:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+    .modal-prev {
+        left: 12px;
+    }
+
+    .modal-next {
+        right: 12px;
+    }
+
+    .modal-img-wrap {
+        width: 100%;
+        max-height: 500px;
+        overflow: hidden;
+    }
+
+        .modal-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .modal-info {
+        padding: 1.5rem;
+    }
+
+    .modal-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: rgba(59,130,246,0.1);
+        color: #3b82f6;
+        padding: 0.3rem 0.9rem;
+        border-radius: 50px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+
+    .modal-info h2 {
+        font-size: 1.4rem;
+        color: #1e3a8a;
+        margin-bottom: 0.5rem;
+    }
+
+    .modal-lieu {
+        color: #6b7280;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .modal-desc {
+        color: #4b5563;
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+
+    .modal-counter {
+        display: block;
+        text-align: right;
+        color: #9ca3af;
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .header-stats {
+            gap: 1.5rem;
+        }
+
+        .galerie-grid {
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 0.8rem;
+        }
+
+        .galerie-img-wrap {
+            height: 160px;
+        }
+
+        .galerie-overlay {
+            opacity: 1;
+        }
+
+        .filter-buttons {
+            gap: 0.5rem;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.78rem;
+        }
+    }
+</style>
