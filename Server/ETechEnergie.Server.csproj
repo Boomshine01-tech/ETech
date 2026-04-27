@@ -27,4 +27,11 @@
     <ProjectReference Include="..\Shared\ETechEnergie.Shared\ETechEnergie.Shared.csproj" />
   </ItemGroup>
 
+  <Target Name="CopyClientImages" AfterTargets="Build">
+    <ItemGroup>
+      <ClientImages Include="..\Client\wwwroot\images\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ClientImages)" DestinationFolder="$(OutputPath)wwwroot\images\%(RecursiveDir)" SkipUnchangedFiles="true" />
+  </Target>
+
 </Project>

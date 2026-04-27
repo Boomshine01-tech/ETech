@@ -28,8 +28,17 @@
             </div>
         </div>
     </div>
+    <script>
+        window.scrollToSection = function(id) {
+            var el = document.getElementById(id);
+            if (el) {
+                var top = el.getBoundingClientRect().top + window.pageYOffset - 70;
+                window.scrollTo({ top: top, behavior: 'smooth' });
+            }
+        };
+    </script>
 
-
+    <script src="js/utils.js"></script>
     <script src="_framework/blazor.webassembly.js"></script>
 </body>
 </html>

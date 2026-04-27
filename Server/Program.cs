@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 using ETechEnergie.Server.Data;
 using ETechEnergie.Server.Configuration;
 using ETechEnergie.Server.Services;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -254,7 +255,12 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddMemoryCache();
 
 var allowedOrigins = Environment.GetEnvironmentVariable("ALLOWED_ORIGINS")?.Split(',') 
+<<<<<<< Updated upstream
     ?? new[] { "https://etechenergie.onrender.com", "http://localhost:5000", "https://localhost:5001", "https://localhost:58534" };
+=======
+
+    ?? new[] { "https://etechenergie.onrender.com", "http://localhost:5000", "https://localhost:5001", "https://localhost:58534", "http://127.0.0.1:63624" };
+>>>>>>> Stashed changes
 
 Console.WriteLine($"🌐 CORS Origins autorisées: {string.Join(", ", allowedOrigins)}");
 
@@ -312,13 +318,12 @@ app.MapControllers();
 app.MapFallbackToFile("index.html");
 
 
-var portEnv = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-app.Urls.Add($"http://0.0.0.0:{portEnv}");
+// var portEnv = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+// app.Urls.Add($"http://0.0.0.0:{portEnv}");
 
 Console.WriteLine("==========================================");
 Console.WriteLine("🚀 APPLICATION DÉMARRÉE");
 Console.WriteLine($"🌐 Environnement : {app.Environment.EnvironmentName}");
-Console.WriteLine($"🔗 Port          : {portEnv}");
 Console.WriteLine($"🔐 JWT Auth      : Activée");
 Console.WriteLine($"   Issuer        : {issuer}");
 Console.WriteLine($"   Audience      : {audience}");

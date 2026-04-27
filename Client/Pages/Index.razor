@@ -105,77 +105,62 @@
         </div>
 
         <div class="realisations-grid">
-            <!-- Photo 1 — remplacer src par la vraie photo -->
+            <!-- Photo 1 — Chantier BTP -->
             <div class="realisation-card big">
                 <div class="realisation-img-wrap">
-                    <div class="photo-placeholder">
-                        <i class="fas fa-solar-panel"></i>
-                        <span>Photo chantier solaire</span>
-                    </div>
-                    <div class="realisation-overlay">
-                        <span class="realisation-tag"><i class="fas fa-solar-panel"></i> Énergies Renouvelables</span>
-                        <h3>Installation panneaux solaires</h3>
-                        <p>Résidence, Thiès</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Photo 2 -->
-            <div class="realisation-card">
-                <div class="realisation-img-wrap">
-                    <div class="photo-placeholder">
-                        <i class="fas fa-bolt"></i>
-                        <span>Photo installation électrique</span>
-                    </div>
-                    <div class="realisation-overlay">
-                        <span class="realisation-tag"><i class="fas fa-bolt"></i> Électrique</span>
-                        <h3>Câblage industriel</h3>
-                        <p>Usine, Thiès</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Photo 3 -->
-            <div class="realisation-card">
-                <div class="realisation-img-wrap">
-                    <div class="photo-placeholder">
-                        <i class="fas fa-hard-hat"></i>
-                        <span>Photo chantier BTP</span>
-                    </div>
+                    <img src="images/realisations/ChantierBTP1.png" alt="Chantier BTP" class="realisation-img" />
                     <div class="realisation-overlay">
                         <span class="realisation-tag"><i class="fas fa-hard-hat"></i> Génie Civil</span>
-                        <h3>Construction bâtiment</h3>
-                        <p>Quartier Médina Fall, Thiès</p>
+                        <h3>Chantier Principal</h3>
+                        <p>Thiès, Sénégal</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Photo 4 -->
+            <!-- Photo 2 — Restaurant électrique -->
             <div class="realisation-card">
                 <div class="realisation-img-wrap">
-                    <div class="photo-placeholder">
-                        <i class="fas fa-network-wired"></i>
-                        <span>Photo réseau informatique</span>
-                    </div>
+                    <img src="images/realisations/Restaurant.jpeg" alt="Restaurant électrique" class="realisation-img" />
                     <div class="realisation-overlay">
-                        <span class="realisation-tag"><i class="fas fa-network-wired"></i> Réseaux</span>
-                        <h3>Infrastructure réseau</h3>
-                        <p>Entreprise, Dakar</p>
+                        <span class="realisation-tag"><i class="fas fa-bolt"></i> Électrique</span>
+                        <h3>Restaurant — Éclairage LED</h3>
+                        <p>Thiès, Sénégal</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Photo 5 -->
+            <!-- Photo 3 — Chantier BTP Phase 2 -->
             <div class="realisation-card">
                 <div class="realisation-img-wrap">
-                    <div class="photo-placeholder">
-                        <i class="fas fa-industry"></i>
-                        <span>Photo maintenance industrielle</span>
-                    </div>
+                    <img src="images/realisations/ChantierBTP2.png" alt="Chantier BTP Phase 2" class="realisation-img" />
                     <div class="realisation-overlay">
-                        <span class="realisation-tag"><i class="fas fa-industry"></i> Industriel</span>
-                        <h3>Maintenance équipements</h3>
-                        <p>Site industriel, Thiès</p>
+                        <span class="realisation-tag"><i class="fas fa-hard-hat"></i> Génie Civil</span>
+                        <h3>Phase 2 — Avancement</h3>
+                        <p>Thiès, Sénégal</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Photo 4 — Restaurant vue d'ensemble -->
+            <div class="realisation-card">
+                <div class="realisation-img-wrap">
+                    <img src="images/realisations/Restaurant1.jpeg" alt="Restaurant vue d'ensemble" class="realisation-img" />
+                    <div class="realisation-overlay">
+                        <span class="realisation-tag"><i class="fas fa-bolt"></i> Électrique</span>
+                        <h3>Restaurant — Vue d'ensemble</h3>
+                        <p>Thiès, Sénégal</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Photo 5 — ARLA Partenariat -->
+            <div class="realisation-card">
+                <div class="realisation-img-wrap">
+                    <img src="images/realisations/ChantierPartenaire1.jpeg" alt="ARLA Partenariat" class="realisation-img" />
+                    <div class="realisation-overlay">
+                        <span class="realisation-tag"><i class="fas fa-handshake"></i> Partenariat</span>
+                        <h3>ARLA France</h3>
+                        <p>Partenariat International</p>
                     </div>
                 </div>
             </div>
@@ -295,7 +280,7 @@
     private int slideDuration = 4000;
     private double progressWidth = 0;
     private System.Threading.Timer? sliderTimer;
-    private bool progressAnimating = false;
+    //private bool progressAnimating = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -532,6 +517,7 @@
     .container {
         max-width: 1200px;
         margin: 0 auto;
+        padding: 0 20px;
     }
 
     .section-header {
@@ -591,18 +577,12 @@
         min-height: 455px;
     }
 
-    .photo-placeholder {
+    .realisation-img {
         width: 100%; height: 100%;
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-        display: flex; flex-direction: column;
-        align-items: center; justify-content: center;
-        gap: 0.8rem; color: rgba(255,255,255,0.5);
-        border: 2px dashed rgba(255,255,255,0.2);
-        transition: all 0.3s;
+        object-fit: cover;
+        transition: transform 0.3s;
     }
-    .photo-placeholder i { font-size: 2.5rem; }
-    .photo-placeholder span { font-size: 0.8rem; text-align: center; padding: 0 1rem; }
-    .realisation-card.big .photo-placeholder i { font-size: 4rem; }
+    .realisation-card:hover .realisation-img { transform: scale(1.05); }
 
     .realisation-overlay {
         position: absolute; bottom: 0; left: 0; right: 0;
@@ -612,7 +592,6 @@
         transition: transform 0.3s ease;
     }
     .realisation-card:hover .realisation-overlay { transform: translateY(0); }
-    .realisation-card:hover .photo-placeholder { filter: brightness(1.1); }
 
     .realisation-tag {
         display: inline-block;
@@ -944,6 +923,7 @@
     .container {
         max-width: 1200px;
         margin: 0 auto;
+        padding: 0 20px;
     }
 
     h2 {

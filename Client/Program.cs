@@ -22,8 +22,12 @@ builder.Services.AddScoped(sp => new HttpClient
     )
 });
 
+<<<<<<< Updated upstream
 
 // Services 
+=======
+ 
+>>>>>>> Stashed changes
 builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddBlazoredLocalStorage();
