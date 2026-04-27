@@ -13,14 +13,14 @@ builder.Services.AddScoped(sp => new HttpClient
     BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) 
 });
 
-builder.Services.AddScoped(sp => new HttpClient
+/*builder.Services.AddScoped(sp => new HttpClient
 {
     BaseAddress = new Uri(
         builder.HostEnvironment.IsDevelopment()
             ? "http://localhost:8080/"
             : builder.HostEnvironment.BaseAddress
     )
-});
+});*/
 
 // Services 
 builder.Services.AddScoped<CartService>();
