@@ -1,12 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-<<<<<<< HEAD
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.37012.4 d17.14
-=======
+<<<<<<< Updated upstream
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.0.0
->>>>>>> d62865136b1b9bf641420ffeaff1c213275159e6
+=======
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37012.4 d17.14
+>>>>>>> Stashed changes
 MinimumVisualStudioVersion = 16.0.0.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ETechEnergie.Server", "Server\ETechEnergie.Server.csproj", "{AC783B4A-A586-4E02-997A-5A4476902B71}"
 EndProject

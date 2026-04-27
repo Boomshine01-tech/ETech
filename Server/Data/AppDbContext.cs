@@ -13,6 +13,8 @@ public class AppDbContext : DbContext
     public DbSet<ContactRequest> ContactRequests { get; set; }
     public DbSet<TeamMember> TeamMembers { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<Formation> Formations { get; set; }
+    public DbSet<Inscription> Inscriptions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

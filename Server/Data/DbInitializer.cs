@@ -85,13 +85,6 @@ public static class DbInitializer
 
         var categories = new Category[]
         {
-<<<<<<< HEAD
-            new Category { Name = "Capteurs électroniques", Description = "Capteurs et détecteurs pour applications électroniques" },
-            new Category { Name = "Câbles et connectique", Description = "Câbles électriques et réseau de qualité professionnelle" },
-            new Category { Name = "Équipements réseau", Description = "Matériel pour réseaux informatiques et télécommunications" },
-            new Category { Name = "Énergies renouvelables", Description = "Panneaux solaires et équipements pour énergie verte" },
-            new Category { Name = "Cartes de développement", Description = "Arduino, ESP32, Raspberry Pi pour projets électroniques" }
-=======
             new Category { Name = "Capteurs électroniques",   Description = "Capteurs et détecteurs pour applications électroniques" },
             new Category { Name = "Câbles et connectique",    Description = "Câbles électriques et réseau de qualité professionnelle" },
             new Category { Name = "Équipements réseau",       Description = "Matériel pour réseaux informatiques et télécommunications" },
@@ -107,7 +100,6 @@ public static class DbInitializer
             new Category { Name = "Instruments de mesure",    Description = "Oscilloscopes, testeurs de composants, multimètres et alimentations de laboratoire" }, 
             new Category { Name = "Interface utilisateur",    Description = "Claviers matriciels, boutons, interrupteurs et dispositifs d'entrée" }, 
             new Category { Name = "Prototypage",              Description = "Breadboards, jumpers, supports et accessoires de prototypage" }
->>>>>>> d62865136b1b9bf641420ffeaff1c213275159e6
         };
 
         context.Categories.AddRange(categories);
@@ -250,8 +242,13 @@ public static class DbInitializer
                 CategoryId = 5,
                 Stock = 25,
                 IsAvailable = true
+<<<<<<< Updated upstream
             }
 =======
+<<<<<<< HEAD
+=======
+            },
+>>>>>>> feature/all-improvements
             // ── CAPTEURS (CategoryId = 1) ─────────────────────────────────────────
             new Product { Id=1,  Name="Capteur d'empreinte digitale", Description="Capteur biométrique permettant l'identification et la vérification d'identité par empreinte digitale. Compatible avec les microcontrôleurs Arduino et Raspberry Pi via liaison UART. Idéal pour les projets de contrôle d'accès, de sécurité embarquée et d'authentification.", Price=7000m,  ImageUrl="/images/products/Empreinte.jpeg",      CategoryId=1,  Stock=50,  IsAvailable=true, CreatedAt=DateTime.Parse("2026-03-09T15:33:54Z") },
             new Product { Id=2,  Name="Capteur de température et humidité DHT22", Description="Capteur numérique haute précision pour la mesure de la température (−40 à +80 °C) et de l'humidité relative (0–100 % HR). Signal numérique calibré, interface à un seul fil, compatible Arduino, ESP32 et Raspberry Pi. Idéal pour les stations météo, serres et systèmes domotiques.", Price=3000m,  ImageUrl="/images/products/DHT22.jpeg",          CategoryId=1,  Stock=60,  IsAvailable=true, CreatedAt=DateTime.Parse("2026-03-09T15:20:35Z") },
@@ -417,7 +414,11 @@ public static class DbInitializer
             // ── PROTOTYPAGE (CategoryId = 15) ─────────────────────────────────
             new Product { Id=137, Name="Double Breadboard", Description="Plaque de prototypage", Price=5000m, ImageUrl="/images/products/Breadboard.jpeg", CategoryId=15, Stock=0, IsAvailable=true, CreatedAt=DateTime.Parse("2026-03-09T15:19:45Z") },
             new Product { Id=138, Name="Breadboard", Description="Plaque de prototypage", Price=3000m, ImageUrl="/images/products/BreadboardV1.jpeg", CategoryId=15, Stock=0, IsAvailable=true, CreatedAt=DateTime.Parse("2026-03-09T15:19:45Z") }
+<<<<<<< HEAD
 >>>>>>> d62865136b1b9bf641420ffeaff1c213275159e6
+=======
+>>>>>>> Stashed changes
+>>>>>>> feature/all-improvements
         };
 
         context.Products.AddRange(products);
@@ -425,9 +426,16 @@ public static class DbInitializer
         Console.WriteLine($"✅ {products.Length} produits ajoutés");
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
 >>>>>>> d62865136b1b9bf641420ffeaff1c213275159e6
+=======
+<<<<<<< Updated upstream
+
+=======
+>>>>>>> Stashed changes
+>>>>>>> feature/all-improvements
         Console.WriteLine("");
         Console.WriteLine("╔═══════════════════════════════════════════════╗");
         Console.WriteLine("║   ✅ Initialisation Terminée avec Succès !   ║");

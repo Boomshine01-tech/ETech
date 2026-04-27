@@ -8,21 +8,26 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddScoped(sp => new HttpClient 
+/*builder.Services.AddScoped(sp => new HttpClient 
 { 
     BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) 
-});
+});*/
 
-/*builder.Services.AddScoped(sp => new HttpClient
+builder.Services.AddScoped(sp => new HttpClient
 {
     BaseAddress = new Uri(
         builder.HostEnvironment.IsDevelopment()
             ? "http://localhost:8080/"
             : builder.HostEnvironment.BaseAddress
     )
-});*/
+});
+
+<<<<<<< Updated upstream
 
 // Services 
+=======
+ 
+>>>>>>> Stashed changes
 builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddBlazoredLocalStorage();

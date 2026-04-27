@@ -5,7 +5,6 @@
 
 <PageTitle>e-Tech Energie+ | L'expertise technique et énergétique au service de Thiès</PageTitle>
 <HeadContent>
-
     <meta name="description" content="Découvrez e-Tech Energie+, une entreprise dont la mission est de créer, implémenter et maintenir des systèmes alliant sécurité, performance et durabilité." />
     <meta name="keywords" content="Presentation, Accueil" />
     <meta property="og:title" content="Accueil | e-Tech Energie+" />
@@ -106,62 +105,50 @@
         </div>
 
         <div class="realisations-grid">
-            <!-- Photo 1 — remplacer src par la vraie photo -->
+            <!-- Photo 1 — Chantier BTP -->
             <div class="realisation-card big">
                 <div class="realisation-img-wrap">
-                    <div class="photo-placeholder">
-                        <i class="fas fa-solar-panel"></i>
-                        <span>Photo chantier solaire</span>
-                    </div>
-                    <div class="realisation-overlay">
-                        <span class="realisation-tag"><i class="fas fa-solar-panel"></i> Énergies Renouvelables</span>
-                        <h3>Installation panneaux solaires</h3>
-                        <p>Résidence, Thiès</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Photo 2 -->
-            <div class="realisation-card">
-                <div class="realisation-img-wrap">
-                    <div class="photo-placeholder">
-                        <i class="fas fa-bolt"></i>
-                        <span>Photo installation électrique</span>
-                    </div>
-                    <div class="realisation-overlay">
-                        <span class="realisation-tag"><i class="fas fa-bolt"></i> Électrique</span>
-                        <h3>Câblage industriel</h3>
-                        <p>Usine, Thiès</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Photo 3 -->
-            <div class="realisation-card">
-                <div class="realisation-img-wrap">
-                    <div class="photo-placeholder">
-                        <i class="fas fa-hard-hat"></i>
-                        <span>Photo chantier BTP</span>
-                    </div>
+                    <img src="images/realisations/ChantierBTP1.png" alt="Chantier BTP" class="realisation-img" />
                     <div class="realisation-overlay">
                         <span class="realisation-tag"><i class="fas fa-hard-hat"></i> Génie Civil</span>
-                        <h3>Construction bâtiment</h3>
-                        <p>Quartier Médina Fall, Thiès</p>
+                        <h3>Chantier Principal</h3>
+                        <p>Thiès, Sénégal</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Photo 4 -->
+            <!-- Photo 2 — Restaurant électrique -->
             <div class="realisation-card">
                 <div class="realisation-img-wrap">
-                    <div class="photo-placeholder">
-                        <i class="fas fa-network-wired"></i>
-                        <span>Photo réseau informatique</span>
-                    </div>
+                    <img src="images/realisations/Restaurant.jpeg" alt="Restaurant électrique" class="realisation-img" />
                     <div class="realisation-overlay">
-                        <span class="realisation-tag"><i class="fas fa-network-wired"></i> Réseaux</span>
-                        <h3>Infrastructure réseau</h3>
-                        <p>Entreprise, Dakar</p>
+                        <span class="realisation-tag"><i class="fas fa-bolt"></i> Électrique</span>
+                        <h3>Restaurant — Éclairage LED</h3>
+                        <p>Thiès, Sénégal</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Photo 3 — Chantier BTP Phase 2 -->
+            <div class="realisation-card">
+                <div class="realisation-img-wrap">
+                    <img src="images/realisations/ChantierBTP2.png" alt="Chantier BTP Phase 2" class="realisation-img" />
+                    <div class="realisation-overlay">
+                        <span class="realisation-tag"><i class="fas fa-hard-hat"></i> Génie Civil</span>
+                        <h3>Phase 2 — Avancement</h3>
+                        <p>Thiès, Sénégal</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Photo 4 — Restaurant vue d'ensemble -->
+            <div class="realisation-card">
+                <div class="realisation-img-wrap">
+                    <img src="images/realisations/Restaurant1.jpeg" alt="Restaurant vue d'ensemble" class="realisation-img" />
+                    <div class="realisation-overlay">
+                        <span class="realisation-tag"><i class="fas fa-bolt"></i> Électrique</span>
+                        <h3>Restaurant — Vue d'ensemble</h3>
+                        <p>Thiès, Sénégal</p>
                     </div>
                 </div>
             </div>
@@ -293,7 +280,7 @@
     private int slideDuration = 4000;
     private double progressWidth = 0;
     private System.Threading.Timer? sliderTimer;
-    private bool progressAnimating = false;
+    //private bool progressAnimating = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -530,6 +517,7 @@
     .container {
         max-width: 1200px;
         margin: 0 auto;
+        padding: 0 20px;
     }
 
     .section-header {
@@ -589,18 +577,12 @@
         min-height: 455px;
     }
 
-    .photo-placeholder {
+    .realisation-img {
         width: 100%; height: 100%;
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-        display: flex; flex-direction: column;
-        align-items: center; justify-content: center;
-        gap: 0.8rem; color: rgba(255,255,255,0.5);
-        border: 2px dashed rgba(255,255,255,0.2);
-        transition: all 0.3s;
+        object-fit: cover;
+        transition: transform 0.3s;
     }
-    .photo-placeholder i { font-size: 2.5rem; }
-    .photo-placeholder span { font-size: 0.8rem; text-align: center; padding: 0 1rem; }
-    .realisation-card.big .photo-placeholder i { font-size: 4rem; }
+    .realisation-card:hover .realisation-img { transform: scale(1.05); }
 
     .realisation-overlay {
         position: absolute; bottom: 0; left: 0; right: 0;
@@ -610,7 +592,6 @@
         transition: transform 0.3s ease;
     }
     .realisation-card:hover .realisation-overlay { transform: translateY(0); }
-    .realisation-card:hover .photo-placeholder { filter: brightness(1.1); }
 
     .realisation-tag {
         display: inline-block;
@@ -791,3 +772,291 @@
         .slider-dots { bottom: 60px; }
     }
 </style>
+
+
+@* @page "/"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@using ETechEnergie.Shared.Models
+
+<PageTitle>e-Tech Energie+ | L'expertise technique et énergétique au service de Thiès</PageTitle>
+<HeadContent>
+    <meta name="Découvrez e-Tech Energie+, une entreprise dont la mission est de créer, implémenter et maintenir des systèmes alliant sécurité, performance et durabilité." />
+    <meta name="keywords" content="Presentation, Accueil" />
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Accueil | e-Tech Energie+" />
+    <meta property="og:description" content="Présentation d'une Startup sénégalaise innovante dans le secteur de l'électricité et du bâtiment, située à Thiès." />
+    <meta property="og:url" content="https://etechenergie.onrender.com/" />
+</HeadContent>
+
+<section class="hero">
+    <div class="hero-content">
+        <h1>e-Tech Energie+</h1>
+        <p class="tagline">L'expertise technique et énergétique au service de Thiès</p>
+        <p class="subtitle">Performance, fiabilité et évolutivité des solutions technologiques pour votre entreprise</p>
+        <div class="hero-actions">
+            <a href="/services" class="btn btn-primary">Nos Services</a>
+            <a href="/contact" class="btn btn-secondary">Contactez-nous</a>
+        </div>
+    </div>
+</section>
+
+<section class="services-preview">
+    <div class="container">
+        <h2>Nos Domaines d'Expertise</h2>
+        <div class="services-grid">
+            @if (services == null)
+            {
+                <p><em>Chargement des services...</em></p>
+            }
+            else
+            {
+                @foreach (var service in services.Take(4))
+                {
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas @service.IconClass"></i>
+                        </div>
+                        <h3>@service.Name</h3>
+                        <p>@service.Description</p>
+                    </div>
+                }
+            }
+        </div>
+        <div class="text-center mt-4">
+            <a href="/services" class="btn btn-outline">Voir tous nos services</a>
+        </div>
+    </div>
+</section>
+
+<section class="why-choose-us">
+    <div class="container">
+        <h2>Pourquoi Choisir e-Tech Energie+ ?</h2>
+        <div class="features-grid">
+            <div class="feature">
+                <i class="fas fa-certificate"></i>
+                <h3>Expertise Reconnue</h3>
+                <p>Des techniciens qualifiés et expérimentés dans tous les domaines techniques</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-shield-alt"></i>
+                <h3>Qualité Garantie</h3>
+                <p>Respect des normes internationales et garantie sur tous nos travaux</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-leaf"></i>
+                <h3>Solutions Écologiques</h3>
+                <p>Engagement pour les énergies renouvelables et le développement durable</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-headset"></i>
+                <h3>Support 24/7</h3>
+                <p>Une équipe à votre écoute pour tous vos besoins techniques</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="container">
+        <h2>Prêt à Démarrer Votre Projet ?</h2>
+        <p>Contactez-nous dès aujourd'hui pour une consultation gratuite</p>
+        <a href="/contact" class="btn btn-primary btn-lg">Demander un Devis</a>
+    </div>
+</section>
+
+@code {
+    private Service[]? services;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            services = await Http.GetFromJsonAsync<Service[]>("api/services");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur lors du chargement des services: {ex.Message}");
+        }
+    }
+}
+
+<style>
+    .hero {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        padding: 100px 20px;
+        text-align: center;
+    }
+
+    .hero-content h1 {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        font-weight: bold;
+    }
+
+    .tagline {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #fbbf24;
+    }
+
+    .subtitle {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .services-preview {
+        padding: 80px 20px;
+        background: #f9fafb;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    h2 {
+        text-align: center;
+        font-size: 2.5rem;
+        margin-bottom: 3rem;
+        color: #1e3a8a;
+    }
+
+    .services-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .service-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .service-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+    }
+
+    .service-icon {
+        font-size: 3rem;
+        color: #3b82f6;
+        margin-bottom: 1rem;
+    }
+
+    .service-card h3 {
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+        color: #1e3a8a;
+    }
+
+    .why-choose-us {
+        padding: 80px 20px;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+    }
+
+    .feature {
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .feature i {
+        font-size: 3rem;
+        color: #fbbf24;
+        margin-bottom: 1rem;
+    }
+
+    .feature h3 {
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+        color: #1e3a8a;
+    }
+
+    .cta-section {
+        background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+        color: white;
+        padding: 80px 20px;
+        text-align: center;
+    }
+
+    .cta-section h2 {
+        color: white;
+    }
+
+    .btn {
+        padding: 12px 30px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+        display: inline-block;
+        border: 2px solid transparent;
+    }
+
+    .btn-primary {
+        background: #fbbf24;
+        color: #1e3a8a;
+    }
+
+    .btn-primary:hover {
+        background: #f59e0b;
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: white;
+        border-color: white;
+    }
+
+    .btn-secondary:hover {
+        background: white;
+        color: #1e3a8a;
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: #1e3a8a;
+        border-color: #1e3a8a;
+    }
+
+    .btn-outline:hover {
+        background: #1e3a8a;
+        color: white;
+    }
+
+    .btn-lg {
+        padding: 15px 40px;
+        font-size: 1.2rem;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .mt-4 {
+        margin-top: 2rem;
+    }
+</style>
+ *@
