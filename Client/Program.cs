@@ -8,10 +8,10 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-/*builder.Services.AddScoped(sp => new HttpClient 
+builder.Services.AddScoped(sp => new HttpClient 
 { 
     BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) 
-});*/
+});
 
 builder.Services.AddScoped(sp => new HttpClient
 {
@@ -22,10 +22,6 @@ builder.Services.AddScoped(sp => new HttpClient
     )
 });
 
-<<<<<<< HEAD
-=======
-
->>>>>>> d62865136b1b9bf641420ffeaff1c213275159e6
 // Services 
 builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<NotificationService>();
