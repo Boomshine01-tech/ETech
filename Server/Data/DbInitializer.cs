@@ -85,13 +85,6 @@ public static class DbInitializer
 
         var categories = new Category[]
         {
-<<<<<<< HEAD
-            new Category { Name = "Capteurs électroniques", Description = "Capteurs et détecteurs pour applications électroniques" },
-            new Category { Name = "Câbles et connectique", Description = "Câbles électriques et réseau de qualité professionnelle" },
-            new Category { Name = "Équipements réseau", Description = "Matériel pour réseaux informatiques et télécommunications" },
-            new Category { Name = "Énergies renouvelables", Description = "Panneaux solaires et équipements pour énergie verte" },
-            new Category { Name = "Cartes de développement", Description = "Arduino, ESP32, Raspberry Pi pour projets électroniques" }
-=======
             new Category { Name = "Capteurs électroniques",   Description = "Capteurs et détecteurs pour applications électroniques" },
             new Category { Name = "Câbles et connectique",    Description = "Câbles électriques et réseau de qualité professionnelle" },
             new Category { Name = "Équipements réseau",       Description = "Matériel pour réseaux informatiques et télécommunications" },
@@ -107,7 +100,6 @@ public static class DbInitializer
             new Category { Name = "Instruments de mesure",    Description = "Oscilloscopes, testeurs de composants, multimètres et alimentations de laboratoire" }, 
             new Category { Name = "Interface utilisateur",    Description = "Claviers matriciels, boutons, interrupteurs et dispositifs d'entrée" }, 
             new Category { Name = "Prototypage",              Description = "Breadboards, jumpers, supports et accessoires de prototypage" }
->>>>>>> d62865136b1b9bf641420ffeaff1c213275159e6
         };
 
         context.Categories.AddRange(categories);
@@ -116,142 +108,6 @@ public static class DbInitializer
 
         var products = new Product[]
         {
-<<<<<<< HEAD
-            new Product
-            {
-                Name = "Capteur d'empreinte digitale",
-                Description = "Capteur biométrique permettant l'identification par empreinte digitale avec haute précision",
-                Price = 15000,
-                ImageUrl = "/images/products/fingerprint-sensor.jpg",
-                CategoryId = 1,
-                Stock = 30,
-                IsAvailable = true
-            },
-            new Product
-            {
-                Name = "Capteur infrarouge E18-D80NK",
-                Description = "Capteur infrarouge de proximité réglable pour détection d'obstacles sans contact",
-                Price = 2500,
-                ImageUrl = "/images/products/e18-d80nk.jpg",
-                CategoryId = 1,
-                Stock = 40,
-                IsAvailable = true
-            },
-            new Product
-            {
-                Name = "Capteur de température et humidité DHT22",
-                Description = "Capteur numérique haute précision pour la mesure de la température et de l'humidité",
-                Price = 3000,
-                ImageUrl = "/images/products/dht22.jpg",
-                CategoryId = 1,
-                Stock = 60,
-                IsAvailable = true
-            },
-            new Product
-            {
-                Name = "Capteur de température et humidité DHT11",
-                Description = "Capteur économique pour la mesure basique de la température et de l'humidité",
-                Price = 2000,
-                ImageUrl = "/images/products/dht11.jpg",
-                CategoryId = 1,
-                Stock = 80,
-                IsAvailable = true
-            },
-
-            new Product
-            {
-                Name = "Câble électrique 2.5 mm²",
-                Description = "Câble électrique en cuivre 2.5 mm² pour installations domestiques",
-                Price = 21500,
-                ImageUrl = "/images/products/cable-2-5.jpg",
-                CategoryId = 2,
-                Stock = 200,
-                IsAvailable = true
-            },
-            new Product
-            {
-                Name = "Câble électrique 1.5 mm²",
-                Description = "Câble électrique en cuivre 1.5 mm² pour éclairage et petits équipements",
-                Price = 17500,
-                ImageUrl = "/images/products/cable-1-5.jpg",
-                CategoryId = 2,
-                Stock = 250,
-                IsAvailable = true
-            },
-            new Product
-            {
-                Name = "Câble électrique 6 mm²",
-                Description = "Câble électrique haute section 6 mm² pour fortes puissances",
-                Price = 31500,
-                ImageUrl = "/images/products/cable-6.jpeg",
-                CategoryId = 2,
-                Stock = 150,
-                IsAvailable = true
-            },
-
-            new Product
-            {
-                Name = "Câble Ethernet RJ45",
-                Description = "Câble réseau Ethernet pour connexion internet et réseaux locaux",
-                Price = 45000,
-                ImageUrl = "/images/products/ethernet-cable.jpeg",
-                CategoryId = 3,
-                Stock = 100,
-                IsAvailable = true
-            },
-            new Product
-            {
-                Name = "Switch réseau 8 ports",
-                Description = "Switch Ethernet 8 ports pour interconnexion de plusieurs équipements réseau",
-                Price = 25000,
-                ImageUrl = "/images/products/network-switch.jpg",
-                CategoryId = 3,
-                Stock = 20,
-                IsAvailable = true
-            },
-
-            new Product
-            {
-                Name = "Panneau solaire 300W",
-                Description = "Panneau solaire monocristallin haute performance pour production d'énergie renouvelable",
-                Price = 150000,
-                ImageUrl = "/images/products/solar-panel.jpg",
-                CategoryId = 4,
-                Stock = 50,
-                IsAvailable = true
-            },
-
-            new Product
-            {
-                Name = "Arduino Uno R3",
-                Description = "Carte de développement Arduino Uno idéale pour projets électroniques et éducatifs",
-                Price = 8000,
-                ImageUrl = "/images/products/arduino-uno.jpg",
-                CategoryId = 5, 
-                Stock = 35,
-                IsAvailable = true
-            },
-            new Product
-            {
-                Name = "ESP32",
-                Description = "Carte de développement ESP32 avec Wi-Fi et Bluetooth intégrés pour projets IoT",
-                Price = 6000,
-                ImageUrl = "/images/products/esp32.jpg",
-                CategoryId = 5,
-                Stock = 45,
-                IsAvailable = true
-            },
-            new Product
-            {
-                Name = "Raspberry Pi 4",
-                Description = "Mini-ordinateur Raspberry Pi pour projets informatiques, domotiques et éducatifs",
-                Price = 75000,
-                ImageUrl = "/images/products/raspberry-pi.jpg",
-                CategoryId = 5,
-                Stock = 25,
-                IsAvailable = true
-            }
-=======
             // ── CAPTEURS (CategoryId = 1) ─────────────────────────────────────────
             new Product { Id=1,  Name="Capteur d'empreinte digitale", Description="Capteur biométrique permettant l'identification et la vérification d'identité par empreinte digitale. Compatible avec les microcontrôleurs Arduino et Raspberry Pi via liaison UART. Idéal pour les projets de contrôle d'accès, de sécurité embarquée et d'authentification.", Price=7000m,  ImageUrl="/images/products/Empreinte.jpeg",      CategoryId=1,  Stock=50,  IsAvailable=true, CreatedAt=DateTime.Parse("2026-03-09T15:33:54Z") },
             new Product { Id=2,  Name="Capteur de température et humidité DHT22", Description="Capteur numérique haute précision pour la mesure de la température (−40 à +80 °C) et de l'humidité relative (0–100 % HR). Signal numérique calibré, interface à un seul fil, compatible Arduino, ESP32 et Raspberry Pi. Idéal pour les stations météo, serres et systèmes domotiques.", Price=3000m,  ImageUrl="/images/products/DHT22.jpeg",          CategoryId=1,  Stock=60,  IsAvailable=true, CreatedAt=DateTime.Parse("2026-03-09T15:20:35Z") },
@@ -417,17 +273,12 @@ public static class DbInitializer
             // ── PROTOTYPAGE (CategoryId = 15) ─────────────────────────────────
             new Product { Id=137, Name="Double Breadboard", Description="Plaque de prototypage", Price=5000m, ImageUrl="/images/products/Breadboard.jpeg", CategoryId=15, Stock=0, IsAvailable=true, CreatedAt=DateTime.Parse("2026-03-09T15:19:45Z") },
             new Product { Id=138, Name="Breadboard", Description="Plaque de prototypage", Price=3000m, ImageUrl="/images/products/BreadboardV1.jpeg", CategoryId=15, Stock=0, IsAvailable=true, CreatedAt=DateTime.Parse("2026-03-09T15:19:45Z") }
->>>>>>> d62865136b1b9bf641420ffeaff1c213275159e6
         };
 
         context.Products.AddRange(products);
         await context.SaveChangesAsync();
         Console.WriteLine($"✅ {products.Length} produits ajoutés");
 
-<<<<<<< HEAD
-
-=======
->>>>>>> d62865136b1b9bf641420ffeaff1c213275159e6
         Console.WriteLine("");
         Console.WriteLine("╔═══════════════════════════════════════════════╗");
         Console.WriteLine("║   ✅ Initialisation Terminée avec Succès !   ║");
