@@ -19,6 +19,9 @@ public class FormationsController : ControllerBase
         _logger = logger;
     }
 
+    private static DateTime ToUtc(DateTime dt) =>
+        dt.Kind == DateTimeKind.Utc ? dt : DateTime.SpecifyKind(dt, DateTimeKind.Utc);
+
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Formation>>> GetFormations()
     {
@@ -53,15 +56,12 @@ public class FormationsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Formation>> CreateFormation(Formation formation)
     {
-        private static DateTime ToUtc(DateTime dt) =>
-        dt.Kind == DateTimeKind.Utc ? dt : DateTime.SpecifyKind(dt, DateTimeKind.Utc);
-        
-        formation.CreatedAt   = DateTime.UtcNow;
-        formation.UpdatedAt   = DateTime.UtcNow;
-        formation.DateDebut   = ToUtc(formation.DateDebut);
-        formation.DateFin     = ToUtc(formation.DateFin);
+        formation.CreatedAt = DateTime.UtcNow;
+        formation.UpdatedAt = DateTime.UtcNow;
+        formation.DateDebut = ToUtc(formation.DateDebut);
+        formation.DateFin = ToUtc(formation.DateFin);
         formation.PlacesRestantes = formation.CapaciteMax;
-        
+
         _context.Formations.Add(formation);
         await _context.SaveChangesAsync();
 
@@ -74,9 +74,6 @@ public class FormationsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateFormation(int id, Formation formation)
     {
-        private static DateTime ToUtc(DateTime dt) =>
-        dt.Kind == DateTimeKind.Utc ? dt : DateTime.SpecifyKind(dt, DateTimeKind.Utc);
-        
         if (id != formation.Id)
         {
             return BadRequest();
@@ -92,14 +89,14 @@ public class FormationsController : ControllerBase
         existing.Description = formation.Description;
         existing.Prix = formation.Prix;
         existing.DateDebut = ToUtc(formation.DateDebut);
-        existing.DateFin   = ToUtc(formation.DateFin);
-        existing.UpdatedAt = DateTime.UtcNow;
+        existing.DateFin = ToUtc(formation.DateFin);
         existing.Horaires = formation.Horaires;
         existing.Statut = formation.Statut;
         existing.Lieu = formation.Lieu;
         existing.Partenaires = formation.Partenaires;
         existing.InscriptionOuverte = formation.InscriptionOuverte;
         existing.CapaciteMax = formation.CapaciteMax;
+        existing.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
 
