@@ -6,9 +6,6 @@ using ETechEnergie.Shared.Models;
 
 namespace ETechEnergie.Server.Controllers;
 
-private static DateTime ToUtc(DateTime dt) =>
-    dt.Kind == DateTimeKind.Utc ? dt : DateTime.SpecifyKind(dt, DateTimeKind.Utc);
-
 [ApiController]
 [Route("api/[controller]")]
 public class FormationsController : ControllerBase
@@ -56,6 +53,9 @@ public class FormationsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Formation>> CreateFormation(Formation formation)
     {
+        private static DateTime ToUtc(DateTime dt) =>
+        dt.Kind == DateTimeKind.Utc ? dt : DateTime.SpecifyKind(dt, DateTimeKind.Utc);
+        
         formation.CreatedAt   = DateTime.UtcNow;
         formation.UpdatedAt   = DateTime.UtcNow;
         formation.DateDebut   = ToUtc(formation.DateDebut);
@@ -74,6 +74,9 @@ public class FormationsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateFormation(int id, Formation formation)
     {
+        private static DateTime ToUtc(DateTime dt) =>
+        dt.Kind == DateTimeKind.Utc ? dt : DateTime.SpecifyKind(dt, DateTimeKind.Utc);
+        
         if (id != formation.Id)
         {
             return BadRequest();
