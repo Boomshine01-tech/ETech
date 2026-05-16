@@ -14,35 +14,30 @@ var builder = WebApplication.CreateBuilder(args);
 
 string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+var host     = Environment.GetEnvironmentVariable("DB_HOST");
+var port     = Environment.GetEnvironmentVariable("DB_PORT")     ?? "5432";
+var database = Environment.GetEnvironmentVariable("DB_NAME")     ?? "postgres";
+var username = Environment.GetEnvironmentVariable("DB_USER")     ?? "postgres";
+var password = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "";
 
-if (!string.IsNullOrEmpty(databaseUrl))
+if (!string.IsNullOrEmpty(host))
 {
-    Console.WriteLine(" DATABASE_URL détectée (Render)");
-    var uri = new Uri(databaseUrl);
-    var userInfo = uri.UserInfo.Split(':');
-    var port = uri.Port > 0 ? uri.Port : 5432;
-
-    Console.WriteLine($" PostgreSQL Host     : {uri.Host}");
-    Console.WriteLine($" PostgreSQL Port     : {port}");
-    Console.WriteLine($" PostgreSQL Database : {uri.AbsolutePath.Trim('/')}");
-    Console.WriteLine($" PostgreSQL User     : {userInfo[0]}");
-
+    Console.WriteLine($" DB_HOST détecté → {host}:{port}/{database}");
     connectionString =
-        $"Host={uri.Host};" +
+        $"Host={host};" +
         $"Port={port};" +
-        $"Database={uri.AbsolutePath.Trim('/')};" +
-        $"Username={userInfo[0]};" +
-        $"Password={userInfo[1]};" +
+        $"Database={database};" +
+        $"Username={username};" +
+        $"Password={password};" +
         $"SSL Mode=Require;" +
-        $"Trust Server Certificate=true";
+        $"Trust Server Certificate=true;" +
+        $"Pooling=false;";
 }
 else
 {
-    Console.WriteLine("⚠️ DATABASE_URL absente → utilisation appsettings");
+    connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+              ?? "Host=localhost;Database=smartnest;Username=postgres;Password=postgres";
 }
-
-Console.WriteLine(" Chaîne de connexion PostgreSQL prête");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
