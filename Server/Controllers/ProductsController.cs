@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Primitives;
 using ETechEnergie.Server.Data;
 using ETechEnergie.Server.Services;
 using ETechEnergie.Shared.Models;
@@ -19,8 +20,10 @@ public class ProductsController : ControllerBase
 
     private const string ProductCacheKeyPrefix = "product_";
 
+    private static CancellationTokenSource _productsCacheToken = new();
+
     public ProductsController(
-        IWebHostEnvironment environment, 
+        IWebHostEnvironment environment,
         AppDbContext context,
         ILogger<ProductsController> logger,
         IMemoryCache cache)
@@ -33,7 +36,7 @@ public class ProductsController : ControllerBase
 
     [HttpGet]
     [AllowAnonymous]
-    [ResponseCache(Duration = 300)] 
+    [ResponseCache(Duration = 300)]
     public async Task<ActionResult<PagedResult<Product>>> GetProducts(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
@@ -42,7 +45,7 @@ public class ProductsController : ControllerBase
     {
         if (page < 1) page = 1;
         if (pageSize < 1) pageSize = 20;
-        if (pageSize > 100) pageSize = 100; 
+        if (pageSize > 100) pageSize = 100;
 
         try
         {
@@ -65,14 +68,13 @@ public class ProductsController : ControllerBase
                 if (!string.IsNullOrWhiteSpace(search))
                 {
                     var searchLower = search.ToLower();
-                    query = query.Where(p => 
-                        p.Name.ToLower().Contains(searchLower) || 
+                    query = query.Where(p =>
+                        p.Name.ToLower().Contains(searchLower) ||
                         p.Description.ToLower().Contains(searchLower)
                     );
                 }
 
                 var totalItems = await query.CountAsync();
-
                 var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
                 if (page > totalPages && totalPages > 0)
@@ -97,15 +99,17 @@ public class ProductsController : ControllerBase
                     HasNextPage = page < totalPages
                 };
 
+              
                 var cacheOptions = new MemoryCacheEntryOptions()
                     .SetSlidingExpiration(TimeSpan.FromMinutes(5))
                     .SetAbsoluteExpiration(TimeSpan.FromMinutes(15))
-                    .SetPriority(CacheItemPriority.Normal);
+                    .SetPriority(CacheItemPriority.Normal)
+                    .AddExpirationToken(new CancellationChangeToken(_productsCacheToken.Token));
 
                 _cache.Set(cacheKey, cachedResult, cacheOptions);
 
                 _logger.LogInformation(
-                    "Produits chargés depuis DB - Page {Page}/{TotalPages} ({ItemCount} produits)", 
+                    "Produits chargés depuis DB - Page {Page}/{TotalPages} ({ItemCount} produits)",
                     page, totalPages, products.Count);
             }
             else
@@ -142,7 +146,8 @@ public class ProductsController : ControllerBase
             }
 
             var cacheOptions = new MemoryCacheEntryOptions()
-                .SetSlidingExpiration(TimeSpan.FromMinutes(10));
+                .SetSlidingExpiration(TimeSpan.FromMinutes(10))
+                .AddExpirationToken(new CancellationChangeToken(_productsCacheToken.Token));
 
             _cache.Set(cacheKey, product, cacheOptions);
             _logger.LogInformation("Produit {ProductId} chargé depuis DB", id);
@@ -161,7 +166,7 @@ public class ProductsController : ControllerBase
     public async Task<ActionResult<IEnumerable<Product>>> GetProductsByCategory(int categoryId)
     {
         _logger.LogWarning("Endpoint /category/{categoryId} déprécié. Utiliser ?categoryId={categoryId}");
-        
+
         var cacheKey = $"category_products_{categoryId}";
 
         if (!_cache.TryGetValue(cacheKey, out List<Product>? products))
@@ -173,7 +178,8 @@ public class ProductsController : ControllerBase
                 .ToListAsync();
 
             var cacheOptions = new MemoryCacheEntryOptions()
-                .SetSlidingExpiration(TimeSpan.FromMinutes(5));
+                .SetSlidingExpiration(TimeSpan.FromMinutes(5))
+                .AddExpirationToken(new CancellationChangeToken(_productsCacheToken.Token));
 
             _cache.Set(cacheKey, products, cacheOptions);
         }
@@ -190,7 +196,7 @@ public class ProductsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        _logger.LogInformation("Admin {Username} crée un produit: {ProductName}", 
+        _logger.LogInformation("Admin {Username} crée un produit: {ProductName}",
             User.Identity?.Name, product.Name);
 
         product.CreatedAt = DateTime.UtcNow;
@@ -198,9 +204,9 @@ public class ProductsController : ControllerBase
         await _context.SaveChangesAsync();
 
         ClearProductsCache();
-        
+
         _logger.LogInformation("Produit {ProductId} créé avec succès", product.Id);
-        
+
         return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
     }
 
@@ -218,18 +224,33 @@ public class ProductsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        _logger.LogInformation("Admin {Username} modifie le produit ID {ProductId}", 
+        _logger.LogInformation("Admin {Username} modifie le produit ID {ProductId}",
             User.Identity?.Name, id);
 
-        _context.Entry(product).State = EntityState.Modified;
+        
+        var existing = await _context.Products.FindAsync(id);
+
+        if (existing == null)
+        {
+            _logger.LogWarning("Produit {ProductId} introuvable pour modification", id);
+            return NotFound(new { error = "Produit introuvable" });
+        }
+
+        // Mise à jour uniquement des champs éditables
+        existing.Name        = product.Name;
+        existing.Description = product.Description;
+        existing.Price       = product.Price;
+        existing.CategoryId  = product.CategoryId;
+        existing.Stock       = product.Stock;
+        existing.ImageUrl    = product.ImageUrl;
+        existing.IsAvailable = product.IsAvailable;
 
         try
         {
             await _context.SaveChangesAsync();
-            
+
             ClearProductsCache();
-            _cache.Remove($"{ProductCacheKeyPrefix}{id}");
-            
+
             _logger.LogInformation("Produit {ProductId} modifié avec succès", id);
         }
         catch (DbUpdateConcurrencyException)
@@ -247,7 +268,7 @@ public class ProductsController : ControllerBase
 
     [HttpPost("upload-image")]
     [Authorize(Roles = "Admin")]
-    [RequestSizeLimit(10_000_000)] 
+    [RequestSizeLimit(10_000_000)]
     public async Task<IActionResult> UploadImage(IFormFile file)
     {
         try
@@ -257,14 +278,14 @@ public class ProductsController : ControllerBase
                 return BadRequest(new { error = "Aucun fichier fourni" });
             }
 
-            if (file.Length > 5_000_000) 
+            if (file.Length > 5_000_000)
             {
                 return BadRequest(new { error = $"Le fichier est trop volumineux ({file.Length / 1_000_000.0:F2}MB). Maximum: 5MB" });
             }
 
             var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
             var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
-            
+
             if (!allowedExtensions.Contains(extension))
             {
                 return BadRequest(new { error = $"Extension non autorisée. Extensions acceptées: {string.Join(", ", allowedExtensions)}" });
@@ -312,36 +333,31 @@ public class ProductsController : ControllerBase
     public async Task<IActionResult> DeleteProduct(int id)
     {
         var product = await _context.Products.FindAsync(id);
-        
+
         if (product == null)
         {
             _logger.LogWarning("Tentative de suppression d'un produit inexistant: {ProductId}", id);
             return NotFound(new { error = "Produit introuvable" });
         }
 
-        _logger.LogWarning("Admin {Username} supprime le produit ID {ProductId}: {ProductName}", 
+        _logger.LogWarning("Admin {Username} supprime le produit ID {ProductId}: {ProductName}",
             User.Identity?.Name, id, product.Name);
 
         _context.Products.Remove(product);
         await _context.SaveChangesAsync();
 
         ClearProductsCache();
-        _cache.Remove($"{ProductCacheKeyPrefix}{id}");
 
         _logger.LogInformation("Produit {ProductId} supprimé avec succès", id);
 
         return NoContent();
     }
 
+   
     private void ClearProductsCache()
     {
-
-        for (int i = 1; i <= 100; i++) 
-        {
-            _cache.Remove($"category_products_{i}");
-        }
-
-        
+        _productsCacheToken.Cancel();
+        _productsCacheToken = new CancellationTokenSource();
         _logger.LogInformation("Cache des produits invalidé");
     }
 }
