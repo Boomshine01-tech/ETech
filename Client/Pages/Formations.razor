@@ -1,0 +1,731 @@
+﻿@page "/formations"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<PageTitle>Formations en électricité et énergie solaire au Sénégal</PageTitle>
+<HeadContent>
+    <meta name="description" content="Formations professionnelles en électricité, énergie solaire et automatismes industriels à Thiès au Sénégal." />
+    <meta name="keywords" content="formation Thiès, formation professionnelle Sénégal, inscription formation" />
+    <meta property="og:title" content="Formations | e-Tech Energie+" />
+    <meta property="og:url" content="https://etechenergie.onrender.com/formations" />
+</HeadContent>
+
+<!-- ===== HEADER ===== -->
+<div class="page-header">
+    <div class="header-grid"></div>
+    <div class="container">
+        <div class="header-badge"><i class="fas fa-graduation-cap"></i> Formations Professionnelles</div>
+        <h1>Formations professionnelles techniques au Sénégal</h1>
+        <p>Nos formations permettent aux étudiants, techniciens et professionnels d'acquérir des compétences pratiques en installation électrique, énergie solaire et automatismes industriels.</p>
+        @if (isLoading)
+        {
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i> Chargement...
+            </div>
+        }
+        else
+        {
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span class="stat-number">@formationsEnCours.Count</span>
+                    <span class="stat-label">En cours</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">@formationsAVenir.Count</span>
+                    <span class="stat-label">À venir</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">@formationsTerminees.Count</span>
+                    <span class="stat-label">Terminées</span>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@if (isLoading)
+{
+    <div class="loading-container">
+        <div class="spinner"></div>
+        <p>Chargement des formations...</p>
+    </div>
+}
+else
+{
+    <!-- ===== FORMATIONS EN COURS ===== -->
+@if (formationsEnCours.Any())
+{
+    <section class="formations-section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-tag"><i class="fas fa-play-circle"></i> En cours</div>
+                <h2>Formations en cours</h2>
+            </div>
+            <div class="formations-grid">
+                @foreach (var formation in formationsEnCours)
+                {
+                    <div class="formation-card">
+                        <div class="formation-header">
+                            <span class="formation-status status-en-cours">En cours</span>
+                            <span class="formation-price">@formation.Prix.ToString("N0") FCFA</span>
+                        </div>
+                        <h3>@formation.Titre</h3>
+                        <p class="formation-desc">@formation.Description</p>
+                        <div class="formation-details">
+                            <div class="detail"><i class="fas fa-calendar"></i> @formation.DateDebut.ToString("dd/MM/yyyy") - @formation.DateFin.ToString("dd/MM/yyyy")</div>
+                            <div class="detail"><i class="fas fa-clock"></i> @formation.Horaires</div>
+                            <div class="detail"><i class="fas fa-map-marker-alt"></i> @formation.Lieu</div>
+                            <div class="detail"><i class="fas fa-users"></i> @formation.PlacesRestantes / @formation.CapaciteMax places</div>
+                        </div>
+                        @if (formation.InscriptionOuverte && formation.PlacesRestantes > 0)
+                        {
+                            <button class="btn-formation btn-primary" @onclick="() => OpenInscriptionModal(formation)">
+                                <i class="fas fa-user-plus"></i> S'inscrire
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn-formation btn-disabled" disabled>
+                                <i class="fas fa-ban"></i> Inscriptions fermées
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<!-- ===== FORMATIONS À VENIR ===== -->
+@if (formationsAVenir.Any())
+{
+    <section class="formations-section alt-bg">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-tag"><i class="fas fa-calendar-plus"></i> À venir</div>
+                <h2>Prochaines formations</h2>
+            </div>
+            <div class="formations-grid">
+                @foreach (var formation in formationsAVenir)
+                {
+                    <div class="formation-card">
+                        <div class="formation-header">
+                            <span class="formation-status status-avenir">À venir</span>
+                            <span class="formation-price">@formation.Prix.ToString("N0") FCFA</span>
+                        </div>
+                        <h3>@formation.Titre</h3>
+                        <p class="formation-desc">@formation.Description</p>
+                        <div class="formation-details">
+                            <div class="detail"><i class="fas fa-calendar"></i> @formation.DateDebut.ToString("dd/MM/yyyy") - @formation.DateFin.ToString("dd/MM/yyyy")</div>
+                            <div class="detail"><i class="fas fa-clock"></i> @formation.Horaires</div>
+                            <div class="detail"><i class="fas fa-map-marker-alt"></i> @formation.Lieu</div>
+                            <div class="detail"><i class="fas fa-users"></i> @formation.CapaciteMax places</div>
+                        </div>
+                        <button class="btn-formation btn-secondary" @onclick="() => OpenInscriptionModal(formation)">
+                            <i class="fas fa-list"></i> Rejoindre la liste d'attente
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<!-- ===== FORMATIONS TERMINÉES ===== -->
+@if (formationsTerminees.Any())
+{
+    <section class="formations-section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-tag"><i class="fas fa-history"></i> Historique</div>
+                <h2>Formations terminées</h2>
+            </div>
+            <div class="formations-grid">
+                @foreach (var formation in formationsTerminees)
+                {
+                    <div class="formation-card formation-terminee">
+                        <div class="formation-header">
+                            <span class="formation-status status-terminee">Terminée</span>
+                        </div>
+                        <h3>@formation.Titre</h3>
+                        <p class="formation-desc">@formation.Description</p>
+                        <div class="formation-details">
+                            <div class="detail"><i class="fas fa-calendar"></i> @formation.DateDebut.ToString("dd/MM/yyyy") - @formation.DateFin.ToString("dd/MM/yyyy")</div>
+                            <div class="detail"><i class="fas fa-map-marker-alt"></i> @formation.Lieu</div>
+                        </div>
+                        <button class="btn-formation btn-disabled" disabled>
+                            <i class="fas fa-check"></i> Formation terminée
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+}
+
+<!-- ===== MODAL INSCRIPTION ===== -->
+@if (showInscriptionModal && selectedFormation != null)
+{
+    <div class="modal-overlay" @onclick="CloseInscriptionModal">
+        <div class="modal-content" @onclick:stopPropagation="true">
+            <button class="modal-close" @onclick="CloseInscriptionModal"><i class="fas fa-times"></i></button>
+            <h2>Inscription - @selectedFormation.Titre</h2>
+            <div class="formation-info">
+                <div class="info-row"><i class="fas fa-calendar"></i> @selectedFormation.DateDebut.ToString("dd/MM/yyyy") - @selectedFormation.DateFin.ToString("dd/MM/yyyy")</div>
+                <div class="info-row"><i class="fas fa-clock"></i> @selectedFormation.Horaires</div>
+                <div class="info-row"><i class="fas fa-map-marker-alt"></i> @selectedFormation.Lieu</div>
+                <div class="info-row"><i class="fas fa-money-bill-wave"></i> @selectedFormation.Prix.ToString("N0") FCFA</div>
+            </div>
+            <EditForm Model="@inscription" OnValidSubmit="HandleInscription">
+                <div class="form-group">
+                    <label>Nom complet *</label>
+                    <InputText @bind-Value="inscription.Nom" class="form-input" />
+                    <ValidationMessage For="@(() => inscription.Nom)" />
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <InputText @bind-Value="inscription.Email" type="email" class="form-input" />
+                    <ValidationMessage For="@(() => inscription.Email)" />
+                </div>
+                <div class="form-group">
+                    <label>Téléphone *</label>
+                    <InputText @bind-Value="inscription.Telephone" class="form-input" />
+                    <ValidationMessage For="@(() => inscription.Telephone)" />
+                </div>
+                <div class="form-group">
+                    <label>Message (optionnel)</label>
+                    <InputTextArea @bind-Value="inscription.Message" class="form-textarea" rows="3" />
+                </div>
+                @if (inscriptionSuccess)
+                {
+                    <div class="success-message">
+                        <i class="fas fa-check-circle"></i> Inscription réussie ! Nous vous contacterons bientôt.
+                    </div>
+                }
+                else
+                {
+                    @if (errorMessage != null)
+                    {
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i> @errorMessage
+                        </div>
+                    }
+                    <button type="submit" class="btn-submit" disabled="@isSubmitting">
+                        @if (isSubmitting)
+                        {
+                            <i class="fas fa-spinner fa-spin"></i> <text>Traitement en cours</text>
+                        }
+                        else
+                        {
+                            <i class="fas fa-paper-plane"></i> <text>Confirmer l'inscription</text>
+                        }
+                    </button>
+                }
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Formation> allFormations = new();
+    private List<Formation> formationsEnCours = new();
+    private List<Formation> formationsAVenir = new();
+    private List<Formation> formationsTerminees = new();
+    private bool isLoading = true;
+    
+    private bool showInscriptionModal = false;
+    private Formation? selectedFormation;
+    private Inscription inscription = new();
+    private bool isSubmitting = false;
+    private bool inscriptionSuccess = false;
+    private string? errorMessage = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadFormations();
+    }
+
+    private async Task LoadFormations()
+    {
+        try
+        {
+            var response = await Http.GetFromJsonAsync<List<Formation>>("api/formations");
+            if (response != null)
+            {
+                allFormations = response;
+                formationsEnCours = allFormations.Where(f => f.Statut == "En cours").ToList();
+                formationsAVenir = allFormations.Where(f => f.Statut == "A venir").ToList();
+                formationsTerminees = allFormations.Where(f => f.Statut == "Terminée").ToList();
+            }
+        }
+        catch (Exception)
+        {
+            Console.WriteLine($"Erreur chargement formations");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void OpenInscriptionModal(Formation formation)
+    {
+        selectedFormation = formation;
+        inscription = new Inscription();
+        inscriptionSuccess = false;
+        errorMessage = null;
+        showInscriptionModal = true;
+    }
+
+    private void CloseInscriptionModal()
+    {
+        showInscriptionModal = false;
+        selectedFormation = null;
+    }
+
+    private async Task HandleInscription()
+    {
+        if (selectedFormation == null) return;
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            inscription.FormationId = selectedFormation.Id;
+            var response = await Http.PostAsJsonAsync($"api/formations/{selectedFormation.Id}/inscrire", inscription);
+
+            if (response.IsSuccessStatusCode)
+            {
+                inscriptionSuccess = true;
+                await LoadFormations(); // Recharger pour mettre à jour les places
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                errorMessage = errorContent ?? "Une erreur s'est produite lors de l'inscription.";
+            }
+        }
+        catch (Exception)
+        {
+            errorMessage = "Impossible de contacter le serveur. Veuillez réessayer.";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}
+
+<style>
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+    /* ===== HEADER ===== */
+    .page-header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        padding: 80px 20px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .header-grid {
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+        background-size: 60px 60px;
+    }
+
+    .header-badge {
+        display: inline-block;
+        background: rgba(251,191,36,0.2);
+        border: 1px solid rgba(251,191,36,0.5);
+        color: #fbbf24;
+        padding: 0.4rem 1.2rem;
+        border-radius: 50px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        position: relative;
+    }
+
+    .page-header h1 {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        margin-bottom: 1rem;
+        position: relative;
+    }
+
+    .page-header h1 span { color: #fbbf24; }
+
+    .page-header p {
+        font-size: 1.1rem;
+        opacity: 0.85;
+        margin-bottom: 2.5rem;
+        position: relative;
+    }
+
+    .header-stats {
+        display: flex;
+        justify-content: center;
+        gap: 3rem;
+        flex-wrap: wrap;
+        position: relative;
+    }
+
+    .stat-item { text-align: center; }
+
+    .stat-number {
+        display: block;
+        font-size: 2rem;
+        color: #fbbf24;
+        margin-bottom: 0.3rem;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.7);
+    }
+
+    .loading-spinner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        color: #fbbf24;
+        font-size: 1rem;
+        margin-top: 1rem;
+    }
+
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 2rem;
+        color: #6b7280;
+    }
+
+    .loading-container .spinner {
+        border: 3px solid #e5e7eb;
+        border-top-color: #3b82f6;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin-bottom: 1rem;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* ===== TAGS ===== */
+    .section-tag {
+        display: inline-block;
+        background: rgba(59,130,246,0.1);
+        color: #3b82f6;
+        padding: 0.3rem 1rem;
+        border-radius: 50px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 0.75rem;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .section-header h2 {
+        font-size: 2.2rem;
+        color: #1e3a8a;
+        margin: 0;
+    }
+
+    /* ===== FORMATIONS SECTION ===== */
+    .formations-section {
+        padding: 80px 20px;
+        background: white;
+    }
+
+    .formations-section.alt-bg { background: #f9fafb; }
+
+    .formations-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2rem;
+    }
+
+    .formation-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        transition: all 0.3s;
+        border: 1px solid #e5e7eb;
+    }
+
+    .formation-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    }
+
+    .formation-card.formation-terminee {
+        opacity: 0.7;
+    }
+
+    .formation-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .formation-status {
+        padding: 0.3rem 0.8rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-en-cours { background: #dbeafe; color: #1e40af; }
+    .status-avenir { background: #fef3c7; color: #92400e; }
+    .status-terminee { background: #e5e7eb; color: #4b5563; }
+
+    .formation-price {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e3a8a;
+    }
+
+    .formation-card h3 {
+        font-size: 1.3rem;
+        color: #1e3a8a;
+        margin-bottom: 0.75rem;
+    }
+
+    .formation-desc {
+        color: #6b7280;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+
+    .formation-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .formation-details .detail {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        color: #4b5563;
+        font-size: 0.9rem;
+    }
+
+    .formation-details .detail i {
+        color: #3b82f6;
+        width: 16px;
+    }
+
+    .btn-formation {
+        width: 100%;
+        padding: 0.9rem;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border: none;
+    }
+
+    .btn-formation.btn-primary {
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+        color: white;
+    }
+
+    .btn-formation.btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(30,58,138,0.4);
+    }
+
+    .btn-formation.btn-secondary {
+        background: #fbbf24;
+        color: #1e3a8a;
+    }
+
+    .btn-formation.btn-secondary:hover {
+        background: #f59e0b;
+        transform: translateY(-2px);
+    }
+
+    .btn-formation.btn-disabled {
+        background: #e5e7eb;
+        color: #6b7280;
+        cursor: not-allowed;
+    }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 20px;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 16px;
+        max-width: 500px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 2rem;
+        position: relative;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: #6b7280;
+        transition: color 0.2s;
+    }
+
+    .modal-close:hover { color: #ef4444; }
+
+    .modal-content h2 {
+        font-size: 1.5rem;
+        color: #1e3a8a;
+        margin-bottom: 1.5rem;
+    }
+
+    .formation-info {
+        background: #f9fafb;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .formation-info .info-row {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        color: #4b5563;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .formation-info .info-row:last-child { margin-bottom: 0; }
+
+    .formation-info .info-row i { color: #3b82f6; width: 16px; }
+
+    .form-group { margin-bottom: 1rem; }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.4rem;
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.9rem;
+    }
+
+    .form-input, .form-textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: border-color 0.3s;
+        box-sizing: border-box;
+    }
+
+    .form-input:focus, .form-textarea:focus {
+        outline: none;
+        border-color: #3b82f6;
+    }
+
+    .form-textarea { resize: none; }
+
+    .btn-submit {
+        width: 100%;
+        padding: 0.9rem;
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(30,58,138,0.4);
+    }
+
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .success-message {
+        background: #d1fae5;
+        color: #065f46;
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .error-message {
+        background: #fee2e2;
+        color: #991b1b;
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    @@media (max-width: 768px) {
+        .formations-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .header-stats {
+            gap: 1.5rem;
+        }
+    }
+</style>

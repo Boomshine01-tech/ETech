@@ -1,0 +1,225 @@
+## Variables d'environnement
+.env
+.env.local
+.env.*.local
+*.env.local
+
+## Fichiers de configuration sensibles
+appsettings.Development.json
+appsettings.Production.json
+<<<<<<< HEAD
+=======
+appsettings.json
+>>>>>>> d62865136b1b9bf641420ffeaff1c213275159e6
+
+## Clés et secrets
+jwt_secret*.txt
+*.key
+*.pem
+secrets.json
+
+## Credentials
+credentials.json
+*credentials*
+*secrets*
+
+# ===================================
+# .NET / ASP.NET Core
+# ===================================
+
+## Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio
+.vs/
+.vscode/
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## User-specific files
+*.user
+*.suo
+*.userprefs
+
+## Build Results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+
+## Rider
+.idea/
+*.sln.iml
+
+## Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+## ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# ===================================
+# Blazor WebAssembly
+# ===================================
+
+## Blazor build files
+**/wwwroot/lib/
+**/wwwroot/_framework/
+**/bin/Debug/
+**/bin/Release/
+**/obj/
+
+## Service Worker
+service-worker-assets.js
+service-worker.published.js
+
+# ===================================
+# Entity Framework
+# ===================================
+
+## Migrations (optionnel, à commenter si vous voulez versionner)
+# **/Migrations/
+
+## Database files
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# ===================================
+# Node.js (si utilisé)
+# ===================================
+
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===================================
+# Logs et fichiers temporaires
+# ===================================
+
+*.log
+logs/
+*.tmp
+*.temp
+~$*
+Thumbs.db
+.DS_Store
+
+# ===================================
+# Docker (optionnel)
+# ===================================
+
+## Docker compose overrides
+docker-compose.override.yml
+.dockerignore.local
+
+# ===================================
+# IDE et Éditeurs
+# ===================================
+
+## JetBrains
+.idea/
+*.iml
+
+## Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+## Vim
+*.swp
+*.swo
+*~
+
+## Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+
+# ===================================
+# Tests
+# ===================================
+
+TestResults/
+[Tt]est[Rr]esult*/
+*.trx
+*.coverage
+*.coveragexml
+
+# ===================================
+# NuGet
+# ===================================
+
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+
+# ===================================
+# Backup et Temporaires
+# ===================================
+
+*.bak
+*.backup
+*.old
+*-backup
+*-old
+
+# ===================================
+# Uploads et Media (si applicable)
+# ===================================
+
+## Images uploadées (si vous ne voulez pas les versionner)
+# **/wwwroot/images/products/*
+# !**/wwwroot/images/products/.gitkeep
+
+# ===================================
+# Autres
+# ===================================
+
+## Profiling
+*.psess
+*.vsp
+*.vspx
+
+## SQL Server files
+*.mdf
+*.ldf
+*.ndf
+
+## Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+## Mac
+.DS_Store
+.AppleDouble
+.LSOverride

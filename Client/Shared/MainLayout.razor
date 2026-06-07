@@ -1,0 +1,50 @@
+@inherits LayoutComponentBase
+
+<div class="page">
+    <NavMenu />
+    <main>
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+    <Footer />
+</div>
+
+<script type="application/ld+json">
+{
+"context": "https://schema.org",
+"type": "LocalBusiness",
+"name": "e-Tech Energie+",
+"image": "https://etechenergie.onrender.com/images/logo.png",
+"url": "https://etechenergie.onrender.com",
+"telephone": "+221 770467004",
+"address": {
+"type": "PostalAddress",
+"addressLocality": "Thiès",
+"addressCountry": "SN"
+},
+"description": "Entreprise spécialisée en énergie solaire, installation 
+électrique et automatismes industriels et vente de materiel éléctronique au Sénégal"
+}
+</script>
+
+<style>
+    .page {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    main {
+        flex: 1;
+    }
+
+    .content {
+        padding: 0;
+    }
+
+    .px-4 {
+        padding-left: 0;
+        padding-right: 0;
+    }
+</style>

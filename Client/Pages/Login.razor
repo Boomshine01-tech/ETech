@@ -1,0 +1,410 @@
+@page "/login"
+@inject NavigationManager Navigation
+@inject AuthenticationService AuthService
+@inject NotificationService NotificationService
+@using ETechEnergie.Shared.Models
+@using ETechEnergie.Client.Services
+
+<PageTitle>Connexion | e-Tech Energie+</PageTitle>
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="logo-section">
+            <i class="fas fa-bolt fa-3x"></i>
+            <h1>e-Tech Energie+</h1>
+            <p>Espace Administrateur</p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle"></i> @errorMessage
+            </div>
+        }
+
+        <EditForm Model="@loginRequest" OnValidSubmit="HandleLogin">
+            <DataAnnotationsValidator />
+
+            <div class="form-group">
+                <label for="username">
+                    <i class="fas fa-user"></i> Nom d'utilisateur
+                </label>
+                <InputText id="username" 
+                           class="form-control" 
+                           @bind-Value="loginRequest.Username" 
+                           placeholder="Entrez votre nom d'utilisateur" />
+                <ValidationMessage For="@(() => loginRequest.Username)" />
+            </div>
+
+            <div class="form-group">
+                <label for="password">
+                    <i class="fas fa-lock"></i> Mot de passe
+                </label>
+                <InputText id="password" 
+                           type="password" 
+                           class="form-control" 
+                           @bind-Value="loginRequest.Password" 
+                           placeholder="Entrez votre mot de passe" />
+                <ValidationMessage For="@(() => loginRequest.Password)" />
+            </div>
+
+            <div class="form-group remember-me-group">
+                <label class="remember-me-label">
+                    <InputCheckbox @bind-Value="loginRequest.RememberMe" class="remember-me-checkbox" />
+                    <span class="remember-me-text">
+                        <i class="fas fa-clock"></i> Se souvenir de moi
+                    </span>
+                </label>
+                <small class="remember-me-hint">
+                    @if (loginRequest.RememberMe)
+                    {
+                        <i class="fas fa-info-circle"></i>
+                        <text>Votre session restera active pendant 30 jours</text>
+                    }
+                    else
+                    {
+                        <i class="fas fa-info-circle"></i>
+                        <text>Votre session expirera dans 24 heures</text>
+                    }
+                </small>
+            </div>
+
+            <button type="submit" class="btn-login" disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <i class="fas fa-spinner fa-spin"></i> <text>Connexion...</text>
+                }
+                else
+                {
+                    <i class="fas fa-sign-in-alt"></i> <text>Se connecter</text>
+                }
+            </button>
+        </EditForm>
+
+        <div class="footer-links">
+            <a href="/" class="back-link">
+                <i class="fas fa-arrow-left"></i> Retour à l'accueil
+            </a>
+        </div>
+    </div>
+
+    @if (showRememberMeSuccess)
+    {
+        <div class="remember-me-toast">
+            <i class="fas fa-check-circle"></i>
+            <div>
+                <strong>Session enregistrée !</strong>
+                <p>Vous resterez connecté pendant 30 jours</p>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private LoginRequest loginRequest = new();
+    private string? errorMessage;
+    private bool isLoading = false;
+    private bool showRememberMeSuccess = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var isAuthenticated = await AuthService.IsAuthenticatedAsync();
+        
+        if (isAuthenticated)
+        {
+            Console.WriteLine("⚠️ Utilisateur déjà connecté, redirection vers admin");
+            Navigation.NavigateTo("/admin/products");
+        }
+    }
+
+    private async Task HandleLogin()
+    {
+        errorMessage = null;
+        isLoading = true;
+
+        try
+        {
+            Console.WriteLine($"📝 Soumission login | Username: {loginRequest.Username} | RememberMe: {loginRequest.RememberMe}");
+            
+            var response = await AuthService.LoginAsync(loginRequest);
+
+            if (response.Success)
+            {
+                Console.WriteLine("✅ Login réussi");
+                
+                if (loginRequest.RememberMe)
+                {
+                    NotificationService.ShowSuccess($"Bienvenue {response.Username} ! Session valide 30 jours.");
+                    showRememberMeSuccess = true;
+                    
+                    _ = Task.Run(async () =>
+                    {
+                        await Task.Delay(3000);
+                        showRememberMeSuccess = false;
+                        StateHasChanged();
+                    });
+                }
+                else
+                {
+                    NotificationService.ShowSuccess($"Bienvenue {response.Username} !");
+                }
+
+                await Task.Delay(500);
+                Navigation.NavigateTo("/admin/products", forceLoad: true);
+            }
+            else
+            {
+                errorMessage = response.Message;
+                Console.WriteLine($"❌ Login échoué: {response.Message}");
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Une erreur est survenue lors de la connexion";
+            Console.WriteLine($"❌ Exception: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}
+
+<style>
+    .login-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        padding: 20px;
+        position: relative;
+    }
+
+    .login-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        padding: 40px;
+        max-width: 450px;
+        width: 100%;
+        animation: slideIn 0.4s ease-out;
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .logo-section {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .logo-section i {
+        color: #fbbf24;
+        margin-bottom: 20px;
+    }
+
+    .logo-section h1 {
+        color: #1e3a8a;
+        font-size: 2rem;
+        margin-bottom: 5px;
+    }
+
+    .logo-section p {
+        color: #6b7280;
+        font-size: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #1e3a8a;
+        font-weight: 600;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .remember-me-group {
+        background: #f9fafb;
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid #e5e7eb;
+    }
+
+    .remember-me-label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        margin-bottom: 10px;
+    }
+
+    .remember-me-checkbox {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+        cursor: pointer;
+        accent-color: #3b82f6;
+    }
+
+    .remember-me-text {
+        color: #1e3a8a;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .remember-me-hint {
+        display: block;
+        color: #6b7280;
+        font-size: 0.85rem;
+        margin-left: 30px;
+    }
+
+    .remember-me-hint i {
+        margin-right: 5px;
+    }
+
+    .btn-login {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 10px;
+    }
+
+    .btn-login:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-login:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .footer-links {
+        text-align: center;
+        margin-top: 30px;
+    }
+
+    .back-link {
+        color: #6b7280;
+        text-decoration: none;
+        font-size: 0.95rem;
+        transition: color 0.3s;
+    }
+
+    .back-link:hover {
+        color: #3b82f6;
+    }
+
+    .alert {
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        animation: shake 0.5s;
+    }
+
+    .alert-danger {
+        background: #fee2e2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+    }
+
+    @@keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+    }
+
+    .validation-message {
+        color: #dc2626;
+        font-size: 0.85rem;
+        margin-top: 5px;
+    }
+
+    .remember-me-toast {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: #10b981;
+        color: white;
+        padding: 20px 25px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        animation: slideInRight 0.4s ease-out;
+        z-index: 1000;
+    }
+
+    .remember-me-toast i {
+        font-size: 2rem;
+    }
+
+    .remember-me-toast strong {
+        display: block;
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+    }
+
+    .remember-me-toast p {
+        margin: 0;
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    @@keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(100px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .login-card {
+            padding: 30px 20px;
+        }
+
+        .remember-me-toast {
+            bottom: 20px;
+            right: 20px;
+            left: 20px;
+        }
+    }
+</style>
