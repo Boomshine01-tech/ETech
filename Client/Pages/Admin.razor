@@ -302,13 +302,25 @@
     {
         try
         {
-            var pagedResult = await Http.GetFromJsonAsync<PagedResult<Product>>("api/products?pageSize=1000");
-            if (pagedResult != null)
-            {
-                products = pagedResult.Items.ToArray();
-            }
+            var allProducts = new List<Product>();
+            int page = 1;
+            PagedResult<Product>? result;
 
+            do
+            {
+                result = await Http.GetFromJsonAsync<PagedResult<Product>>(
+                    $"api/products?pageSize=100&page={page}");
+            
+                if (result?.Items != null)
+                    allProducts.AddRange(result.Items);
+            
+                page++;
+            } 
+            while (result != null && result.HasNextPage);
+
+            products = allProducts.ToArray();
             categories = await Http.GetFromJsonAsync<Category[]>("api/categories");
+    
         }
         catch (Exception ex)
         {
