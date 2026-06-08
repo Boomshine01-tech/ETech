@@ -13,9 +13,9 @@ public static class CompanyInfo
     public const string PostalCode = "21000";
     
     // Contacts téléphoniques
-    public const string Phone1 = "+221 77 046 70 04";
-    public const string Phone2 = "+221 78 805 16 17";
-    public const string WhatsApp = "+221 77 046 70 04";
+    public const string Phone1 = "+221 78 805 16 17";
+    public const string Phone2 = "+221 76 348 99 48";
+    public const string WhatsApp = "+221 78 805 16 17";
     
     // Emails
     public const string EmailContact = "etechenergieplus@gmail.com";
