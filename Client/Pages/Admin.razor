@@ -310,17 +310,17 @@
             {
                 result = await Http.GetFromJsonAsync<PagedResult<Product>>(
                     $"api/products?pageSize=100&page={page}");
-            
+
                 if (result?.Items != null)
                     allProducts.AddRange(result.Items);
-            
+
                 page++;
-            } 
+            }
             while (result != null && result.HasNextPage);
 
             products = allProducts.ToArray();
+
             categories = await Http.GetFromJsonAsync<Category[]>("api/categories");
-    
         }
         catch (Exception ex)
         {
@@ -339,14 +339,15 @@
     {
         editingProduct = new Product
         {
-            Id = product.Id,
-            Name = product.Name,
+            Id          = product.Id,
+            Name        = product.Name,
             Description = product.Description,
-            Price = product.Price,
-            CategoryId = product.CategoryId,
-            Stock = product.Stock,
-            ImageUrl = product.ImageUrl,
-            IsAvailable = product.IsAvailable
+            Price       = product.Price,
+            CategoryId  = product.CategoryId,
+            Stock       = product.Stock,
+            ImageUrl    = product.ImageUrl,
+            IsAvailable = product.IsAvailable,
+            CreatedAt   = product.CreatedAt,
         };
         showForm = true;
     }
