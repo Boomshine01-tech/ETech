@@ -16,7 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
 </HeadContent>
 
-<!-- ===== HEADER EN TÊTE (Bleu avec compteurs) ===== -->
+<!-- ===== HEADER  ===== -->
 <div class="page-header">
     <div class="header-grid-bg"></div>
     <div class="container relative-z">
@@ -41,14 +41,14 @@
             </div>
             <div class="stat-divider"></div>
             <div class="stat-item">
-                <span class="stat-number">200+</span>
+                <span class="stat-number">50+</span>
                 <span class="stat-label">Clients Satisfaits</span>
             </div>
         </div>
     </div>
 </div>
 
-<!-- ===== NAV PILLS DE FILTRE ===== -->
+<!-- ===== NAV PILLS  ===== -->
 <div class="pill-nav-wrap">
     <nav class="pill-nav">
         <button class="pill @(activeCategory == "all" ? "active" : "")" @onclick='() => SetCategory("all")'>
@@ -63,10 +63,16 @@
         <button class="pill @(activeCategory == "froid" ? "active" : "")" @onclick='() => SetCategory("froid")'>
             <i class="fas fa-wind"></i> Froid &amp; Clim
         </button>
+        <button class="pill @(activeCategory == "btp" ? "active" : "")" @onclick='() => SetCategory("btp")'>
+            <i class="fas fa-HardHat"></i> Génie Civil
+        </button>
+        <button class="pill @(activeCategory == "it" ? "active" : "")" @onclick='() => SetCategory("it")'>
+            <i class="fas fa-Network"></i> Télécoms &amp; IT
+        </button>
     </nav>
 </div>
 
-<!-- ===== CORPS PRINCIPAL DE SERVICES ===== -->
+<!-- ===== Body ===== -->
 <section class="services-section" id="services-grid">
     <div class="container">
         @if (services == null)
@@ -132,7 +138,7 @@
                                 </div>
                             }
 
-                            <!-- CAROUSEL VISUEL (Désormais visible juste avant la demande de devis) -->
+                            <!-- CAROUSEL VISUEL  -->
                             @if (s.ImagesList != null && s.ImagesList.Any())
                             {
                                 var currentImgIndex = GetCurrentIndex(s.Id, s.ImagesList.Count);
@@ -347,13 +353,15 @@
                 CategoryDisplayName = "Génie Solaire & Autonomie",
                 NameTitlePart = "Dimensionnement",
                 NameSubtitlePart = "Énergie Solaire",
-                Description = "Systèmes de production solaire autonomes, hybrides connectés avec batteries, et stations de pompage agricole performantes au Sénégal.",
+                Description = "e-Tech Energie+ est votre partenaire de référence au Sénégal pour la transition énergétique. Nous concevons, simulons et installons des systèmes photovoltaïques performants adaptés aux coupures réseau (délestages) et aux zones rurales non électrifiées. Nos installations intègrent des composants haut de gamme de marques mondiales (Victron, Fronius, Growatt) pour assurer une fiabilité sans failles.",
                 IconClass = "fa-sun",
                 StatValue = "450 kWc+",
                 StatLabel = "Puissance photovoltaïque installée à Thiès et régions",
                 DetailsList = new List<ServiceDetailVM> {
-                    new("Simulation Multi-Critères", "Analyse d'impact, courbe de charges et dimensionnement pour une fiabilité sans failles."),
-                    new("Stations de Pompage Solaire", "Maraîchage et bétail approvisionnés en direct au fil du soleil sans dépendance de batteries.")
+                    new("Simulation Multi-Critères", "Analyse experte de vos factures Senelec ou audit énergétique sur site par enregistrement de courbe de charge pour un dimensionnement optimal sans surcoût."),
+                    new("Systèmes Hybrides & Stockage", "Continuité de service totale. Basculement automatique et instantané (sans coupure) entre le solaire, la Senelec, les batteries et un groupe électrogène."),
+                    new("Stations de Pompage Solaire", "Solutions économiques pour les exploitations agricoles (maraîchage). Pompage direct au fil du soleil sans batteries, réduisant l'entretien au minimum."),
+                    new("Supervision IoT Connectée", "Consultez la production de vos panneaux et l'état de charge de vos batteries en temps réel sur smartphone et ordinateur via des passerelles Wi-Fi/4G.")
                 },
                 ImagesList = new List<ServiceImageVM> {
                     new("https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=800", "Centrale solaire sur toiture métallique"),
@@ -366,17 +374,76 @@
                 CategoryDisplayName = "Électricité Domestique & Industrielle",
                 NameTitlePart = "Installation Électrique",
                 NameSubtitlePart = "Moderne",
-                Description = "Travaux d'électricité générale, installation domestique haute fidélité, câblage industriel, automatisme et conformité de sécurité.",
+                Description = "Du raccordement d'habitations individuelles aux installations électriques d'usines ou de bâtiments de grande hauteur, nos électriciens certifiés assurent des travaux d'une qualité technique irréprochable. Nous mettons en œuvre les normes internationales et sénégalaises de sécurité (NFC 15-100) pour protéger vos équipements et garantir votre confort.",
                 IconClass = "fa-bolt",
-                StatValue = "180+ Chantiers",
+                StatValue = "50+ Chantiers",
                 StatLabel = "Bâtiments, bureaux et industries équipés avec succès",
                 DetailsList = new List<ServiceDetailVM> {
-                    new("Éclairage LED & Faux Plafonds", "Création d'ambiances esthétiques et hautement économes en consommation."),
-                    new("Mise à la Terre & Sécurité", "Création de puits de terre optimisés, protection foudre et armoire de couplage.")
+                    new("Éclairage LED & Faux Plafonds", "Création d'ambiances esthétiques et économes. Intégration soignée de rubans LED, spots directionnels et variateurs pour salons, restaurants, bureaux."),
+                    new("Tableaux Électriques & Armoires", "Câblage structuré, étiquetage clair, pose de disjoncteurs différentiels haute sensibilité, de parasurtenseurs (foudre) et d'inverseurs de source."),
+                    new("Automatismes & Armoire d'usine", "Câblage de circuits de commande, de démarreurs progressifs et de variateurs de vitesse pour les moteurs électriques dans l'industrie."),
+                    new("Mise à la Terre & Sécurité", "Mesure de résistivité, création de puits de terre de qualité, liaisons équipotentielles, essentiels pour prémunir les personnes contre l'électrisation.")
                 },
                 ImagesList = new List<ServiceImageVM> {
                     new("https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=800", "Tableaux de distribution et protections thermiques"),
                     new("https://images.unsplash.com/photo-1558346490-a72e53ae2d4f?q=80&w=800", "Spots LED encastrés modernes")
+                }
+            },
+            new ServiceViewModel {
+                Id = "froid",
+                Category = "froid",
+                CategoryDisplayName = "Froid, Clim & Ventilation",
+                NameTitlePart = "Froid, Clim & Ventilation",
+                NameSubtitlePart = "Moderne",
+                Description = "Le climat au Sénégal exige un traitement thermique précis et continu. e-Tech Energie+ calcule et sélectionne pour vous la technologie de climatisation la plus sobre en électricité (climatiseurs Inverter A+++). Qu'il s'agisse de fraîcheur résidentielle, de traitement d'air de salle de serveurs informatiques ou de lignes de conservation frigorifique agricole, nous répondons présent.",
+                IconClass = "fa-wind",
+                StatValue = "A+++ Inverter",
+                StatLabel = "Optimisation de consommation jusqu'à -40% d'électricité",
+                DetailsList = new List<ServiceDetailVM> {
+                    new("Climatisation Inverter Éco-Énergie", "Vente et pose de climatiseurs split à régulation de fréquence pour un confort acoustique parfait et un démarrage progressif sans appels de courant."),
+                    new("Entretien, Nettoyage & Recharge", "Nettoyage haute pression antibactérien des turbines et filtres, recherche de fuites et recharge de gaz R32 / R410 de manière éco-responsable.")
+                },
+                ImagesList = new List<ServiceImageVM> {
+                    new("https://images.unsplash.com/photo-1621905252507-b354bc25edac?q=80&w=800", "Technicien effectuant la charge en fluide frigorigène"),
+                    new("https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=800", "Climatisation murale Inverter intégrée en faux plafond")
+                }
+            },
+            new ServiceViewModel {
+                Id = "btp",
+                Category = "btp",
+                CategoryDisplayName = "Génie civil",
+                NameTitlePart = "Génie Civil",
+                NameSubtitlePart = "Gros Œuvre BTP",
+                Description = "Grâce à notre polyvalence, nous réalisons des structures de génie civil solides et durables. De la conceptualisation architecturale aux travaux de coulage de béton armé, e-Tech Energie+ déploie des chefs de chantier et des ingénieurs qualifiés pour garantir le respect rigoureux des plans de ferraillage, de dosage du béton et des délais de livraison.",
+                IconClass = "fa-HardHat",
+                StatValue = "100%",
+                StatLabel = "Livraison dans les critères de qualité et d'ingénierie",
+                DetailsList = new List<ServiceDetailVM> {
+                    new("Béton Armé & Structures Métalliques", "Bâtiment résidentiel, hangars d'entreposage logistique, fondations de poteaux d'éclairage ou de pylônes solaires."),
+                    new("Second Œuvre & Finition Soignée", "Faux-plafonnages décoratifs, plâtrerie moderne, carrelage grand format et peintures intérieures/extérieures résistantes au soleil et à l'humidité.")
+                },
+                ImagesList = new List<ServiceImageVM> {
+                    new("https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=800", "Bétonnage et gros œuvre structurel pour immeuble résidentiel"),
+                    new("https://images.unsplash.com/photo-1590069261209-f8e9b8642343?q=80&w=800", "Suivi technique et revues de plans par notre équipe à Thiès")
+                }
+            },
+            new ServiceViewModel {
+                Id = "it",
+                Category = "it",
+                CategoryDisplayName = "Télécoms, IT & Sécurité",
+                NameTitlePart = "Télécoms, Informatique",
+                NameSubtitlePart = "Sécurité",
+                Description = "Une infrastructure moderne de services nécessite d'excellentes liaisons réseaux et une sécurité active intelligente. Nous réalisons les baies de brassage, la distribution Wi-Fi professionnelle longue portée pour entrepôts et universités, ainsi que la vidéosurveillance moderne accessible depuis votre mobile à distance.",
+                IconClass = "fa-Network",
+                StatValue = "Full HD",
+                StatLabel = "Réseaux sécurisés et caméras connectées par Internet",
+                DetailsList = new List<ServiceDetailVM> {
+                    new("Réseau Local d'Entreprise (LAN)", "Création de rosettes RJ45 catégorie 6A, raccordement de commutateurs (switches PoE) et déploiement de routeurs professionnels."),
+                    new("Vidéosurveillance & Alarme", "Pose de caméras de sécurité de marque Hikvision ou Dahua dotées de l'intelligence artificielle pour la détection humaine et l'alerte rapide.")
+                },
+                ImagesList = new List<ServiceImageVM> {
+                    new( "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=800",  "Baie informatique câblée dans les règles de l'art par nos techniciens"),
+                    new("https://images.unsplash.com/photo-1557597774-9d273605dfa9?q=80&w=800",  "Caméra IP extérieure dômes motorisés PTZ de surveillance active")
                 }
             }
         };
