@@ -1,59 +1,189 @@
 @page "/services"
+@inject IJSRuntime JS
 @inject HttpClient Http
 @using ETechEnergie.Shared.Models
+@implements IDisposable
 
 <PageTitle>Services d'électricité et énergie solaire au Sénégal | e-Tech Energie+</PageTitle>
+
 <HeadContent>
-    <meta name="description" content="Découvrez nos services en installation électrique, énergie solaire, maintenance industrielle et automatismes au Sénégal." />
-    <meta name="keywords" content="Installation Électrique Domestique et Industrielle Thiès, Dimensionnement et Installation Solaire Thies , Services en Informatique et Télécommunications Sénégal, BTP Senegal" />
+    <meta name="description" content="Découvrez nos services haut de gamme en installation électrique, énergie solaire, froid et automatique au Sénégal." />
+    <meta name="keywords" content="Installation Électrique Domestique et Industrielle Thiès, Dimensionnement et Installation Solaire Thies, Climatisation Sénégal, BTP" />
     <meta property="og:title" content="Services | e-Tech Energie+" />
-    <meta property="og:description" content="Nos divers services couvrent tout, de l'installation électrique à la conception de systèmes solaires, en passant par les travaux de construction." />
+    <meta property="og:description" content="Nos services techniques réunissent rigueur industrielle et excellence énergétique." />
     <meta property="og:url" content="https://etechenergie.onrender.com/services" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
 </HeadContent>
 
+<!-- ===== HEADER EN TÊTE (Bleu avec compteurs) ===== -->
 <div class="page-header">
-    <div class="container">
-        <h1>Nos Services</h1>
-        <p>Des solutions complètes pour tous vos besoins techniques et énergétiques</p>
+    <div class="header-grid-bg"></div>
+    <div class="container relative-z">
+        <div class="header-badge">
+            <i class="fas fa-award"></i> e-Tech Expertise &amp; Services
+        </div>
+        <h1>Nos Solutions <span class="accent">Énergétiques</span></h1>
+        <p class="header-sub">
+            Des solutions durables d'ingénierie, d'installation électrique et d'énergie 
+            solaire de haute technologie adaptées aux réalités du Sénégal.
+        </p>
+
+        <div class="header-stats">
+            <div class="stat-item">
+                <span class="stat-number">450 kWc+</span>
+                <span class="stat-label">Solaire Installé</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-number">100% Sûr</span>
+                <span class="stat-label">Norme NFC 15-100</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-number">200+</span>
+                <span class="stat-label">Clients Satisfaits</span>
+            </div>
+        </div>
     </div>
 </div>
 
-<section class="services-section">
+<!-- ===== NAV PILLS DE FILTRE ===== -->
+<div class="pill-nav-wrap">
+    <nav class="pill-nav">
+        <button class="pill @(activeCategory == "all" ? "active" : "")" @onclick='() => SetCategory("all")'>
+            <i class="fas fa-bolt"></i> Tous
+        </button>
+        <button class="pill @(activeCategory == "solaire" ? "active" : "")" @onclick='() => SetCategory("solaire")'>
+            <i class="fas fa-sun"></i> Solaire
+        </button>
+        <button class="pill @(activeCategory == "electricite" ? "active" : "")" @onclick='() => SetCategory("electricite")'>
+            <i class="fas fa-plug"></i> Électricité
+        </button>
+        <button class="pill @(activeCategory == "froid" ? "active" : "")" @onclick='() => SetCategory("froid")'>
+            <i class="fas fa-wind"></i> Froid &amp; Clim
+        </button>
+    </nav>
+</div>
+
+<!-- ===== CORPS PRINCIPAL DE SERVICES ===== -->
+<section class="services-section" id="services-grid">
     <div class="container">
         @if (services == null)
         {
             <div class="loading">
                 <i class="fas fa-spinner fa-spin"></i>
-                <p>Chargement des services...</p>
+                <p>Chargement de nos compétences clés...</p>
             </div>
         }
-        else if (!services.Any())
+        else if (!GetFilteredServices().Any())
         {
-            <p class="no-data">Aucun service disponible pour le moment.</p>
+            <p class="no-data">Aucun service disponible pour cette catégorie.</p>
         }
         else
         {
             <div class="services-list">
-                @foreach (var service in services)
+                @foreach (var s in GetFilteredServices())
                 {
-                    <div class="service-detail-card">
+                    var isDarkTheme = s.Category == "electricite";
+                    <div class="service-detail-card @(isDarkTheme ? "dark-theme" : "")">
+                        
+                        <!-- Header de section adaptative -->
                         <div class="service-header">
-                            <div class="service-icon-large">
-                                <i class="fas @service.IconClass"></i>
+                            <div class="eyebrow-badge">
+                                <span class="ey-line"></span>
+                                <i class="fas @s.IconClass"></i>
+                                <span>@s.CategoryDisplayName</span>
                             </div>
-                            <h2>@service.Name</h2>
+                            
+                            <h2>
+                                @s.NameTitlePart <br />
+                                <em class="accent-title">&amp; @s.NameSubtitlePart</em>
+                            </h2>
                         </div>
+
+                        <!-- Body de la fiche -->
                         <div class="service-body">
-                            <p class="service-description">@service.Description</p>
-                            <div class="service-detailed">
-                                @service.DetailedDescription
+                            <p class="service-description">@s.Description</p>
+                            
+                            <!-- Spécificités techniques -->
+                            <div class="tech-specifications-grid">
+                                @if (s.DetailsList != null)
+                                {
+                                    @foreach (var detail in s.DetailsList)
+                                    {
+                                        <div class="tech-spec-item">
+                                            <h4><i class="fas fa-check-circle"></i> @detail.Title</h4>
+                                            <p>@detail.Content</p>
+                                        </div>
+                                    }
+                                }
                             </div>
+
+                            <!-- Stat de performance embarquée -->
+                            @if (!string.IsNullOrEmpty(s.StatValue))
+                            {
+                                <div class="perf-metric-badge">
+                                    <div class="pm-text">
+                                        <span class="pm-label">Performance Projet</span>
+                                        <span class="pm-desc">@s.StatLabel</span>
+                                    </div>
+                                    <span class="pm-value">@s.StatValue</span>
+                                </div>
+                            }
+
+                            <!-- CAROUSEL VISUEL (Désormais visible juste avant la demande de devis) -->
+                            @if (s.ImagesList != null && s.ImagesList.Any())
+                            {
+                                var currentImgIndex = GetCurrentIndex(s.Id, s.ImagesList.Count);
+                                <div class="service-carousel-wrap">
+                                    <div class="hero-image-side" @onclick='() => OpenModal(s, currentImgIndex)'>
+                                        <img src="@s.ImagesList[currentImgIndex].Url" alt="@s.ImagesList[currentImgIndex].Caption" class="hero-img" />
+                                        
+                                        <div class="hero-img-overlay">
+                                            <button type="button" class="zoom-btn"><i class="fas fa-expand-arrows-alt"></i> Agrandir</button>
+                                        </div>
+
+                                        <div class="img-counter-badge">
+                                            <span class="img-cur">@(currentImgIndex + 1)</span>
+                                            <span class="img-sep">/</span>
+                                            <span class="img-tot">@s.ImagesList.Count</span>
+                                        </div>
+
+                                        <!-- Progress-bar barrettes -->
+                                        @if (s.ImagesList.Count > 1)
+                                        {
+                                            <div class="progress-bar-wrap">
+                                                @for (int idx = 0; idx < s.ImagesList.Count; idx++)
+                                                {
+                                                    var capturedIdx = idx;
+                                                    <div class="pb-seg @(capturedIdx == currentImgIndex ? "active" : "")"
+                                                         @onclick:stopPropagation="true"
+                                                         @onclick='() => SetImageIndex(s.Id, capturedIdx)'></div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <!-- Navigation manuelle par flèches -->
+                                    @if (s.ImagesList.Count > 1)
+                                    {
+                                        <div class="hero-arrows">
+                                            <button type="button" class="arrow-btn" @onclick:stopPropagation="true" @onclick='() => StepImage(s.Id, s.ImagesList.Count, -1)'><i class="fas fa-arrow-left"></i></button>
+                                            <button type="button" class="arrow-btn" @onclick:stopPropagation="true" @onclick='() => StepImage(s.Id, s.ImagesList.Count, 1)'><i class="fas fa-arrow-right"></i></button>
+                                        </div>
+                                    }
+                                </div>
+                            }
+
+                            <!-- Bouton d'action Devis -->
                             <div class="service-actions">
-                                <a href="/contact" class="btn btn-primary">
-                                    <i class="fas fa-envelope"></i> Demander un devis
+                                <a href="/contact?service=@s.Id" class="btn btn-primary">
+                                    <i class="fas fa-file-alt"></i> Demander un devis gratuit
                                 </a>
                             </div>
                         </div>
+
                     </div>
                 }
             </div>
@@ -61,206 +191,509 @@
     </div>
 </section>
 
+<!-- ===== FAQ & PROMESSE ===== -->
+<div class="container qa-layout">
+    <div class="qa-col">
+        <h3><i class="fas fa-question-circle"></i> Foire Aux <span class="accent">Questions</span></h3>
+        <div class="accordion-group">
+            @for (int i = 0; i < Faqs.Count; i++)
+            {
+                var idx = i;
+                var isOpen = openFaqIndex == idx;
+                <div class="accord-box">
+                    <button class="accord-head" @onclick="() => ToggleFaq(idx)">
+                        <span>@Faqs[idx].Question</span>
+                        <i class="fas fa-chevron-down @(isOpen ? "rotate-icon" : "")"></i>
+                    </button>
+                    @if (isOpen)
+                    {
+                        <div class="accord-body">
+                            @Faqs[idx].Answer
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="guarantee-card">
+        <span class="badge-accent"><i class="fas fa-sparkles"></i> e-Tech Engagement</span>
+        <h3>La Promesse <br />e-Tech Energie+</h3>
+        <p>Basés à Thiès, nous unissons rigueur industrielle, éthique et conformité internationale pour tous nos clients du Sénégal.</p>
+        <hr />
+        <ul class="promesses-list">
+            <li>
+                <i class="fas fa-shield-alt"></i>
+                <div>
+                    <strong>Garantie de Qualité</strong>
+                    <span>Respect strict de la norme NF C 15-100 pour l'électricité générale.</span>
+                </div>
+            </li>
+            <li>
+                <i class="fas fa-solar-panel"></i>
+                <div>
+                    <strong>Matériel Certifié</strong>
+                    <span>Panneaux monocristallins robustes garantis 25 ans en rendement.</span>
+                </div>
+            </li>
+            <li>
+                <i class="fas fa-comments-dollar"></i>
+                <div>
+                    <strong>Suivi &amp; SAV localisé</strong>
+                    <span>Assistance réactive basée à Thiès avec supervision IoT.</span>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- ===== CTA COMPLEMENTAIRE ===== -->
 <section class="cta-services">
-    <div class="container">
-        <h2>Besoin d'un Service Personnalisé ?</h2>
-        <p>Notre équipe est à votre disposition pour étudier vos besoins spécifiques</p>
-        <a href="/contact" class="btn btn-light btn-lg">Contactez-nous</a>
+    <div class="cta-inner">
+        <div class="cta-deco-text">PROJET</div>
+        <div class="cta-content">
+            <h2>Vous avez un projet ?</h2>
+            <p>Notre équipe d'ingénieurs à Thiès est prête à étudier vos spécifications.</p>
+            <a href="/contact" class="btn btn-light btn-lg">
+                Demander une étude gratuite <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
     </div>
 </section>
 
+<!-- ===== MODAL DE VISUALISATION ZOOME ===== -->
+@if (showModal && selectedService != null)
+{
+    <div class="modal-overlay" @onclick="CloseModal">
+        <div class="modal-shell" @onclick:stopPropagation="true">
+            <button class="modal-x" @onclick="CloseModal"><i class="fas fa-times"></i></button>
+
+            <div class="modal-body">
+                <div class="modal-visual">
+                    <img src="@selectedService.ImagesList[modalImageIndex].Url" alt="@selectedService.ImagesList[modalImageIndex].Caption" />
+                </div>
+                <div class="modal-panel">
+                    <div class="mp-tag">
+                        <i class="fas @selectedService.IconClass"></i> @selectedService.CategoryDisplayName
+                    </div>
+                    <h2 class="mp-title">@selectedService.NameTitlePart @selectedService.NameSubtitlePart</h2>
+                    <p class="mp-desc">@selectedService.ImagesList[modalImageIndex].Caption</p>
+                    
+                    <div class="mp-counter">@(modalImageIndex + 1) <em>/</em> @selectedService.ImagesList.Count</div>
+                    <a href="/contact?service=@selectedService.Id" class="btn btn-primary" style="margin-top: auto; text-align: center;">Chiffrer ce type d'ouvrage</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
-    private Service[]? services;
+    private List<ServiceViewModel>? services;
+    private string activeCategory = "all";
+    private int openFaqIndex = -1;
+
+    private Dictionary<string, int> carouselIndices = new();
+
+    private bool showModal = false;
+    private ServiceViewModel? selectedService;
+    private int modalImageIndex = 0;
+
+    private System.Timers.Timer? autoTimer;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            services = await Http.GetFromJsonAsync<Service[]>("api/services");
+            var apiServices = await Http.GetFromJsonAsync<ServiceDto[]>("api/services");
+            if (apiServices != null)
+            {
+                services = apiServices.Select(s => new ServiceViewModel(s)).ToList();
+            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erreur: {ex.Message}");
+            Console.WriteLine($"Erreur API: {ex.Message}. Utilisation de l'architecture locale e-Tech.");
+            InitializeMockServices();
+        }
+
+        // Timer de rotation des carrousels
+        autoTimer = new System.Timers.Timer(5000);
+        autoTimer.Elapsed += (_, _) => InvokeAsync(() =>
+        {
+            if (services != null)
+            {
+                foreach (var s in services)
+                {
+                    if (s.ImagesList != null && s.ImagesList.Count > 1)
+                    {
+                        var cur = GetCurrentIndex(s.Id, s.ImagesList.Count);
+                        carouselIndices[s.Id] = (cur + 1) % s.ImagesList.Count;
+                    }
+                }
+                StateHasChanged();
+            }
+        });
+        autoTimer.AutoReset = true;
+        autoTimer.Enabled = true;
+    }
+
+    private void InitializeMockServices()
+    {
+        services = new List<ServiceViewModel>
+        {
+            new ServiceViewModel {
+                Id = "solaire",
+                Category = "solaire",
+                CategoryDisplayName = "Génie Solaire & Autonomie",
+                NameTitlePart = "Dimensionnement",
+                NameSubtitlePart = "Énergie Solaire",
+                Description = "Systèmes de production solaire autonomes, hybrides connectés avec batteries, et stations de pompage agricole performantes au Sénégal.",
+                IconClass = "fa-sun",
+                StatValue = "450 kWc+",
+                StatLabel = "Puissance photovoltaïque installée à Thiès et régions",
+                DetailsList = new List<ServiceDetailVM> {
+                    new("Simulation Multi-Critères", "Analyse d'impact, courbe de charges et dimensionnement pour une fiabilité sans failles."),
+                    new("Stations de Pompage Solaire", "Maraîchage et bétail approvisionnés en direct au fil du soleil sans dépendance de batteries.")
+                },
+                ImagesList = new List<ServiceImageVM> {
+                    new("https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=800", "Centrale solaire sur toiture métallique"),
+                    new("https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?q=80&w=800", "Panneaux photovoltaïques monocristallins")
+                }
+            },
+            new ServiceViewModel {
+                Id = "electrique",
+                Category = "electricite",
+                CategoryDisplayName = "Électricité Domestique & Industrielle",
+                NameTitlePart = "Installation Électrique",
+                NameSubtitlePart = "Moderne",
+                Description = "Travaux d'électricité générale, installation domestique haute fidélité, câblage industriel, automatisme et conformité de sécurité.",
+                IconClass = "fa-bolt",
+                StatValue = "180+ Chantiers",
+                StatLabel = "Bâtiments, bureaux et industries équipés avec succès",
+                DetailsList = new List<ServiceDetailVM> {
+                    new("Éclairage LED & Faux Plafonds", "Création d'ambiances esthétiques et hautement économes en consommation."),
+                    new("Mise à la Terre & Sécurité", "Création de puits de terre optimisés, protection foudre et armoire de couplage.")
+                },
+                ImagesList = new List<ServiceImageVM> {
+                    new("https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=800", "Tableaux de distribution et protections thermiques"),
+                    new("https://images.unsplash.com/photo-1558346490-a72e53ae2d4f?q=80&w=800", "Spots LED encastrés modernes")
+                }
+            }
+        };
+    }
+
+    private List<ServiceViewModel> GetFilteredServices()
+    {
+        if (services == null) return new();
+        if (activeCategory == "all") return services;
+        return services.Where(s => s.Category == activeCategory).ToList();
+    }
+
+    private void SetCategory(string cat)
+    {
+        activeCategory = cat;
+        StateHasChanged();
+    }
+
+    private int GetCurrentIndex(string serviceId, int totalCount)
+    {
+        if (!carouselIndices.ContainsKey(serviceId))
+        {
+            carouselIndices[serviceId] = 0;
+        }
+        return carouselIndices[serviceId];
+    }
+
+    private void SetImageIndex(string serviceId, int index)
+    {
+        carouselIndices[serviceId] = index;
+        StateHasChanged();
+    }
+
+    private void StepImage(string serviceId, int total, int step)
+    {
+        var cur = GetCurrentIndex(serviceId, total);
+        var next = (cur + step + total) % total;
+        carouselIndices[serviceId] = next;
+        StateHasChanged();
+    }
+
+    private void ToggleFaq(int idx)
+    {
+        openFaqIndex = openFaqIndex == idx ? -1 : idx;
+    }
+
+    private void OpenModal(ServiceViewModel svc, int imgIdx)
+    {
+        selectedService = svc;
+        modalImageIndex = imgIdx;
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+        selectedService = null;
+    }
+
+    public void Dispose()
+    {
+        autoTimer?.Stop();
+        autoTimer?.Dispose();
+    }
+
+    public List<FAQItemVM> Faqs { get; } = new()
+    {
+        new("Comment se déroule le dimensionnement d'un projet solaire ?", "Notre équipe réalise d'abord un audit complet de vos appareils ou pose un enregistreur de charge sur votre compteur Senelec pour concevoir la capacité photovoltaïque nécessaire."),
+        new("Intervenez-vous partout au Sénégal ?", "Bien que nos bureaux soient situés à Thiès, nos équipes se déplacent partout au Sénégal (Dakar, Saint-Louis, Casamance, Touba, etc.)."),
+        new("Vos installations électriques sont-elles garanties ?", "Oui, absolument. Toutes nos installations sont assorties d'une garantie avec un SAV réactif.")
+    };
+
+    public class ServiceViewModel
+    {
+        public string Id { get; set; } = "";
+        public string Category { get; set; } = "";
+        public string CategoryDisplayName { get; set; } = "";
+        public string NameTitlePart { get; set; } = "";
+        public string NameSubtitlePart { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string IconClass { get; set; } = "";
+        public string StatValue { get; set; } = "";
+        public string StatLabel { get; set; } = "";
+        public List<ServiceDetailVM>? DetailsList { get; set; }
+        public List<ServiceImageVM>? ImagesList { get; set; }
+
+        public ServiceViewModel() { }
+        public ServiceViewModel(ServiceDto dto)
+        {
+            Id = dto.Id;
+            Category = dto.Category;
+            CategoryDisplayName = dto.CategoryDisplayName;
+            NameTitlePart = dto.NameTitlePart;
+            NameSubtitlePart = dto.NameSubtitlePart;
+            Description = dto.Description;
+            IconClass = dto.IconClass;
+            StatValue = dto.StatValue;
+            StatLabel = dto.StatLabel;
+            DetailsList = dto.DetailsList?.Select(d => new ServiceDetailVM(d.Title, d.Content)).ToList();
+            ImagesList = dto.ImagesList?.Select(i => new ServiceImageVM(i.Url, i.Caption)).ToList();
         }
     }
+
+    public record ServiceDetailVM(string Title, string Content);
+    public record ServiceImageVM(string Url, string Caption);
+    public record FAQItemVM(string Question, string Answer);
+
+    public class ServiceDto
+    {
+        public string Id { get; set; } = "";
+        public string Category { get; set; } = "";
+        public string CategoryDisplayName { get; set; } = "";
+        public string NameTitlePart { get; set; } = "";
+        public string NameSubtitlePart { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string IconClass { get; set; } = "";
+        public string StatValue { get; set; } = "";
+        public string StatLabel { get; set; } = "";
+        public List<ServiceDetailDto>? DetailsList { get; set; }
+        public List<ServiceImageDto>? ImagesList { get; set; }
+    }
+    public class ServiceDetailDto { public string Title { get; set; } = ""; public string Content { get; set; } = ""; }
+    public class ServiceImageDto { public string Url { get; set; } = ""; public string Caption { get; set; } = ""; }
 }
 
 <style>
-    .page-header {
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-        color: white;
-        padding: 60px 20px;
-        text-align: center;
-    }
+:root {
+    --ink:      #0f1923;
+    --ink2:     #1e2d3d;
+    --soft:     #4a5c6e;
+    --mist:     #f2f5f8;
+    --gold:     #f5a623; 
+    --gold-lt:  #aeff9e;
+    --blue:     #1e3a8a;
+    --blue-mid: #3b82f6;
+    --green:    #39ff14;
+    --white:    #ffffff;
+    --r:        12px;
+    --r-lg:     20px;
+    --font-h:   'Bebas Neue', sans-serif;
+    --font-s:   'DM Serif Display', serif;
+    --font-b:   'DM Sans', sans-serif;
+}
 
-    .page-header h1 {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-    }
+body { font-family: var(--font-b); color: var(--ink); background: #f8fafc; }
 
-    .page-header p {
-        font-size: 1.3rem;
-        opacity: 0.9;
-    }
+/* HEADER EN TÊTE */
+.page-header {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e2d3d 50%, #3b82f6 100%);
+    color: white; padding: 100px 20px 80px;
+    text-align: center; position: relative; overflow: hidden;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.header-grid-bg {
+    position: absolute; inset: 0;
+    background-image:
+        linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
+    background-size: 50px 50px;
+}
+.relative-z { position: relative; z-index: 10; }
+.header-badge {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: rgba(57,255,20,.15); border: 1px solid rgba(57,255,20,.4);
+    color: var(--gold); padding: .4rem 1.2rem; border-radius: 50px;
+    font-size: .8rem; font-weight: 700; margin-bottom: 1.5rem;
+    text-transform: uppercase; letter-spacing: 0.1em;
+}
+.page-header h1 { font-family: var(--font-h); font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 800; margin-bottom: 1.2rem; text-transform: uppercase; }
+.accent { color: var(--gold); }
+.header-sub { font-size: 1.1rem; opacity: .8; max-width: 640px; margin: 0 auto 2.5rem; line-height: 1.7; }
+.header-stats { display: flex; justify-content: center; align-items: center; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12); border-radius: 16px; padding: 1.5rem 2rem; max-width: 600px; margin: 0 auto; backdrop-filter: blur(8px); }
+.stat-item { flex: 1; text-align: center; }
+.stat-number { display: block; font-family: var(--font-h); font-size: 2.2rem; font-weight: 800; color: var(--gold); }
+.stat-label  { font-size: .75rem; color: rgba(255,255,255,.6); margin-top: .2rem; display: block; text-transform: uppercase; }
+.stat-divider { width: 1px; height: 40px; background: rgba(255,255,255,.2); flex-shrink: 0; margin: 0 .5rem; }
 
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 20px;
-    }
+/* FILTRES COHÉRENTS */
+.pill-nav-wrap {
+    display: flex; justify-content: center;
+    padding: 1.5rem 1rem; background: var(--white);
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 1px 0 rgba(0,0,0,.05);
+}
+.pill-nav { display: flex; gap: .6rem; background: var(--mist); padding: .35rem; border-radius: 50px; }
+.pill {
+    display: inline-flex; align-items: center; gap: .5rem;
+    padding: .55rem 1.4rem; border-radius: 50px; border: none;
+    background: transparent; color: var(--soft);
+    font-family: var(--font-b); font-size: .85rem; font-weight: 600;
+    cursor: pointer; transition: all .3s; white-space: nowrap;
+}
+.pill:hover { color: var(--ink); background: rgba(255,255,255,.7); }
+.pill.active { background: var(--ink); color: var(--gold); box-shadow: 0 4px 16px rgba(15,25,35,.25); }
 
-    .services-section {
-        padding: 60px 20px;
-    }
+/* CARDS CONFIGURATION */
+.services-section { padding: 60px 0; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+.services-list { display: flex; flex-direction: column; gap: 4rem; }
 
-    .services-list {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-    }
+.service-detail-card {
+    background: var(--white); border-radius: 24px;
+    border: 1px solid rgba(0,0,0,0.06); padding: 3rem;
+    transition: box-shadow .4s, transform .3s;
+    max-width: 860px; margin: 0 auto; width: 100%;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.02);
+}
+.service-detail-card:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(15,25,35,.07); }
 
-    .service-detail-card {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        overflow: hidden;
-        transition: transform 0.3s, box-shadow 0.3s;
-    }
+.service-detail-card.dark-theme {
+    background: var(--ink); color: white;
+    box-shadow: 0 24px 64px rgba(0,0,0,.22);
+    border-color: rgba(255,255,255,0.05);
+}
+.service-detail-card.dark-theme h2 { color: white; }
+.service-header { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
+.eyebrow-badge { display: inline-flex; align-items: center; gap: .7rem; font-size: .75rem; font-weight: 700; text-transform: uppercase; color: var(--soft); }
+.ey-line { width: 28px; height: 2px; background: var(--gold); border-radius: 2px; }
 
-    .service-detail-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-    }
+h2 { font-family: var(--font-h); font-size: clamp(3rem, 5vw, 4.5rem); line-height: .95; color: var(--ink); text-transform: uppercase; }
+.accent-title { font-family: var(--font-s); font-style: italic; color: var(--gold); display: block; text-transform: lowercase; }
 
-    .service-header {
-        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-        padding: 2rem;
-        display: flex;
-        align-items: center;
-        gap: 2rem;
-    }
+.service-body { display: flex; flex-direction: column; gap: 2rem; }
+.service-description { font-size: 1.1rem; line-height: 1.7; color: var(--soft); }
 
-    .service-icon-large {
-        font-size: 4rem;
-        color: #3b82f6;
-        min-width: 80px;
-        text-align: center;
-    }
+.tech-specifications-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.tech-spec-item { padding: 1.2rem; border-radius: 12px; background: var(--mist); border: 1px solid rgba(0,0,0,0.04); }
+.dark-theme .tech-spec-item { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.05); }
+.tech-spec-item h4 { font-weight: 700; font-size: .95rem; margin-bottom: .4rem; display: flex; align-items: center; gap: .5rem; }
+.tech-spec-item h4 i { color: var(--gold); }
+.tech-spec-item p { font-size: .8rem; opacity: .8; line-height: 1.6; }
 
-    .service-header h2 {
-        font-size: 2rem;
-        color: #1e3a8a;
-        margin: 0;
-    }
+.perf-metric-badge { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem; border-radius: 12px; background: rgba(57,255,20,0.08); border: 1px solid rgba(57,255,20,0.25); }
+.pm-text { display: flex; flex-direction: column; }
+.pm-label { font-size: .65rem; font-weight: 700; text-transform: uppercase; color: var(--soft); }
+.pm-desc { font-size: .85rem; font-weight: 600; margin-top: .15rem; }
+.pm-value { font-family: var(--font-h); font-size: 2.2rem; color: var(--gold); font-weight: 800; line-height: 1; }
 
-    .service-body {
-        padding: 2rem;
-    }
+/* RENDU DU CAROUSEL JUSTE AVANT LA ZONE DE DEVIS */
+.service-carousel-wrap { margin: 1rem 0; width: 100%; position: relative; }
+.hero-image-side { position: relative; border-radius: var(--r-lg); overflow: hidden; aspect-ratio: 4/3; cursor: pointer; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+.hero-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .6s cubic-bezier(.4,0,.2,1); }
+.hero-image-side:hover .hero-img { transform: scale(1.03); }
+.hero-img-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,25,35,0.7) 0%, transparent 50%); display: flex; align-items: flex-end; padding: 1.5rem; opacity: 0; transition: opacity .3s; }
+.hero-image-side:hover .hero-img-overlay { opacity: 1; }
 
-    .service-description {
-        font-size: 1.2rem;
-        color: #3b82f6;
-        font-weight: 600;
-        margin-bottom: 1.5rem;
-    }
+.zoom-btn { background: var(--gold); color: var(--ink); border: none; padding: .6rem 1.2rem; border-radius: 50px; font-weight: 700; cursor: pointer; font-size: .8rem; text-transform: uppercase; }
 
-    .service-detailed {
-        font-size: 1.1rem;
-        line-height: 1.8;
-        color: #4b5563;
-        margin-bottom: 2rem;
-    }
+.img-counter-badge { position: absolute; top: 14px; right: 14px; background: rgba(15,25,35,0.8); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; padding: .4rem .8rem; font-family: var(--font-h); font-size: 1rem; }
+.img-cur { color: var(--gold); font-size: 1.2rem; }
+.img-sep { opacity: .5; }
 
-    .service-actions {
-        display: flex;
-        gap: 1rem;
-    }
+.progress-bar-wrap { position: absolute; bottom: 0; left: 0; right: 0; display: flex; gap: 4px; padding: 12px; z-index: 5; }
+.pb-seg { flex: 1; height: 3px; background: rgba(255,255,255,0.3); border-radius: 2px; cursor: pointer; }
+.pb-seg.active { background: var(--gold); height: 4px; }
 
-    .btn {
-        padding: 12px 30px;
-        border-radius: 5px;
-        text-decoration: none;
-        font-weight: 600;
-        transition: all 0.3s;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        border: 2px solid transparent;
-    }
+.hero-arrows { display: flex; gap: .6rem; margin-top: .8rem; justify-content: flex-end; }
+.arrow-btn { width: 42px; height: 42px; border-radius: 50%; background: var(--ink); border: none; color: var(--gold); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background .2s; }
+.arrow-btn:hover { background: var(--gold); color: var(--ink); }
 
-    .btn-primary {
-        background: #3b82f6;
-        color: white;
-    }
+.service-actions { margin-top: 1rem; }
+.btn { display: inline-flex; align-items: center; gap: .6rem; padding: 14px 28px; border-radius: 12px; font-family: var(--font-b); font-weight: 700; font-size: .9rem; text-decoration: none; cursor: pointer; transition: all .3s; border: none; }
+.btn-primary { background: var(--gold); color: var(--ink); box-shadow: 0 10px 25px rgba(57,255,20,0.25); text-transform: uppercase; letter-spacing: 0.05em; font-size: .8rem; }
+.btn-primary:hover { background: var(--white); color: var(--ink); transform: scale(1.02); }
 
-    .btn-primary:hover {
-        background: #2563eb;
-        transform: translateY(-2px);
-    }
+/* FAQ ET PROMESSE */
+.qa-layout { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 4rem; padding: 80px 20px; }
+.qa-col h3 { font-family: var(--font-h); font-size: 2.5rem; text-transform: uppercase; margin-bottom: 2rem; }
 
-    .btn-light {
-        background: white;
-        color: #1e3a8a;
-    }
+.accordion-group { display: flex; flex-direction: column; gap: 1rem; }
+.accord-box { background: white; border-radius: 16px; border: 1px solid rgba(0,0,0,0.06); overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.01); }
+.accord-head { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 1.25rem; border: none; background: transparent; font-weight: 700; text-align: left; cursor: pointer; font-family: var(--font-b); color: var(--ink2); font-size: .95rem; }
+.accord-head i { color: var(--soft); transition: transform .3s; }
+.rotate-icon { transform: rotate(180deg); color: var(--gold) !important; }
+.accord-body { padding: 0 1.25rem 1.25rem; font-size: .85rem; color: var(--soft); line-height: 1.6; border-top: 1px solid var(--mist); padding-top: 1rem; background: #fafbfc; }
 
-    .btn-light:hover {
-        background: #f3f4f6;
-    }
+.guarantee-card { background: white; padding: 2.5rem; border-radius: 24px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 15px 45px rgba(0,0,0,0.02); }
+.badge-accent { display: inline-flex; align-items: center; gap: .5rem; font-size: .7rem; font-weight: 800; text-transform: uppercase; color: var(--gold); background: rgba(57,255,20,0.1); padding: .3rem .8rem; border-radius: 4px; }
+.guarantee-card h3 { font-family: var(--font-h); font-size: 2.5rem; uppercase; line-height: .95; margin: 1.5rem 0 1rem; }
+.guarantee-card p { font-size: .85rem; color: var(--soft); line-height: 1.6; margin-bottom: 2rem; }
 
-    .btn-lg {
-        padding: 15px 40px;
-        font-size: 1.2rem;
-    }
+.promesses-list { list-style: none; display: flex; flex-direction: column; gap: 1.5rem; }
+.promesses-list li { display: flex; gap: 1rem; align-items: start; }
+.promesses-list li i { font-size: 1.3rem; color: var(--blue-mid); margin-top: .15rem; }
+.promesses-list li strong { font-size: .9rem; display: block; color: var(--ink); }
 
-    .cta-services {
-        background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
-        color: white;
-        padding: 80px 20px;
-        text-align: center;
-    }
+/* SECTION PUBLICITAIRE BAS RECTANGLE */
+.cta-services { background: var(--ink); color: white; padding: 100px 20px; text-align: center; position: relative; overflow: hidden; }
+.cta-inner { max-width: 1200px; margin: 0 auto; position: relative; }
+.cta-deco-text { position: absolute; left: -20px; top: 50%; transform: translateY(-50%); font-family: var(--font-h); font-size: 12vw; color: rgba(255,255,255,.02); letter-spacing: .1em; user-select: none; pointer-events: none; }
+.cta-content { position: relative; z-index: 5; }
+.cta-content h2 { font-family: var(--font-h); font-size: clamp(2.5rem, 6vw, 4.5rem); margin-bottom: 1rem; }
+.cta-content p { font-size: 1.1rem; opacity: .7; margin-bottom: 2.5rem; max-width: 500px; margin-inline: auto; }
+.btn-light { background: var(--gold); color: var(--ink); box-shadow: 0 10px 30px rgba(57,255,20,0.3); }
 
-    .cta-services h2 {
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-    }
+/* ZOOM MODALE */
+.modal-overlay { position: fixed; inset: 0; background: rgba(5,10,20,.95); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+.modal-shell { background: var(--white); border-radius: var(--r-lg); max-width: 900px; width: 100%; overflow: hidden; position: relative; box-shadow: 0 30px 70px rgba(0,0,0,0.5); }
+.modal-x { position: absolute; top: 14px; right: 14px; width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.5); border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.modal-body { display: flex; }
+.modal-visual { flex: 1.2; background: #050a12; display: flex; align-items: center; justify-content: center; padding: 20px; min-height: 380px; }
+.modal-visual img { max-width: 100%; max-height: 60vh; object-fit: contain; border-radius: 8px; }
+.modal-panel { width: 280px; padding: 2.5rem 1.5rem; display: flex; flex-direction: column; gap: 1rem; border-left: 1px solid var(--mist); }
+.mp-tag { display: inline-flex; align-items: center; gap: .4rem; background: var(--ink); color: var(--gold); padding: .3rem .8rem; border-radius: 4px; font-size: .7rem; font-weight: 850; text-transform: uppercase; width: fit-content; }
+.mp-title { font-family: var(--font-h); font-size: 1.8rem; color: var(--ink); line-height: 1.1; uppercase; }
+.mp-desc { font-size: .85rem; color: var(--soft); line-height: 1.5; }
 
-    .cta-services p {
-        font-size: 1.2rem;
-        margin-bottom: 2rem;
-    }
-
-    .loading {
-        text-align: center;
-        padding: 4rem;
-        font-size: 1.5rem;
-        color: #6b7280;
-    }
-
-    .loading i {
-        font-size: 3rem;
-        color: #3b82f6;
-        margin-bottom: 1rem;
-    }
-
-    .no-data {
-        text-align: center;
-        padding: 3rem;
-        font-size: 1.2rem;
-        color: #6b7280;
-    }
-
-    @@media (max-width: 768px) {
-        .service-header {
-            flex-direction: column;
-            text-align: center;
-        }
-
-        .service-header h2 {
-            font-size: 1.5rem;
-        }
-
-        .page-header h1 {
-            font-size: 2rem;
-        }
-    }
+@@media (max-width: 900px) {
+    .qa-layout { grid-template-columns: 1fr; gap: 3rem; }
+    .modal-body { flex-direction: column; }
+    .modal-panel { width: 100%; border-left: none; border-top: 1px solid var(--mist); }
+}
+@@media (max-width: 600px) {
+    .tech-specifications-grid { grid-template-columns: 1fr; }
+    .service-detail-card { padding: 1.5rem; }
+    .page-header { padding: 60px 10px; }
+    .header-stats { flex-direction: column; gap: 1rem; }
+    .stat-divider { display: none; }
+}
 </style>
