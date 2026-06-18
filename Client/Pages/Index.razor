@@ -767,5 +767,42 @@
         .slide-progress { display: none; }
         .slide-label { font-size: 0.75rem; bottom: 100px; }
         .slider-dots { bottom: 60px; }
+
+        /* Grille réalisations : passage en colonne unique */
+        .realisations-grid {
+            grid-template-columns: 1fr;
+            grid-template-rows: auto;
+        }
+        .realisation-card.big {
+            grid-column: span 1;
+            grid-row: span 1;
+        }
+        .realisation-card.big .realisation-img-wrap {
+            height: 220px;
+            min-height: 220px;
+        }
+
+        /* Réduction des paddings des sections */
+        .realisations-section  { padding: 50px 15px; }
+        .testimonials-section  { padding: 50px 15px; }
+        .why-choose-us         { padding: 50px 15px; }
+        .cta-section           { padding: 50px 15px; }
+
+        /* Contenu du hero */
+        .hero-content { padding: 1.5rem 1rem; }
+
+        /* Boutons hero — empilés verticalement sur très petits écrans */
+        .hero-actions { gap: 0.75rem; }
+
+        /* Titres de sections */
+        h2 { font-size: 2rem; }
+        .cta-section h2 { font-size: 2rem; }
+    }
+
+    @@media (max-width: 480px) {
+        .features-grid        { grid-template-columns: 1fr; }
+        .testimonials-grid    { grid-template-columns: 1fr; }
+        .stat-number          { font-size: 1.4rem; }
+        .stat-item            { padding: 0.9rem 1.2rem; }
     }
 </style>
