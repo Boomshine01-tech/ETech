@@ -652,6 +652,8 @@ body { font-family: var(--font-b); color: var(--ink); background: #f8fafc; }
     transition: box-shadow .4s, transform .3s;
     max-width: 860px; margin: 0 auto; width: 100%;
     box-shadow: 0 10px 40px rgba(0,0,0,0.02);
+    box-sizing: border-box;
+    overflow: hidden;
 }
 .service-detail-card:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(15,25,35,.07); }
 
@@ -665,8 +667,7 @@ body { font-family: var(--font-b); color: var(--ink); background: #f8fafc; }
 .eyebrow-badge { display: inline-flex; align-items: center; gap: .7rem; font-size: .75rem; font-weight: 700; text-transform: uppercase; color: var(--soft); }
 .ey-line { width: 28px; height: 2px; background: var(--gold); border-radius: 2px; }
 
-h2 { font-family: var(--font-h); font-size: clamp(2rem, 5vw, 4.5rem); line-height: .95; color: var(--ink); text-transform: uppercase; }
-.accent-title { font-family: var(--font-s); font-style: italic; color: var(--gold); display: block; text-transform: lowercase; }
+h2 { font-family: var(--font-h); font-size: clamp(2rem, 5vw, 4.5rem); line-height: .95; color: var(--ink); text-transform: uppercase; overflow-wrap: break-word; word-break: break-word; }.accent-title { font-family: var(--font-s); font-style: italic; color: var(--gold); display: block; text-transform: lowercase; }
 
 .service-body { display: flex; flex-direction: column; gap: 2rem; }
 .service-description { font-size: 1.1rem; line-height: 1.7; color: var(--soft); }
@@ -770,6 +771,8 @@ h2 { font-family: var(--font-h); font-size: clamp(2rem, 5vw, 4.5rem); line-heigh
     /* Nav pills : réduire padding */
     .pill-nav-wrap { padding: 1rem 0; justify-content: flex-start; }
     .pill { padding: .45rem .85rem; font-size: .78rem; }
+    .services-section { overflow-x: hidden; }
+    .service-body { gap: 1.2rem; }
 }
 @@media (max-width: 480px) {
     h2 { font-size: clamp(1.8rem, 7vw, 2.5rem); }
