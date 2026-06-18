@@ -1290,6 +1290,27 @@
             font-size: 1.5rem;
         }
     }
+
+    @@media (max-width: 480px) {
+        .products-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .product-card {
+            min-width: 0;
+        }
+
+        .category-circle {
+            width: 65px;
+            height: 65px;
+        }
+
+        .category-item span {
+            font-size: 0.7rem;
+            max-width: 65px;
+        }
+    }
 </style>
 
 <script>
