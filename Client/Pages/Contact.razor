@@ -380,6 +380,7 @@
 
     .form-control {
         width: 100%;
+        box-sizing: border-box;
         padding: 12px 15px;
         border: 2px solid #e5e7eb;
         border-radius: 5px;
@@ -422,5 +423,19 @@
         .contact-grid {
             grid-template-columns: 1fr;
         }
+    }
+
+    @@media (max-width: 768px) {
+        .page-header h1 { font-size: clamp(1.5rem, 5vw, 2.5rem); }
+        .contact-section { padding: 40px 10px; }
+        .contact-form-container { padding: 1.2rem; }
+        .info-item { gap: 1rem; padding: 1rem; }
+    }
+
+    @@media (max-width: 480px) {
+        .page-header { padding: 40px 10px; }
+        .contact-form-container { padding: 1rem; }
+        .info-icon { min-width: 35px; font-size: 1.5rem; }
+        .form-control { font-size: .95rem; padding: 10px 12px; }
     }
 </style>
