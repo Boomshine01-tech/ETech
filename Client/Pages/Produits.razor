@@ -40,6 +40,22 @@
                 <span>Tout voir</span>
             </div>
 
+            <!-- Actionneurs -->
+            <div class="category-item @(selectedCategoryName == "Actionneurs" ? "active" : "")" @onclick='() => SelectCategoryByName("Actionneurs")'>
+                <div class="category-circle">
+                    <img src="images/categories/Actionneur.jpeg" alt="Actionneurs" />
+                </div>
+                <span>Actionneurs</span>
+            </div>
+
+            <!-- Afficheurs -->
+            <div class="category-item @(selectedCategoryName == "Afficheurs" ? "active" : "")" @onclick='() => SelectCategoryByName("Afficheurs")'>
+                <div class="category-circle">
+                    <img src="images/categories/Afficheur.jpeg" alt="Afficheurs" />
+                </div>
+                <span>Afficheurs</span>
+            </div>
+
             <!-- Câbles et connectique -->
             <div class="category-item @(selectedCategoryName == "Câbles et connectique" ? "active" : "")" @onclick='() => SelectCategoryByName("Câbles et connectique")'>
                 <div class="category-circle">
@@ -64,6 +80,14 @@
                 <span>Cartes de développement</span>
             </div>
 
+            <!-- Composants électroniques -->
+            <div class="category-item @(selectedCategoryName == "Composants électroniques" ? "active" : "")" @onclick='() => SelectCategoryByName("Composants électroniques")'>
+                <div class="category-circle">
+                    <img src="images/categories/electronique.jpeg" alt="Composants électroniques" />
+                </div>
+                <span>Composants électroniques</span>
+            </div>
+
             <!-- Énergies renouvelables -->
             <div class="category-item @(selectedCategoryName == "Énergies renouvelables" ? "active" : "")" @onclick='() => SelectCategoryByName("Énergies renouvelables")'>
                 <div class="category-circle">
@@ -80,6 +104,22 @@
                 <span>Équipements réseau</span>
             </div>
 
+            <!-- Instruments de mesure -->
+            <div class="category-item @(selectedCategoryName == "Instruments de mesure" ? "active" : "")" @onclick='() => SelectCategoryByName("Instruments de mesure")'>
+                <div class="category-circle">
+                    <img src="images/categories/instrument.jpeg" alt="Instruments de mesure" />
+                </div>
+                <span>Instruments de mesure</span>
+            </div>
+
+            <!-- Interface utilisateur -->
+            <div class="category-item @(selectedCategoryName == "Interface utilisateur" ? "active" : "")" @onclick='() => SelectCategoryByName("Interface utilisateur")'>
+                <div class="category-circle">
+                    <img src="images/categories/Bouton.jpeg" alt="Interface utilisateur" />
+                </div>
+                <span>Interface utilisateur</span>
+            </div>
+
             <!-- Kits -->
             <div class="category-item @(selectedCategoryName == "Kits" ? "active" : "")" @onclick='() => SelectCategoryByName("Kits")'>
                 <div class="category-circle">
@@ -87,13 +127,21 @@
                 </div>
                 <span>Kits</span>
             </div>
+ 
+            <!-- Modules d'alimentation -->
+           <div class="category-item @(selectedCategoryName == "Modules d'alimentation" ? "active" : "")" @onclick="@(() => SelectCategoryByName("Modules d'alimentation"))">
+                <div class="category-circle">
+                    <img src="images/categories/Alim.jpeg" alt="Modules d'alimentation" />
+                </div>
+                <span>Modules d'alimentation</span>
+            </div>
 
             <!-- Module de Communication -->
-            <div class="category-item @(selectedCategoryName == "Module de Communication" ? "active" : "")" @onclick='() => SelectCategoryByName("Module de Communication")'>
+            <div class="category-item @(selectedCategoryName == "Modules de Communication" ? "active" : "")" @onclick='() => SelectCategoryByName("Modules de Communication")'>
                 <div class="category-circle">
-                    <img src="images/categories/moduledecomunicationlora.jpg" alt="Module de Communication" />
+                    <img src="images/categories/moduledecomunicationlora.jpg" alt="Modules de Communication" />
                 </div>
-                <span>Module de Communication</span>
+                <span>Modules de Communication</span>
             </div>
 
             <!-- Outils de programmation -->
@@ -102,6 +150,14 @@
                     <img src="images/categories/outildeprogrammationpickit3.jpg" alt="Outils de programmation" />
                 </div>
                 <span>Outils de programmation</span>
+            </div>
+
+            <!-- Prototypage -->
+            <div class="category-item @(selectedCategoryName == "Prototypage" ? "active" : "")" @onclick='() => SelectCategoryByName("Prototypage")'>
+                <div class="category-circle">
+                    <img src="images/categories/prototypage.jpeg" alt="Prototypage" />
+                </div>
+                <span>Prototypage</span>
             </div>
 
         </div>
