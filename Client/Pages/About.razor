@@ -5,98 +5,137 @@
 
 <PageTitle>À Propos - e-Tech Energie+</PageTitle>
 <HeadContent>
-    <meta name="description" content="Découvrez notre equipe au complet" />
-    <meta name="keywords" content="Membre de l'equipe" />
-    
-    <!-- Open Graph -->
-    <meta property="og:title" content="A propos | e-Tech Energie+" />
-    <meta property="og:description" content="Notre parcours" />
-    <meta property="og:url" content="https://etechenergie.onrender.com/about" />
+    <meta name="description" content="Découvrez notre équipe et notre histoire chez e-Tech Energie+" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 </HeadContent>
 
-<div class="page-header">
-    <div class="container">
-        <h1>À Propos de @CompanyInfo.CompanyName</h1>
-        <p>@CompanyInfo.Slogan</p>
+<!-- ===== HERO MORPHING ===== -->
+<div class="hero-morphing">
+    <canvas id="morphingCanvas"></canvas>
+    <div class="hero-overlay"></div>
+    
+    <div class="hero-content">
+        <div class="hero-badge floating-badge">
+            <i class="fas fa-users"></i> Notre Équipe
+            <div class="badge-ring"></div>
+        </div>
+        
+        <h1 class="hero-title">
+            <span class="title-word" data-text="À">À</span>
+            <span class="title-word accent" data-text="Propos">Propos</span>
+            <span class="title-word" data-text="de">de</span>
+            <span class="title-word" data-text="@CompanyInfo.CompanyName">@CompanyInfo.CompanyName</span>
+        </h1>
+        
+        <p class="hero-subtitle">@CompanyInfo.Slogan</p>
+        
+        <div class="hero-scroll">
+            <div class="scroll-mouse">
+                <div class="scroll-wheel"></div>
+            </div>
+            <span>Découvrir</span>
+        </div>
     </div>
 </div>
 
 <section class="about-section">
-    <div class="container">
-        <div class="about-content">
-            <h2>Notre Histoire</h2>
-            <p>
-                e-Tech Energie+ est une entreprise sénégalaise spécialisée dans les solutions techniques et énergétiques.
-                Basée à Thiès, nous nous engageons à fournir des services de qualité supérieure à nos clients à travers
-                tout le Sénégal.
-            </p>
-            <p>
-                Notre expertise couvre un large éventail de domaines, de l'installation électrique aux énergies renouvelables,
-                en passant par la maintenance industrielle et le génie civil. Nous sommes fiers de contribuer au développement
-                technologique et énergétique de notre région.
-            </p>
-        </div>
+    <div class="section-header">
+        <div class="header-glow">📖 Notre Histoire 📖</div>
+        <h2>Découvrez <span class="gradient-text">notre parcours</span></h2>
+        <div class="header-line"></div>
+    </div>
+    
+    <div class="about-content">
+        <p>
+            e-Tech Energie+ est une entreprise sénégalaise spécialisée dans les solutions techniques et énergétiques.
+            Basée à Thiès, nous nous engageons à fournir des services de qualité supérieure à nos clients à travers
+            tout le Sénégal.
+        </p>
+        <p>
+            Notre expertise couvre un large éventail de domaines, de l'installation électrique aux énergies renouvelables,
+            en passant par la maintenance industrielle et le génie civil. Nous sommes fiers de contribuer au développement
+            technologique et énergétique de notre région.
+        </p>
+    </div>
 
-        <div class="values-grid">
-            <div class="value-card">
+    <div class="section-header">
+        <div class="header-glow">💡 Nos Valeurs 💡</div>
+        <h2>Ce qui nous <span class="gradient-text">anime</span></h2>
+        <div class="header-line"></div>
+    </div>
+
+    <div class="values-grid">
+        <div class="value-card">
+            <div class="value-icon">
                 <i class="fas fa-award"></i>
-                <h3>Excellence</h3>
-                <p>Nous visons l'excellence dans chaque projet, garantissant qualité et professionnalisme</p>
             </div>
-            <div class="value-card">
-                <i class="fas fa-handshake"></i>
-                <h3>Fiabilité</h3>
-                <p>Des partenaires de confiance pour vos projets les plus importants</p>
-            </div>
-            <div class="value-card">
-                <i class="fas fa-lightbulb"></i>
-                <h3>Innovation</h3>
-                <p>Nous adoptons les dernières technologies pour des solutions modernes</p>
-            </div>
-            <div class="value-card">
-                <i class="fas fa-users"></i>
-                <h3>Proximité</h3>
-                <p>Une équipe à l'écoute de vos besoins et disponible à tout moment</p>
-            </div>
+            <h3>Excellence</h3>
+            <p>Nous visons l'excellence dans chaque projet, garantissant qualité et professionnalisme</p>
         </div>
-
-        <div class="team-section">
-            <h2>Rencontrez Notre Équipe</h2>
-            <p class="team-intro">
-                Notre force réside dans notre équipe de professionnels qualifiés et passionnés.
-            </p>
-            
-            @if (teamMembers == null)
-            {
-                <div class="loading">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <p>Chargement de l'équipe...</p>
-                </div>
-            }
-            else if (!teamMembers.Any())
-            {
-                <p class="no-data">Aucun membre d'équipe à afficher.</p>
-            }
-            else
-            {
-                <div class="team-grid">
-                    @foreach (var member in teamMembers)
-                    {
-                        <div class="team-member-card">
-                            <div class="member-photo">
-                                <img src="@member.ImageUrl" alt="@member.Name" />
-                            </div>
-                            <div class="member-info">
-                                <h3>@member.Name</h3>
-                                <p class="member-position">@member.Position</p>
-                                <p class="member-bio">@member.Bio</p>
-                            </div>
-                        </div>
-                    }
-                </div>
-            }
+        <div class="value-card">
+            <div class="value-icon">
+                <i class="fas fa-handshake"></i>
+            </div>
+            <h3>Fiabilité</h3>
+            <p>Des partenaires de confiance pour vos projets les plus importants</p>
+        </div>
+        <div class="value-card">
+            <div class="value-icon">
+                <i class="fas fa-lightbulb"></i>
+            </div>
+            <h3>Innovation</h3>
+            <p>Nous adoptons les dernières technologies pour des solutions modernes</p>
+        </div>
+        <div class="value-card">
+            <div class="value-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h3>Proximité</h3>
+            <p>Une équipe à l'écoute de vos besoins et disponible à tout moment</p>
         </div>
     </div>
+
+    <div class="section-header">
+        <div class="header-glow">👥 Notre Équipe 👥</div>
+        <h2>Rencontrez nos <span class="gradient-text">experts</span></h2>
+        <div class="header-line"></div>
+    </div>
+    
+    <p class="team-intro">
+        Notre force réside dans notre équipe de professionnels qualifiés et passionnés.
+    </p>
+    
+    @if (teamMembers == null)
+    {
+        <div class="loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Chargement de l'équipe...</p>
+        </div>
+    }
+    else if (!teamMembers.Any())
+    {
+        <p class="no-data">Aucun membre d'équipe à afficher.</p>
+    }
+    else
+    {
+        <div class="team-grid">
+            @foreach (var member in teamMembers)
+            {
+                <div class="team-member-card">
+                    <div class="member-photo">
+                        <img src="@member.ImageUrl" alt="@member.Name" />
+                    </div>
+                    <div class="member-info">
+                        <h3>@member.Name</h3>
+                        <p class="member-position">@member.Position</p>
+                        <p class="member-bio">@member.Bio</p>
+                    </div>
+                </div>
+            }
+        </div>
+    }
 </section>
 
 @code {
@@ -115,138 +154,458 @@
     }
 }
 
-<style>
-    .page-header {
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-        color: white;
-        padding: 60px 20px;
-        text-align: center;
-    }
-
-    .page-header h1 {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-    }
-
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 20px;
-    }
-
-    .about-section {
-        padding: 60px 20px;
-    }
-
-    .about-content {
-        margin-bottom: 4rem;
-    }
-
-    .about-content h2 {
-        font-size: 2.5rem;
-        color: #1e3a8a;
-        margin-bottom: 1.5rem;
-    }
-
-    .about-content p {
-        font-size: 1.1rem;
-        line-height: 1.8;
-        color: #4b5563;
-        margin-bottom: 1rem;
-    }
-
-    .values-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 2rem;
-        margin-bottom: 4rem;
-    }
-
-    .value-card {
-        background: white;
-        padding: 2rem;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        text-align: center;
-        transition: transform 0.3s;
-    }
-
-    .value-card:hover {
-        transform: translateY(-5px);
-    }
-
-    .value-card i {
-        font-size: 3rem;
-        color: #3b82f6;
-        margin-bottom: 1rem;
-    }
-
-    .value-card h3 {
-        font-size: 1.5rem;
-        color: #1e3a8a;
-        margin-bottom: 1rem;
-    }
-
-    .team-section h2 {
-        font-size: 2.5rem;
-        color: #1e3a8a;
-        text-align: center;
-        margin-bottom: 1rem;
-    }
-
-    .team-intro {
-        text-align: center;
-        font-size: 1.1rem;
-        color: #6b7280;
-        margin-bottom: 3rem;
-        max-width: 800px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .team-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 2rem;
-    }
-
-    .team-member {
-        text-align: center;
-        padding: 1.5rem;
-    }
-
-    .member-avatar {
-        width: 100px;
-        height: 100px;
-        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-        border-radius: 50%;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1rem;
-    }
-
-    .member-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-
-    .team-member h4 {
-        font-size: 1.2rem;
-        color: #1e3a8a;
-        margin-bottom: 0.5rem;
-    }
-
-    .team-member p {
-        color: #6b7280;
-    }
-
-    @@media (max-width: 768px) {
-        .page-header h1 {
-            font-size: 2rem;
+<script>
+    (function() {
+        // ===== MORPHING CANVAS =====
+        const canvas = document.getElementById('morphingCanvas');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let time = 0;
+            
+            function resize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+            }
+            
+            function drawMorphing() {
+                if (!ctx) return;
+                ctx.clearRect(0, 0, width, height);
+                
+                const gradient = ctx.createLinearGradient(0, 0, width, height);
+                gradient.addColorStop(0, '#1e3a8a');
+                gradient.addColorStop(0.5, '#2563eb');
+                gradient.addColorStop(1, '#3b82f6');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+                
+                const centerX = width / 2;
+                const centerY = height / 2;
+                
+                for (let i = 0; i < 12; i++) {
+                    ctx.beginPath();
+                    const angle = (i / 12) * Math.PI * 2 + time * 0.3;
+                    const radius = 150 + Math.sin(time * 0.5 + i) * 30;
+                    const x = centerX + Math.cos(angle) * radius;
+                    const y = centerY + Math.sin(angle) * radius;
+                    
+                    for (let j = 0; j < 30; j++) {
+                        const subAngle = angle + (j / 30) * Math.PI * 2;
+                        const subRadius = radius + Math.sin(time * 2 + subAngle * 3) * 40;
+                        const px = centerX + Math.cos(subAngle) * subRadius;
+                        const py = centerY + Math.sin(subAngle) * subRadius;
+                        
+                        ctx.fillStyle = `rgba(245, 166, 35, ${0.1 + Math.sin(time * 2 + i) * 0.05})`;
+                        ctx.beginPath();
+                        ctx.arc(px, py, 4 + Math.sin(time * 3 + i) * 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+                
+                time += 0.02;
+                requestAnimationFrame(drawMorphing);
+            }
+            
+            window.addEventListener('resize', resize);
+            resize();
+            drawMorphing();
         }
+        
+        // ===== SCROLL REVEAL =====
+        const revealElements = document.querySelectorAll('.value-card, .team-member-card');
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0) scale(1)';
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        revealElements.forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(50px) scale(0.9)';
+            el.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+            revealObserver.observe(el);
+        });
+    })();
+</script>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: #0a0f1c;
+    overflow-x: hidden;
+}
+
+/* ===== HERO MORPHING ===== */
+.hero-morphing {
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#morphingCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, transparent 0%, rgba(10,15,28,0.6) 100%);
+    z-index: 2;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    padding: 20px;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    padding: 8px 24px;
+    border-radius: 60px;
+    color: #f5a623;
+    font-weight: 600;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.badge-ring {
+    position: absolute;
+    inset: -2px;
+    border-radius: 60px;
+    border: 1px solid rgba(245,166,35,0.5);
+    animation: ringPulse 2s infinite;
+}
+
+@@keyframes ringPulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 1; }
+}
+
+.floating-badge {
+    animation: floatBadge 3s infinite ease-in-out;
+}
+
+@@keyframes floatBadge {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.hero-title {
+    font-size: clamp(2rem, 8vw, 4.5rem);
+    font-weight: 800;
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+.title-word {
+    display: inline-block;
+    color: white;
+    margin: 0 10px;
+    animation: titleGlow 2s ease-in-out infinite;
+}
+
+@@keyframes titleGlow {
+    0%, 100% { text-shadow: 0 0 5px rgba(245,166,35,0.3); }
+    50% { text-shadow: 0 0 20px rgba(245,166,35,0.8), 0 0 30px rgba(245,166,35,0.4); }
+}
+
+.title-word.accent {
+    color: #f5a623;
+}
+
+.hero-subtitle {
+    font-size: 1.3rem;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 40px;
+}
+
+.hero-scroll {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    animation: bounce 2s infinite;
+}
+
+@@keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-10px); }
+}
+
+.scroll-mouse {
+    width: 26px;
+    height: 40px;
+    border: 2px solid white;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.scroll-wheel {
+    width: 3px;
+    height: 8px;
+    background: white;
+    border-radius: 2px;
+    margin-top: 6px;
+    animation: scrollWheel 1.5s infinite;
+}
+
+@@keyframes scrollWheel {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(15px); }
+}
+
+.hero-scroll span {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* ===== ABOUT SECTION ===== */
+.about-section {
+    padding: 80px 20px;
+    background: linear-gradient(135deg, #0f1420, #0a0f1c);
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.header-glow {
+    display: inline-block;
+    background: rgba(245,166,35,0.1);
+    padding: 6px 20px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    color: #f5a623;
+    margin-bottom: 20px;
+    animation: headerGlow 3s infinite;
+}
+
+@@keyframes headerGlow {
+    0%, 100% { box-shadow: 0 0 5px rgba(245,166,35,0.3); }
+    50% { box-shadow: 0 0 20px rgba(245,166,35,0.5); }
+}
+
+.section-header h2 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    color: white;
+    margin-bottom: 15px;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #f5a623, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.header-line {
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, #f5a623, #3b82f6);
+    margin: 0 auto;
+    border-radius: 3px;
+}
+
+.about-content {
+    max-width: 800px;
+    margin: 0 auto 60px;
+    text-align: center;
+}
+
+.about-content p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 1.5rem;
+}
+
+.values-grid {
+    max-width: 1200px;
+    margin: 0 auto 60px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+}
+
+.value-card {
+    background: linear-gradient(135deg, #1a2332, #0f1420);
+    border-radius: 24px;
+    padding: 40px 30px;
+    border: 1px solid rgba(59,130,246,0.2);
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.value-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(245,166,35,0.5);
+    box-shadow: 0 10px 30px rgba(245,166,35,0.2);
+}
+
+.value-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #f5a623, #e5941a);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 2rem;
+    color: #0a0f1c;
+}
+
+.value-card h3 {
+    color: white;
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+}
+
+.value-card p {
+    color: rgba(255,255,255,0.7);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.team-intro {
+    text-align: center;
+    font-size: 1.1rem;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 40px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.team-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.team-member-card {
+    background: linear-gradient(135deg, #1a2332, #0f1420);
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid rgba(59,130,246,0.2);
+    transition: all 0.3s;
+}
+
+.team-member-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(245,166,35,0.5);
+    box-shadow: 0 10px 30px rgba(245,166,35,0.2);
+}
+
+.member-photo {
+    width: 100%;
+    height: 250px;
+    overflow: hidden;
+}
+
+.member-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.member-info {
+    padding: 30px;
+    text-align: center;
+}
+
+.member-info h3 {
+    color: white;
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
+
+.member-position {
+    color: #f5a623;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+}
+
+.member-bio {
+    color: rgba(255,255,255,0.7);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    color: rgba(255,255,255,0.6);
+}
+
+.loading i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.no-data {
+    text-align: center;
+    color: rgba(255,255,255,0.6);
+    padding: 2rem;
+}
+
+/* ===== RESPONSIVE ===== */
+@@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2rem;
     }
+    
+    .values-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .team-grid {
+        grid-template-columns: 1fr;
+    }
+}
 </style>

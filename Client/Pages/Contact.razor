@@ -8,168 +8,200 @@
 @using System.Net.Http.Json
 
 <PageTitle>Contact - e-Tech Energie+</PageTitle>
+<HeadContent>
+    <meta name="description" content="Contactez e-Tech Energie+ pour vos projets techniques et énergétiques à Thiès." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+</HeadContent>
 
-<div class="page-header">
-    <div class="container">
-        <h1>Contactez-nous</h1>
-        <p>Notre équipe est à votre écoute pour répondre à tous vos besoins</p>
+<!-- ===== HERO MORPHING ===== -->
+<div class="hero-morphing">
+    <canvas id="morphingCanvas"></canvas>
+    <div class="hero-overlay"></div>
+    
+    <div class="hero-content">
+        <div class="hero-badge floating-badge">
+            <i class="fas fa-envelope"></i> Contactez-nous
+            <div class="badge-ring"></div>
+        </div>
+        
+        <h1 class="hero-title">
+            <span class="title-word" data-text="Restons">Restons</span>
+            <span class="title-word accent" data-text="Connectés">Connectés</span>
+        </h1>
+        
+        <div class="hero-cta">
+            <a href="#contact-section" class="cta-btn-primary">
+                <span>Envoyer un message</span>
+                <i class="fas fa-arrow-down"></i>
+                <div class="btn-glow"></div>
+            </a>
+            <a href="tel:@CompanyInfo.Phone1.Replace(" ", "")" class="cta-btn-secondary">
+                <i class="fas fa-phone"></i>
+                <span>@CompanyInfo.Phone1</span>
+            </a>
+        </div>
+        
+        <div class="hero-scroll">
+            <div class="scroll-mouse">
+                <div class="scroll-wheel"></div>
+            </div>
+            <span>Contacter</span>
+        </div>
     </div>
 </div>
 
-<section class="contact-section">
-    <div class="container">
-        <div class="contact-grid">
-            <div class="contact-info">
-                <h2>Informations de Contact</h2>
-                
-                <div class="info-item">
-                    <div class="info-icon">
-                        <i class="fas fa-map-marker-alt"></i>
-                    </div>
-                    <div class="info-content">
-                        <h3>Adresse</h3>
-                        <p>@CompanyInfo.Address</p>
-                        <p>@CompanyInfo.City, @CompanyInfo.Country</p>
-                        <a href="@CompanyInfo.GoogleMapsUrl" target="_blank" class="map-link">
-                            <i class="fas fa-external-link-alt"></i> Voir sur Google Maps
-                        </a>
-                    </div>
+<!-- ===== CONTACT SECTION ===== -->
+<section class="contact-section" id="contact-section">
+    <div class="section-header">
+        <div class="header-glow">📞 Disponible 24/7 📞</div>
+        <h2>Nous sommes <span class="gradient-text">à votre écoute</span></h2>
+        <div class="header-line"></div>
+    </div>
+    
+    <div class="contact-grid">
+        <div class="contact-info">
+            <div class="info-card">
+                <div class="info-icon">
+                    <i class="fas fa-map-marker-alt"></i>
                 </div>
-
-                <div class="info-item">
-                    <div class="info-icon">
-                        <i class="fas fa-phone"></i>
-                    </div>
-                    <div class="info-content">
-                        <h3>Téléphone</h3>
-                        <p><a href="tel:@CompanyInfo.Phone1.Replace(" ", "")">@CompanyInfo.Phone1</a></p>
-                        <p><a href="tel:@CompanyInfo.Phone2.Replace(" ", "")">@CompanyInfo.Phone2</a></p>
-                    </div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-icon">
-                        <i class="fab fa-whatsapp"></i>
-                    </div>
-                    <div class="info-content">
-                        <h3>WhatsApp</h3>
-                        <p>
-                            <a href="https://wa.me/@CompanyInfo.WhatsApp.Replace("+", "").Replace(" ", "")" 
-                               target="_blank" class="whatsapp-link">
-                                <i class="fab fa-whatsapp"></i> @CompanyInfo.WhatsApp
-                            </a>
-                        </p>
-                    </div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-icon">
-                        <i class="fas fa-envelope"></i>
-                    </div>
-                    <div class="info-content">
-                        <h3>Email</h3>
-                        <p><a href="mailto:@CompanyInfo.EmailContact">@CompanyInfo.EmailContact</a></p>
-                        <p><a href="mailto:@CompanyInfo.EmailInfo">@CompanyInfo.EmailInfo</a></p>
-                    </div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="info-content">
-                        <h3>Horaires d'ouverture</h3>
-                        <p>@CompanyInfo.HoursWeekdays</p>
-                        <p>@CompanyInfo.HoursSaturday</p>
-                        <p class="closed">@CompanyInfo.HoursSunday</p>
-                    </div>
-                </div>
-
-                <div class="social-links">
-                    <h3>Suivez-nous</h3>
-                    <div class="social-icons">
-                        <a href="@CompanyInfo.FacebookUrl" target="_blank" rel="noopener noreferrer" 
-                           class="social-icon facebook" title="Facebook">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="@CompanyInfo.TwitterUrl" target="_blank" rel="noopener noreferrer" 
-                           class="social-icon twitter" title="Twitter">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="@CompanyInfo.LinkedInUrl" target="_blank" rel="noopener noreferrer" 
-                           class="social-icon linkedin" title="LinkedIn">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
-                        <a href="@CompanyInfo.InstagramUrl" target="_blank" rel="noopener noreferrer" 
-                           class="social-icon instagram" title="Instagram">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                    </div>
-                </div>
+                <h3>Adresse</h3>
+                <p>@CompanyInfo.Address</p>
+                <p>@CompanyInfo.City, @CompanyInfo.Country</p>
+                <a href="@CompanyInfo.GoogleMapsUrl" target="_blank" class="info-link">
+                    <i class="fas fa-external-link-alt"></i> Voir sur Google Maps
+                </a>
             </div>
 
-            <div class="contact-form-container">
+            <div class="info-card">
+                <div class="info-icon">
+                    <i class="fas fa-phone"></i>
+                </div>
+                <h3>Téléphone</h3>
+                <p><a href="tel:@CompanyInfo.Phone1.Replace(" ", "")">@CompanyInfo.Phone1</a></p>
+                <p><a href="tel:@CompanyInfo.Phone2.Replace(" ", "")">@CompanyInfo.Phone2</a></p>
+            </div>
+
+            <div class="info-card">
+                <div class="info-icon whatsapp">
+                    <i class="fab fa-whatsapp"></i>
+                </div>
+                <h3>WhatsApp</h3>
+                <p>
+                    <a href="https://wa.me/@CompanyInfo.WhatsApp.Replace("+", "").Replace(" ", "")" 
+                       target="_blank" class="whatsapp-link">
+                        <i class="fab fa-whatsapp"></i> @CompanyInfo.WhatsApp
+                    </a>
+                </p>
+            </div>
+
+            <div class="info-card">
+                <div class="info-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <h3>Email</h3>
+                <p><a href="mailto:@CompanyInfo.EmailContact">@CompanyInfo.EmailContact</a></p>
+                <p><a href="mailto:@CompanyInfo.EmailInfo">@CompanyInfo.EmailInfo</a></p>
+            </div>
+
+            <div class="info-card">
+                <div class="info-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h3>Horaires</h3>
+                <p>@CompanyInfo.HoursWeekdays</p>
+                <p>@CompanyInfo.HoursSaturday</p>
+                <p class="closed">@CompanyInfo.HoursSunday</p>
+            </div>
+
+            <div class="social-links">
+                <h3>Suivez-nous</h3>
+                <div class="social-icons">
+                    <a href="@CompanyInfo.FacebookUrl" target="_blank" rel="noopener noreferrer" 
+                       class="social-icon facebook" title="Facebook">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="@CompanyInfo.TwitterUrl" target="_blank" rel="noopener noreferrer" 
+                       class="social-icon twitter" title="Twitter">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="@CompanyInfo.LinkedInUrl" target="_blank" rel="noopener noreferrer" 
+                       class="social-icon linkedin" title="LinkedIn">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="@CompanyInfo.InstagramUrl" target="_blank" rel="noopener noreferrer" 
+                       class="social-icon instagram" title="Instagram">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="contact-form-wrapper">
+            <div class="form-header">
                 <h2>Envoyez-nous un Message</h2>
-                
-                @if (showSuccessMessage)
-                {
-                    <div class="success-alert">
-                        <i class="fas fa-check-circle"></i>
-                        <p>Votre message a été envoyé avec succès ! Nous vous contacterons bientôt.</p>
-                    </div>
-                }
-
-                <EditForm Model="@contactRequest" OnValidSubmit="HandleSubmit">
-                    <DataAnnotationsValidator />
-
-                    <div class="form-group">
-                        <label for="name">Nom complet *</label>
-                        <InputText id="name" class="form-control" @bind-Value="contactRequest.Name" 
-                                   placeholder="Votre nom complet" />
-                        <ValidationMessage For="@(() => contactRequest.Name)" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="email">Email *</label>
-                        <InputText id="email" type="email" class="form-control" @bind-Value="contactRequest.Email" 
-                                   placeholder="votre@email.com" />
-                        <ValidationMessage For="@(() => contactRequest.Email)" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="phone">Téléphone *</label>
-                        <InputText id="phone" class="form-control" @bind-Value="contactRequest.Phone" 
-                                   placeholder="+221 77 123 45 67" />
-                        <ValidationMessage For="@(() => contactRequest.Phone)" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="company">Entreprise (optionnel)</label>
-                        <InputText id="company" class="form-control" @bind-Value="contactRequest.Company" 
-                                   placeholder="Nom de votre entreprise" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="message">Message *</label>
-                        <InputTextArea id="message" class="form-control" @bind-Value="contactRequest.Message" 
-                                       rows="5" placeholder="Décrivez votre projet ou votre besoin..." />
-                        <ValidationMessage For="@(() => contactRequest.Message)" />
-                    </div>
-
-                    <button type="submit" class="btn btn-submit" disabled="@isSubmitting">
-                        @if (isSubmitting)
-                        {
-                            <i class="fas fa-spinner fa-spin"></i>
-                            <span>Envoi en cours...</span>
-                        }
-                        else
-                        {
-                            <i class="fas fa-paper-plane"></i>
-                            <span>Envoyer le message</span>
-                        }
-                    </button>
-                </EditForm>
+                <p>Remplissez le formulaire ci-dessous et nous vous répondrons dans les plus brefs délais</p>
             </div>
+            
+            @if (showSuccessMessage)
+            {
+                <div class="success-alert">
+                    <i class="fas fa-check-circle"></i>
+                    <p>Votre message a été envoyé avec succès ! Nous vous contacterons bientôt.</p>
+                </div>
+            }
+
+            <EditForm Model="@contactRequest" OnValidSubmit="HandleSubmit" class="contact-form">
+                <DataAnnotationsValidator />
+
+                <div class="form-group">
+                    <label for="name">Nom complet *</label>
+                    <InputText id="name" class="form-control" @bind-Value="contactRequest.Name" 
+                               placeholder="Votre nom complet" />
+                    <ValidationMessage For="@(() => contactRequest.Name)" />
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email *</label>
+                    <InputText id="email" type="email" class="form-control" @bind-Value="contactRequest.Email" 
+                               placeholder="votre@email.com" />
+                    <ValidationMessage For="@(() => contactRequest.Email)" />
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Téléphone *</label>
+                    <InputText id="phone" class="form-control" @bind-Value="contactRequest.Phone" 
+                               placeholder="+221 77 123 45 67" />
+                    <ValidationMessage For="@(() => contactRequest.Phone)" />
+                </div>
+
+                <div class="form-group">
+                    <label for="company">Entreprise (optionnel)</label>
+                    <InputText id="company" class="form-control" @bind-Value="contactRequest.Company" 
+                               placeholder="Nom de votre entreprise" />
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Message *</label>
+                    <InputTextArea id="message" class="form-control" @bind-Value="contactRequest.Message" 
+                                   rows="5" placeholder="Décrivez votre projet ou votre besoin..." />
+                    <ValidationMessage For="@(() => contactRequest.Message)" />
+                </div>
+
+                <button type="submit" class="btn-submit" disabled="@isSubmitting">
+                    @if (isSubmitting)
+                    {
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Envoi en cours...</span>
+                    }
+                    else
+                    {
+                        <i class="fas fa-paper-plane"></i>
+                        <span>Envoyer le message</span>
+                    }
+                </button>
+            </EditForm>
         </div>
     </div>
 </section>
@@ -216,206 +248,582 @@
     }
 }
 
-<style>
-    .page-header {
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-        color: white;
-        padding: 60px 20px;
-        text-align: center;
-    }
-
-    .page-header h1 {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-    }
-
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 20px;
-    }
-
-    .contact-section {
-        padding: 60px 20px;
-    }
-
-    .contact-grid {
-        display: grid;
-        grid-template-columns: 1fr 1.5fr;
-        gap: 3rem;
-    }
-
-    .info-item {
-        display: flex;
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-        padding: 1.5rem;
-        background: #f9fafb;
-        border-radius: 10px;
-    }
-
-    .info-icon {
-        font-size: 2rem;
-        color: #3b82f6;
-        min-width: 50px;
-    }
-
-    .info-content h3 {
-        font-size: 1.2rem;
-        color: #1e3a8a;
-        margin-bottom: 0.5rem;
-    }
-
-    .info-content p {
-        color: #6b7280;
-        margin: 0.3rem 0;
-    }
-
-    .info-content a {
-        color: #3b82f6;
-        text-decoration: none;
-        transition: color 0.3s;
-    }
-
-    .info-content a:hover {
-        color: #2563eb;
-        text-decoration: underline;
-    }
-
-    .map-link, .whatsapp-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
-        font-weight: 600;
-    }
-
-    .whatsapp-link {
-        color: #25D366 !important;
-    }
-
-    .closed {
-        color: #ef4444 !important;
-        font-weight: 600;
-    }
-
-    .social-links {
-        margin-top: 2rem;
-    }
-
-    .social-links h3 {
-        font-size: 1.2rem;
-        color: #1e3a8a;
-        margin-bottom: 1rem;
-    }
-
-    .social-icons {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-    }
-
-    .social-icon {
-        width: 50px;
-        height: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        text-decoration: none;
-        font-size: 1.3rem;
-        transition: all 0.3s;
-        color: white;
-    }
-
-    .social-icon.facebook { background: #1877F2; }
-    .social-icon.twitter { background: #1DA1F2; }
-    .social-icon.linkedin { background: #0A66C2; }
-    .social-icon.instagram { background: linear-gradient(45deg, #F58529, #DD2A7B, #8134AF); }
-
-    .social-icon:hover {
-        transform: translateY(-5px) scale(1.1);
-        box-shadow: 0 8px 15px rgba(0,0,0,0.2);
-    }
-
-    .contact-form-container {
-        background: white;
-        padding: 2rem;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    .success-alert {
-        background: #d1fae5;
-        border: 2px solid #10b981;
-        color: #065f46;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .success-alert i {
-        font-size: 1.5rem;
-        color: #10b981;
-    }
-
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-
-    .form-group label {
-        display: block;
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 0.5rem;
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 12px 15px;
-        border: 2px solid #e5e7eb;
-        border-radius: 5px;
-        font-size: 1rem;
-        transition: border-color 0.3s;
-    }
-
-    .form-control:focus {
-        outline: none;
-        border-color: #3b82f6;
-    }
-
-    .btn-submit {
-        width: 100%;
-        padding: 15px;
-        background: #3b82f6;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        font-size: 1.1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background 0.3s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-    }
-
-    .btn-submit:hover:not(:disabled) {
-        background: #2563eb;
-    }
-
-    .btn-submit:disabled {
-        background: #9ca3af;
-        cursor: not-allowed;
-    }
-
-    @@media (max-width: 968px) {
-        .contact-grid {
-            grid-template-columns: 1fr;
+<script>
+    (function() {
+        // ===== MORPHING CANVAS =====
+        const canvas = document.getElementById('morphingCanvas');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let time = 0;
+            
+            function resize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+            }
+            
+            function drawMorphing() {
+                if (!ctx) return;
+                ctx.clearRect(0, 0, width, height);
+                
+                const gradient = ctx.createLinearGradient(0, 0, width, height);
+                gradient.addColorStop(0, '#1e3a8a');
+                gradient.addColorStop(0.5, '#2563eb');
+                gradient.addColorStop(1, '#3b82f6');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+                
+                const centerX = width / 2;
+                const centerY = height / 2;
+                
+                for (let i = 0; i < 12; i++) {
+                    ctx.beginPath();
+                    const angle = (i / 12) * Math.PI * 2 + time * 0.3;
+                    const radius = 150 + Math.sin(time * 0.5 + i) * 30;
+                    const x = centerX + Math.cos(angle) * radius;
+                    const y = centerY + Math.sin(angle) * radius;
+                    
+                    for (let j = 0; j < 30; j++) {
+                        const subAngle = angle + (j / 30) * Math.PI * 2;
+                        const subRadius = radius + Math.sin(time * 2 + subAngle * 3) * 40;
+                        const px = centerX + Math.cos(subAngle) * subRadius;
+                        const py = centerY + Math.sin(subAngle) * subRadius;
+                        
+                        ctx.fillStyle = `rgba(245, 166, 35, ${0.1 + Math.sin(time * 2 + i) * 0.05})`;
+                        ctx.beginPath();
+                        ctx.arc(px, py, 4 + Math.sin(time * 3 + i) * 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+                
+                time += 0.02;
+                requestAnimationFrame(drawMorphing);
+            }
+            
+            window.addEventListener('resize', resize);
+            resize();
+            drawMorphing();
         }
+        
+        // ===== SCROLL REVEAL =====
+        const revealElements = document.querySelectorAll('.info-card, .contact-form-wrapper');
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0) scale(1)';
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        revealElements.forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(50px) scale(0.9)';
+            el.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+            revealObserver.observe(el);
+        });
+    })();
+</script>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: #0a0f1c;
+    overflow-x: hidden;
+}
+
+/* ===== HERO MORPHING ===== */
+.hero-morphing {
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#morphingCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, transparent 0%, rgba(10,15,28,0.6) 100%);
+    z-index: 2;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    padding: 20px;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    padding: 8px 24px;
+    border-radius: 60px;
+    color: #f5a623;
+    font-weight: 600;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.badge-ring {
+    position: absolute;
+    inset: -2px;
+    border-radius: 60px;
+    border: 1px solid rgba(245,166,35,0.5);
+    animation: ringPulse 2s infinite;
+}
+
+@@keyframes ringPulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 1; }
+}
+
+.floating-badge {
+    animation: floatBadge 3s infinite ease-in-out;
+}
+
+@@keyframes floatBadge {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.hero-title {
+    font-size: clamp(2rem, 8vw, 4.5rem);
+    font-weight: 800;
+    margin-bottom: 40px;
+    line-height: 1.2;
+}
+
+.title-word {
+    display: inline-block;
+    color: white;
+    margin: 0 10px;
+    animation: titleGlow 2s ease-in-out infinite;
+}
+
+@@keyframes titleGlow {
+    0%, 100% { text-shadow: 0 0 5px rgba(245,166,35,0.3); }
+    50% { text-shadow: 0 0 20px rgba(245,166,35,0.8), 0 0 30px rgba(245,166,35,0.4); }
+}
+
+.title-word.accent {
+    color: #f5a623;
+}
+
+.hero-cta {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 60px;
+}
+
+.cta-btn-primary, .cta-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 32px;
+    border-radius: 60px;
+    text-decoration: none;
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.cta-btn-primary {
+    background: #f5a623;
+    color: #0a0f1c;
+}
+
+.cta-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(245,166,35,0.4);
+}
+
+.btn-glow {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s;
+}
+
+.cta-btn-primary:hover .btn-glow {
+    left: 100%;
+}
+
+.cta-btn-secondary {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+}
+
+.cta-btn-secondary:hover {
+    background: rgba(255,255,255,0.2);
+    transform: translateY(-2px);
+}
+
+.hero-scroll {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    animation: bounce 2s infinite;
+}
+
+@@keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-10px); }
+}
+
+.scroll-mouse {
+    width: 26px;
+    height: 40px;
+    border: 2px solid white;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.scroll-wheel {
+    width: 3px;
+    height: 8px;
+    background: white;
+    border-radius: 2px;
+    margin-top: 6px;
+    animation: scrollWheel 1.5s infinite;
+}
+
+@@keyframes scrollWheel {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(15px); }
+}
+
+.hero-scroll span {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* ===== CONTACT SECTION ===== */
+.contact-section {
+    padding: 80px 20px;
+    background: linear-gradient(135deg, #0f1420, #0a0f1c);
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.header-glow {
+    display: inline-block;
+    background: rgba(245,166,35,0.1);
+    padding: 6px 20px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    color: #f5a623;
+    margin-bottom: 20px;
+    animation: headerGlow 3s infinite;
+}
+
+@@keyframes headerGlow {
+    0%, 100% { box-shadow: 0 0 5px rgba(245,166,35,0.3); }
+    50% { box-shadow: 0 0 20px rgba(245,166,35,0.5); }
+}
+
+.section-header h2 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    color: white;
+    margin-bottom: 15px;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #f5a623, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.header-line {
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, #f5a623, #3b82f6);
+    margin: 0 auto;
+    border-radius: 3px;
+}
+
+.contact-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 40px;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.info-card {
+    background: linear-gradient(135deg, #1a2332, #0f1420);
+    border-radius: 24px;
+    padding: 30px 25px;
+    border: 1px solid rgba(59,130,246,0.2);
+    transition: all 0.3s;
+}
+
+.info-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(245,166,35,0.5);
+    box-shadow: 0 10px 30px rgba(245,166,35,0.2);
+}
+
+.info-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #f5a623, #e5941a);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    color: #0a0f1c;
+}
+
+.info-icon.whatsapp {
+    background: #25D366;
+    color: white;
+}
+
+.info-card h3 {
+    color: white;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+}
+
+.info-card p {
+    color: rgba(255,255,255,0.7);
+    margin: 8px 0;
+}
+
+.info-card a {
+    color: #3b82f6;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.info-card a:hover {
+    color: #f5a623;
+}
+
+.info-link, .whatsapp-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    font-weight: 600;
+}
+
+.whatsapp-link {
+    color: #25D366 !important;
+}
+
+.closed {
+    color: #ef4444 !important;
+    font-weight: 600;
+}
+
+.social-links {
+    margin-top: 20px;
+}
+
+.social-links h3 {
+    color: white;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+}
+
+.social-icons {
+    display: flex;
+    gap: 15px;
+}
+
+.social-icon {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    text-decoration: none;
+    font-size: 1.3rem;
+    transition: all 0.3s;
+    color: white;
+}
+
+.social-icon.facebook { background: #1877F2; }
+.social-icon.twitter { background: #1DA1F2; }
+.social-icon.linkedin { background: #0A66C2; }
+.social-icon.instagram { background: linear-gradient(45deg, #F58529, #DD2A7B, #8134AF); }
+
+.social-icon:hover {
+    transform: translateY(-5px) scale(1.1);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+}
+
+.contact-form-wrapper {
+    background: linear-gradient(135deg, #1a2332, #0f1420);
+    border-radius: 24px;
+    padding: 40px;
+    border: 1px solid rgba(59,130,246,0.2);
+}
+
+.form-header {
+    margin-bottom: 30px;
+}
+
+.form-header h2 {
+    color: white;
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+}
+
+.form-header p {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.95rem;
+}
+
+.success-alert {
+    background: rgba(16, 185, 129, 0.2);
+    border: 2px solid #10b981;
+    color: #10b981;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.success-alert i {
+    font-size: 1.5rem;
+}
+
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 8px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(255,255,255,0.05);
+    border: 2px solid rgba(59,130,246,0.2);
+    border-radius: 12px;
+    font-size: 1rem;
+    color: white;
+    transition: all 0.3s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #f5a623;
+    background: rgba(255,255,255,0.08);
+}
+
+.form-control::placeholder {
+    color: rgba(255,255,255,0.4);
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 16px;
+    background: #f5a623;
+    color: #0a0f1c;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-submit:hover:not(:disabled) {
+    background: #e5941a;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(245,166,35,0.4);
+}
+
+.btn-submit:disabled {
+    background: #6b7280;
+    cursor: not-allowed;
+}
+
+/* ===== RESPONSIVE ===== */
+@@media (max-width: 968px) {
+    .contact-grid {
+        grid-template-columns: 1fr;
     }
+    
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-cta {
+        flex-direction: column;
+        align-items: center;
+    }
+}
 </style>

@@ -24,6 +24,15 @@ public class CategoriesController : ControllerBase
             .ToListAsync();
     }
 
+    [HttpGet("with-products")]
+    public async Task<ActionResult<IEnumerable<Category>>> GetCategoriesWithProducts()
+    {
+        return await _context.Categories
+            .Where(c => c.Products.Any())
+            .OrderBy(c => c.Name)
+            .ToListAsync();
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<Category>> GetCategory(int id)
     {

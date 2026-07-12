@@ -255,7 +255,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddMemoryCache();
 
 var allowedOrigins = Environment.GetEnvironmentVariable("ALLOWED_ORIGINS")?.Split(',') 
-    ?? new[] { "https://etechenergie.onrender.com", "http://localhost:5000", "https://localhost:5001", "https://localhost:58534", "http://127.0.0.1:63624" };
+    ?? new[] { "https://etechenergie.onrender.com", "http://localhost:5000", "https://localhost:5001", "https://localhost:58534", "http://127.0.0.1:63624", "http://127.0.0.1:56956", "http://localhost:8080", "http://127.0.0.1:49818" };
 
 Console.WriteLine($"🌐 CORS Origins autorisées: {string.Join(", ", allowedOrigins)}");
 
@@ -313,8 +313,8 @@ app.MapControllers();
 app.MapFallbackToFile("index.html");
 
 
-// var portEnv = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-// app.Urls.Add($"http://0.0.0.0:{portEnv}");
+var portEnv = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+app.Urls.Add($"http://0.0.0.0:{portEnv}");
 
 Console.WriteLine("==========================================");
 Console.WriteLine("🚀 APPLICATION DÉMARRÉE");

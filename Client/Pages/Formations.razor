@@ -5,18 +5,28 @@
 <PageTitle>Formations - e-Tech Energie+</PageTitle>
 <HeadContent>
     <meta name="description" content="e-Tech Energie+ dispense des formations professionnelles à Thiès, Sénégal. Inscrivez-vous à nos formations en cours ou rejoignez la liste d'attente." />
-    <meta name="keywords" content="formation Thiès, formation professionnelle Sénégal, inscription formation" />
-    <meta property="og:title" content="Formations | e-Tech Energie+" />
-    <meta property="og:url" content="https://etechenergie.onrender.com/formations" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 </HeadContent>
 
-<!-- ===== HEADER ===== -->
-<div class="page-header">
-    <div class="header-grid"></div>
-    <div class="container">
-        <div class="header-badge"><i class="fas fa-graduation-cap"></i> Formations Professionnelles</div>
-        <h1>Nos <span>Formations</span></h1>
-        <p>Développez vos compétences avec nos formations professionnelles</p>
+<!-- ===== HERO MORPHING ===== -->
+<div class="hero-morphing">
+    <canvas id="morphingCanvas"></canvas>
+    <div class="hero-overlay"></div>
+    
+    <div class="hero-content">
+        <div class="hero-badge floating-badge">
+            <i class="fas fa-graduation-cap"></i> Formations Pro
+            <div class="badge-ring"></div>
+        </div>
+        
+        <h1 class="hero-title">
+            <span class="title-word" data-text="Nos">Nos</span>
+            <span class="title-word accent" data-text="Formations">Formations</span>
+            <span class="title-word" data-text="Professionnelles">Professionnelles</span>
+        </h1>
+        
         @if (isLoading)
         {
             <div class="loading-spinner">
@@ -40,6 +50,13 @@
                 </div>
             </div>
         }
+        
+        <div class="hero-scroll">
+            <div class="scroll-mouse">
+                <div class="scroll-wheel"></div>
+            </div>
+            <span>Explorer</span>
+        </div>
     </div>
 </div>
 
@@ -56,42 +73,41 @@ else
 @if (formationsEnCours.Any())
 {
     <section class="formations-section">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-tag"><i class="fas fa-play-circle"></i> En cours</div>
-                <h2>Formations en cours</h2>
-            </div>
-            <div class="formations-grid">
-                @foreach (var formation in formationsEnCours)
-                {
-                    <div class="formation-card">
-                        <div class="formation-header">
-                            <span class="formation-status status-en-cours">En cours</span>
-                            <span class="formation-price">@formation.Prix.ToString("N0") FCFA</span>
-                        </div>
-                        <h3>@formation.Titre</h3>
-                        <p class="formation-desc">@formation.Description</p>
-                        <div class="formation-details">
-                            <div class="detail"><i class="fas fa-calendar"></i> @formation.DateDebut.ToString("dd/MM/yyyy") - @formation.DateFin.ToString("dd/MM/yyyy")</div>
-                            <div class="detail"><i class="fas fa-clock"></i> @formation.Horaires</div>
-                            <div class="detail"><i class="fas fa-map-marker-alt"></i> @formation.Lieu</div>
-                            <div class="detail"><i class="fas fa-users"></i> @formation.PlacesRestantes / @formation.CapaciteMax places</div>
-                        </div>
-                        @if (formation.InscriptionOuverte && formation.PlacesRestantes > 0)
-                        {
-                            <button class="btn-formation btn-primary" @onclick="() => OpenInscriptionModal(formation)">
-                                <i class="fas fa-user-plus"></i> S'inscrire
-                            </button>
-                        }
-                        else
-                        {
-                            <button class="btn-formation btn-disabled" disabled>
-                                <i class="fas fa-ban"></i> Inscriptions fermées
-                            </button>
-                        }
+        <div class="section-header">
+            <div class="header-glow"><i class="fas fa-play-circle"></i> En cours</div>
+            <h2>Formations <span class="gradient-text">en cours</span></h2>
+            <div class="header-line"></div>
+        </div>
+        <div class="formations-grid">
+            @foreach (var formation in formationsEnCours)
+            {
+                <div class="formation-card">
+                    <div class="formation-header">
+                        <span class="formation-status status-en-cours">En cours</span>
+                        <span class="formation-price">@formation.Prix.ToString("N0") FCFA</span>
                     </div>
-                }
-            </div>
+                    <h3>@formation.Titre</h3>
+                    <p class="formation-desc">@formation.Description</p>
+                    <div class="formation-details">
+                        <div class="detail"><i class="fas fa-calendar"></i> @formation.DateDebut.ToString("dd/MM/yyyy") - @formation.DateFin.ToString("dd/MM/yyyy")</div>
+                        <div class="detail"><i class="fas fa-clock"></i> @formation.Horaires</div>
+                        <div class="detail"><i class="fas fa-map-marker-alt"></i> @formation.Lieu</div>
+                        <div class="detail"><i class="fas fa-users"></i> @formation.PlacesRestantes / @formation.CapaciteMax places</div>
+                    </div>
+                    @if (formation.InscriptionOuverte && formation.PlacesRestantes > 0)
+                    {
+                        <button class="btn-formation btn-primary" @onclick="() => OpenInscriptionModal(formation)">
+                            <i class="fas fa-user-plus"></i> S'inscrire
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="btn-formation btn-disabled" disabled>
+                            <i class="fas fa-ban"></i> Inscriptions fermées
+                        </button>
+                    }
+                </div>
+            }
         </div>
     </section>
 }
@@ -100,33 +116,32 @@ else
 @if (formationsAVenir.Any())
 {
     <section class="formations-section alt-bg">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-tag"><i class="fas fa-calendar-plus"></i> À venir</div>
-                <h2>Prochaines formations</h2>
-            </div>
-            <div class="formations-grid">
-                @foreach (var formation in formationsAVenir)
-                {
-                    <div class="formation-card">
-                        <div class="formation-header">
-                            <span class="formation-status status-avenir">À venir</span>
-                            <span class="formation-price">@formation.Prix.ToString("N0") FCFA</span>
-                        </div>
-                        <h3>@formation.Titre</h3>
-                        <p class="formation-desc">@formation.Description</p>
-                        <div class="formation-details">
-                            <div class="detail"><i class="fas fa-calendar"></i> @formation.DateDebut.ToString("dd/MM/yyyy") - @formation.DateFin.ToString("dd/MM/yyyy")</div>
-                            <div class="detail"><i class="fas fa-clock"></i> @formation.Horaires</div>
-                            <div class="detail"><i class="fas fa-map-marker-alt"></i> @formation.Lieu</div>
-                            <div class="detail"><i class="fas fa-users"></i> @formation.CapaciteMax places</div>
-                        </div>
-                        <button class="btn-formation btn-secondary" @onclick="() => OpenInscriptionModal(formation)">
-                            <i class="fas fa-list"></i> Rejoindre la liste d'attente
-                        </button>
+        <div class="section-header">
+            <div class="header-glow"><i class="fas fa-calendar-plus"></i> À venir</div>
+            <h2>Prochaines <span class="gradient-text">formations</span></h2>
+            <div class="header-line"></div>
+        </div>
+        <div class="formations-grid">
+            @foreach (var formation in formationsAVenir)
+            {
+                <div class="formation-card">
+                    <div class="formation-header">
+                        <span class="formation-status status-avenir">À venir</span>
+                        <span class="formation-price">@formation.Prix.ToString("N0") FCFA</span>
                     </div>
-                }
-            </div>
+                    <h3>@formation.Titre</h3>
+                    <p class="formation-desc">@formation.Description</p>
+                    <div class="formation-details">
+                        <div class="detail"><i class="fas fa-calendar"></i> @formation.DateDebut.ToString("dd/MM/yyyy") - @formation.DateFin.ToString("dd/MM/yyyy")</div>
+                        <div class="detail"><i class="fas fa-clock"></i> @formation.Horaires</div>
+                        <div class="detail"><i class="fas fa-map-marker-alt"></i> @formation.Lieu</div>
+                        <div class="detail"><i class="fas fa-users"></i> @formation.CapaciteMax places</div>
+                    </div>
+                    <button class="btn-formation btn-secondary" @onclick="() => OpenInscriptionModal(formation)">
+                        <i class="fas fa-list"></i> Rejoindre la liste d'attente
+                    </button>
+                </div>
+            }
         </div>
     </section>
 }
@@ -135,30 +150,29 @@ else
 @if (formationsTerminees.Any())
 {
     <section class="formations-section">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-tag"><i class="fas fa-history"></i> Historique</div>
-                <h2>Formations terminées</h2>
-            </div>
-            <div class="formations-grid">
-                @foreach (var formation in formationsTerminees)
-                {
-                    <div class="formation-card formation-terminee">
-                        <div class="formation-header">
-                            <span class="formation-status status-terminee">Terminée</span>
-                        </div>
-                        <h3>@formation.Titre</h3>
-                        <p class="formation-desc">@formation.Description</p>
-                        <div class="formation-details">
-                            <div class="detail"><i class="fas fa-calendar"></i> @formation.DateDebut.ToString("dd/MM/yyyy") - @formation.DateFin.ToString("dd/MM/yyyy")</div>
-                            <div class="detail"><i class="fas fa-map-marker-alt"></i> @formation.Lieu</div>
-                        </div>
-                        <button class="btn-formation btn-disabled" disabled>
-                            <i class="fas fa-check"></i> Formation terminée
-                        </button>
+        <div class="section-header">
+            <div class="header-glow"><i class="fas fa-history"></i> Historique</div>
+            <h2>Formations <span class="gradient-text">terminées</span></h2>
+            <div class="header-line"></div>
+        </div>
+        <div class="formations-grid">
+            @foreach (var formation in formationsTerminees)
+            {
+                <div class="formation-card formation-terminee">
+                    <div class="formation-header">
+                        <span class="formation-status status-terminee">Terminée</span>
                     </div>
-                }
-            </div>
+                    <h3>@formation.Titre</h3>
+                    <p class="formation-desc">@formation.Description</p>
+                    <div class="formation-details">
+                        <div class="detail"><i class="fas fa-calendar"></i> @formation.DateDebut.ToString("dd/MM/yyyy") - @formation.DateFin.ToString("dd/MM/yyyy")</div>
+                        <div class="detail"><i class="fas fa-map-marker-alt"></i> @formation.Lieu</div>
+                    </div>
+                    <button class="btn-formation btn-disabled" disabled>
+                        <i class="fas fa-check"></i> Formation terminée
+                    </button>
+                </div>
+            }
         </div>
     </section>
 }
@@ -318,414 +332,647 @@ else
     }
 }
 
+<script>
+    (function() {
+        // ===== MORPHING CANVAS =====
+        const canvas = document.getElementById('morphingCanvas');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let time = 0;
+            
+            function resize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+            }
+            
+            function drawMorphing() {
+                if (!ctx) return;
+                ctx.clearRect(0, 0, width, height);
+                
+                const gradient = ctx.createLinearGradient(0, 0, width, height);
+                gradient.addColorStop(0, '#1e3a8a');
+                gradient.addColorStop(0.5, '#2563eb');
+                gradient.addColorStop(1, '#3b82f6');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+                
+                const centerX = width / 2;
+                const centerY = height / 2;
+                
+                for (let i = 0; i < 12; i++) {
+                    ctx.beginPath();
+                    const angle = (i / 12) * Math.PI * 2 + time * 0.3;
+                    const radius = 150 + Math.sin(time * 0.5 + i) * 30;
+                    const x = centerX + Math.cos(angle) * radius;
+                    const y = centerY + Math.sin(angle) * radius;
+                    
+                    for (let j = 0; j < 30; j++) {
+                        const subAngle = angle + (j / 30) * Math.PI * 2;
+                        const subRadius = radius + Math.sin(time * 2 + subAngle * 3) * 40;
+                        const px = centerX + Math.cos(subAngle) * subRadius;
+                        const py = centerY + Math.sin(subAngle) * subRadius;
+                        
+                        ctx.fillStyle = `rgba(245, 166, 35, ${0.1 + Math.sin(time * 2 + i) * 0.05})`;
+                        ctx.beginPath();
+                        ctx.arc(px, py, 4 + Math.sin(time * 3 + i) * 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+                
+                time += 0.02;
+                requestAnimationFrame(drawMorphing);
+            }
+            
+            window.addEventListener('resize', resize);
+            resize();
+            drawMorphing();
+        }
+        
+        // ===== SCROLL REVEAL =====
+        const revealElements = document.querySelectorAll('.formation-card');
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0) scale(1)';
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        revealElements.forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(50px) scale(0.9)';
+            el.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+            revealObserver.observe(el);
+        });
+    })();
+</script>
+
 <style>
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-    /* ===== HEADER ===== */
-    .page-header {
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-        color: white;
-        padding: 80px 20px;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-    }
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: #0a0f1c;
+    overflow-x: hidden;
+}
 
-    .header-grid {
-        position: absolute;
-        inset: 0;
-        background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-        background-size: 60px 60px;
-    }
+/* ===== HERO MORPHING ===== */
+.hero-morphing {
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+}
 
-    .header-badge {
-        display: inline-block;
-        background: rgba(251,191,36,0.2);
-        border: 1px solid rgba(251,191,36,0.5);
-        color: #fbbf24;
-        padding: 0.4rem 1.2rem;
-        border-radius: 50px;
-        font-size: 0.82rem;
-        font-weight: 600;
-        margin-bottom: 1.5rem;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        position: relative;
-    }
+#morphingCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
 
-    .page-header h1 {
-        font-size: clamp(2rem, 5vw, 3.5rem);
-        margin-bottom: 1rem;
-        position: relative;
-    }
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, transparent 0%, rgba(10,15,28,0.6) 100%);
+    z-index: 2;
+}
 
-    .page-header h1 span { color: #fbbf24; }
+.hero-content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    padding: 20px;
+}
 
-    .page-header p {
-        font-size: 1.1rem;
-        opacity: 0.85;
-        margin-bottom: 2.5rem;
-        position: relative;
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    padding: 8px 24px;
+    border-radius: 60px;
+    color: #f5a623;
+    font-weight: 600;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.badge-ring {
+    position: absolute;
+    inset: -2px;
+    border-radius: 60px;
+    border: 1px solid rgba(245,166,35,0.5);
+    animation: ringPulse 2s infinite;
+}
+
+@@keyframes ringPulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 1; }
+}
+
+.floating-badge {
+    animation: floatBadge 3s infinite ease-in-out;
+}
+
+@@keyframes floatBadge {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.hero-title {
+    font-size: clamp(2rem, 8vw, 4.5rem);
+    font-weight: 800;
+    margin-bottom: 40px;
+    line-height: 1.2;
+}
+
+.title-word {
+    display: inline-block;
+    color: white;
+    margin: 0 10px;
+    animation: titleGlow 2s ease-in-out infinite;
+}
+
+@@keyframes titleGlow {
+    0%, 100% { text-shadow: 0 0 5px rgba(245,166,35,0.3); }
+    50% { text-shadow: 0 0 20px rgba(245,166,35,0.8), 0 0 30px rgba(245,166,35,0.4); }
+}
+
+.title-word.accent {
+    color: #f5a623;
+}
+
+.header-stats {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+    margin-bottom: 60px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 2.5rem;
+    color: #f5a623;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.7);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.loading-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #f5a623;
+    font-size: 1.2rem;
+    margin-bottom: 40px;
+}
+
+.hero-scroll {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    animation: bounce 2s infinite;
+}
+
+@@keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-10px); }
+}
+
+.scroll-mouse {
+    width: 26px;
+    height: 40px;
+    border: 2px solid white;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.scroll-wheel {
+    width: 3px;
+    height: 8px;
+    background: white;
+    border-radius: 2px;
+    margin-top: 6px;
+    animation: scrollWheel 1.5s infinite;
+}
+
+@@keyframes scrollWheel {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(15px); }
+}
+
+.hero-scroll span {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    color: rgba(255,255,255,0.6);
+}
+
+.loading-container .spinner {
+    border: 3px solid rgba(255,255,255,0.1);
+    border-top-color: #f5a623;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===== FORMATIONS SECTION ===== */
+.formations-section {
+    padding: 80px 20px;
+    background: linear-gradient(135deg, #0f1420, #0a0f1c);
+}
+
+.formations-section.alt-bg {
+    background: linear-gradient(135deg, #0a0f1c, #0f1420);
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.header-glow {
+    display: inline-block;
+    background: rgba(245,166,35,0.1);
+    padding: 6px 20px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    color: #f5a623;
+    margin-bottom: 20px;
+    animation: headerGlow 3s infinite;
+}
+
+@@keyframes headerGlow {
+    0%, 100% { box-shadow: 0 0 5px rgba(245,166,35,0.3); }
+    50% { box-shadow: 0 0 20px rgba(245,166,35,0.5); }
+}
+
+.section-header h2 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    color: white;
+    margin-bottom: 15px;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #f5a623, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.header-line {
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, #f5a623, #3b82f6);
+    margin: 0 auto;
+    border-radius: 3px;
+}
+
+.formations-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+}
+
+.formation-card {
+    background: linear-gradient(135deg, #1a2332, #0f1420);
+    border-radius: 24px;
+    padding: 40px 30px;
+    border: 1px solid rgba(59,130,246,0.2);
+    transition: all 0.3s;
+}
+
+.formation-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(245,166,35,0.5);
+    box-shadow: 0 10px 30px rgba(245,166,35,0.2);
+}
+
+.formation-card.formation-terminee {
+    opacity: 0.6;
+}
+
+.formation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.formation-status {
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.status-en-cours { background: rgba(59,130,246,0.2); color: #3b82f6; }
+.status-avenir { background: rgba(245,166,35,0.2); color: #f5a623; }
+.status-terminee { background: rgba(107,114,128,0.2); color: #6b7280; }
+
+.formation-price {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #f5a623;
+}
+
+.formation-card h3 {
+    color: white;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+.formation-desc {
+    color: rgba(255,255,255,0.7);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.formation-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.formation-details .detail {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: rgba(255,255,255,0.6);
+    font-size: 0.9rem;
+}
+
+.formation-details .detail i {
+    color: #3b82f6;
+    width: 18px;
+}
+
+.btn-formation {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: none;
+}
+
+.btn-formation.btn-primary {
+    background: #f5a623;
+    color: #0a0f1c;
+}
+
+.btn-formation.btn-primary:hover {
+    background: #e5941a;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(245,166,35,0.4);
+}
+
+.btn-formation.btn-secondary {
+    background: rgba(59,130,246,0.2);
+    color: #3b82f6;
+    border: 1px solid rgba(59,130,246,0.3);
+}
+
+.btn-formation.btn-secondary:hover {
+    background: #3b82f6;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-formation.btn-disabled {
+    background: rgba(107,114,128,0.2);
+    color: #6b7280;
+    cursor: not-allowed;
+}
+
+/* ===== MODAL ===== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #1a2332, #0f1420);
+    border-radius: 24px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 40px;
+    position: relative;
+    border: 1px solid rgba(59,130,246,0.2);
+}
+
+.modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: rgba(255,255,255,0.6);
+    transition: color 0.2s;
+}
+
+.modal-close:hover { color: #ef4444; }
+
+.modal-content h2 {
+    font-size: 1.8rem;
+    color: white;
+    margin-bottom: 25px;
+}
+
+.formation-info {
+    background: rgba(59,130,246,0.1);
+    padding: 20px;
+    border-radius: 16px;
+    margin-bottom: 30px;
+}
+
+.formation-info .info-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: rgba(255,255,255,0.8);
+    font-size: 0.95rem;
+    margin-bottom: 12px;
+}
+
+.formation-info .info-row:last-child { margin-bottom: 0; }
+
+.formation-info .info-row i { color: #f5a623; width: 18px; }
+
+.form-group { margin-bottom: 20px; }
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.form-input, .form-textarea {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(255,255,255,0.05);
+    border: 2px solid rgba(59,130,246,0.2);
+    border-radius: 12px;
+    font-size: 1rem;
+    color: white;
+    transition: all 0.3s;
+    box-sizing: border-box;
+}
+
+.form-input:focus, .form-textarea:focus {
+    outline: none;
+    border-color: #f5a623;
+    background: rgba(255,255,255,0.08);
+}
+
+.form-input::placeholder, .form-textarea::placeholder {
+    color: rgba(255,255,255,0.4);
+}
+
+.form-textarea { resize: none; }
+
+.btn-submit {
+    width: 100%;
+    padding: 16px;
+    background: #f5a623;
+    color: #0a0f1c;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-submit:hover:not(:disabled) {
+    background: #e5941a;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(245,166,35,0.4);
+}
+
+.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.success-message {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    padding: 16px;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.error-message {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    padding: 16px;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* ===== RESPONSIVE ===== */
+@@media (max-width: 768px) {
+    .formations-grid {
+        grid-template-columns: 1fr;
     }
 
     .header-stats {
-        display: flex;
-        justify-content: center;
-        gap: 3rem;
-        flex-wrap: wrap;
-        position: relative;
+        gap: 1.5rem;
     }
-
-    .stat-item { text-align: center; }
-
-    .stat-number {
-        display: block;
+    
+    .hero-title {
         font-size: 2rem;
-        color: #fbbf24;
-        margin-bottom: 0.3rem;
     }
-
-    .stat-label {
-        font-size: 0.85rem;
-        color: rgba(255,255,255,0.7);
-    }
-
-    .loading-spinner {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        color: #fbbf24;
-        font-size: 1rem;
-        margin-top: 1rem;
-    }
-
-    .loading-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 4rem 2rem;
-        color: #6b7280;
-    }
-
-    .loading-container .spinner {
-        border: 3px solid #e5e7eb;
-        border-top-color: #3b82f6;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        animation: spin 1s linear infinite;
-        margin-bottom: 1rem;
-    }
-
-    @@keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-
-    /* ===== TAGS ===== */
-    .section-tag {
-        display: inline-block;
-        background: rgba(59,130,246,0.1);
-        color: #3b82f6;
-        padding: 0.3rem 1rem;
-        border-radius: 50px;
-        font-size: 0.78rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        margin-bottom: 0.75rem;
-    }
-
-    .section-header {
-        text-align: center;
-        margin-bottom: 3rem;
-    }
-
-    .section-header h2 {
-        font-size: 2.2rem;
-        color: #1e3a8a;
-        margin: 0;
-    }
-
-    /* ===== FORMATIONS SECTION ===== */
-    .formations-section {
-        padding: 80px 20px;
-        background: white;
-    }
-
-    .formations-section.alt-bg { background: #f9fafb; }
-
-    .formations-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 2rem;
-    }
-
-    .formation-card {
-        background: white;
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        transition: all 0.3s;
-        border: 1px solid #e5e7eb;
-    }
-
-    .formation-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 30px rgba(0,0,0,0.12);
-    }
-
-    .formation-card.formation-terminee {
-        opacity: 0.7;
-    }
-
-    .formation-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
-
-    .formation-status {
-        padding: 0.3rem 0.8rem;
-        border-radius: 50px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-
-    .status-en-cours { background: #dbeafe; color: #1e40af; }
-    .status-avenir { background: #fef3c7; color: #92400e; }
-    .status-terminee { background: #e5e7eb; color: #4b5563; }
-
-    .formation-price {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #1e3a8a;
-    }
-
-    .formation-card h3 {
-        font-size: 1.3rem;
-        color: #1e3a8a;
-        margin-bottom: 0.75rem;
-    }
-
-    .formation-desc {
-        color: #6b7280;
-        font-size: 0.95rem;
-        line-height: 1.6;
-        margin-bottom: 1.5rem;
-    }
-
-    .formation-details {
-        display: flex;
-        flex-direction: column;
-        gap: 0.6rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .formation-details .detail {
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-        color: #4b5563;
-        font-size: 0.9rem;
-    }
-
-    .formation-details .detail i {
-        color: #3b82f6;
-        width: 16px;
-    }
-
-    .btn-formation {
-        width: 100%;
-        padding: 0.9rem;
-        border-radius: 8px;
-        font-size: 0.95rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        border: none;
-    }
-
-    .btn-formation.btn-primary {
-        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-        color: white;
-    }
-
-    .btn-formation.btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(30,58,138,0.4);
-    }
-
-    .btn-formation.btn-secondary {
-        background: #fbbf24;
-        color: #1e3a8a;
-    }
-
-    .btn-formation.btn-secondary:hover {
-        background: #f59e0b;
-        transform: translateY(-2px);
-    }
-
-    .btn-formation.btn-disabled {
-        background: #e5e7eb;
-        color: #6b7280;
-        cursor: not-allowed;
-    }
-
-    /* ===== MODAL ===== */
-    .modal-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.8);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-        padding: 20px;
-    }
-
-    .modal-content {
-        background: white;
-        border-radius: 16px;
-        max-width: 500px;
-        width: 100%;
-        max-height: 90vh;
-        overflow-y: auto;
-        padding: 2rem;
-        position: relative;
-    }
-
-    .modal-close {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        background: none;
-        border: none;
-        font-size: 1.2rem;
-        cursor: pointer;
-        color: #6b7280;
-        transition: color 0.2s;
-    }
-
-    .modal-close:hover { color: #ef4444; }
-
-    .modal-content h2 {
-        font-size: 1.5rem;
-        color: #1e3a8a;
-        margin-bottom: 1.5rem;
-    }
-
-    .formation-info {
-        background: #f9fafb;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1.5rem;
-    }
-
-    .formation-info .info-row {
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-        color: #4b5563;
-        font-size: 0.9rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .formation-info .info-row:last-child { margin-bottom: 0; }
-
-    .formation-info .info-row i { color: #3b82f6; width: 16px; }
-
-    .form-group { margin-bottom: 1rem; }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 0.4rem;
-        font-weight: 600;
-        color: #374151;
-        font-size: 0.9rem;
-    }
-
-    .form-input, .form-textarea {
-        width: 100%;
-        padding: 0.75rem;
-        border: 2px solid #e5e7eb;
-        border-radius: 8px;
-        font-size: 0.95rem;
-        transition: border-color 0.3s;
-        box-sizing: border-box;
-    }
-
-    .form-input:focus, .form-textarea:focus {
-        outline: none;
-        border-color: #3b82f6;
-    }
-
-    .form-textarea { resize: none; }
-
-    .btn-submit {
-        width: 100%;
-        padding: 0.9rem;
-        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-    }
-
-    .btn-submit:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(30,58,138,0.4);
-    }
-
-    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-
-    .success-message {
-        background: #d1fae5;
-        color: #065f46;
-        padding: 1rem;
-        border-radius: 8px;
-        text-align: center;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-    }
-
-    .error-message {
-        background: #fee2e2;
-        color: #991b1b;
-        padding: 1rem;
-        border-radius: 8px;
-        text-align: center;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-    }
-
-    @@media (max-width: 768px) {
-        .formations-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .header-stats {
-            gap: 1.5rem;
-        }
-    }
+}
 </style>
