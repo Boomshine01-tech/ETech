@@ -267,25 +267,25 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    try
-    {
-        Console.WriteLine(" Application des migrations EF Core...");
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await context.Database.MigrateAsync();
-        Console.WriteLine("✅ Migrations appliquées avec succès");
+//using (var scope = app.Services.CreateScope())
+//{
+//    try
+//    {
+//        Console.WriteLine(" Application des migrations EF Core...");
+//        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+//        await context.Database.MigrateAsync();
+//        Console.WriteLine("✅ Migrations appliquées avec succès");
         
-        await DbInitializer.Initialize(context);
+//        await DbInitializer.Initialize(context);
         
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine("❌ ERREUR lors des migrations PostgreSQL");
-        Console.WriteLine(ex.Message);
-        throw;
-    }
-}
+//    }
+//    catch (Exception ex)
+//    {
+//        Console.WriteLine("❌ ERREUR lors des migrations PostgreSQL");
+//        Console.WriteLine(ex.Message);
+//        throw;
+//    }
+//}
 
 
 if (app.Environment.IsDevelopment())
