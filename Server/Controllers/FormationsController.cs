@@ -19,6 +19,9 @@ public class FormationsController : ControllerBase
         _logger = logger;
     }
 
+    private static DateTime ToUtc(DateTime dt) =>
+        dt.Kind == DateTimeKind.Utc ? dt : DateTime.SpecifyKind(dt, DateTimeKind.Utc);
+
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Formation>>> GetFormations()
     {
@@ -54,8 +57,11 @@ public class FormationsController : ControllerBase
     public async Task<ActionResult<Formation>> CreateFormation(Formation formation)
     {
         formation.CreatedAt = DateTime.UtcNow;
+        formation.UpdatedAt = DateTime.UtcNow;
+        formation.DateDebut = ToUtc(formation.DateDebut);
+        formation.DateFin = ToUtc(formation.DateFin);
         formation.PlacesRestantes = formation.CapaciteMax;
-        
+
         _context.Formations.Add(formation);
         await _context.SaveChangesAsync();
 
@@ -82,8 +88,8 @@ public class FormationsController : ControllerBase
         existing.Titre = formation.Titre;
         existing.Description = formation.Description;
         existing.Prix = formation.Prix;
-        existing.DateDebut = formation.DateDebut;
-        existing.DateFin = formation.DateFin;
+        existing.DateDebut = ToUtc(formation.DateDebut);
+        existing.DateFin = ToUtc(formation.DateFin);
         existing.Horaires = formation.Horaires;
         existing.Statut = formation.Statut;
         existing.Lieu = formation.Lieu;

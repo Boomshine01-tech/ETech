@@ -4,7 +4,7 @@ public class Inscription
 {
     public int Id { get; set; }
     public int FormationId { get; set; }
-    public Formation Formation { get; set; } = null!;
+    public Formation? Formation { get; set; } = null!;
     public string Nom { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string Telephone { get; set; } = string.Empty;
