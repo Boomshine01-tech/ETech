@@ -1,38 +1,43 @@
 @page "/"
-@using Microsoft.AspNetCore.Components.Web
 @namespace ETechEnergie.Server.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = null;
+}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href="~/" />
-    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
-    <link href="_content/Radzen.Blazor/css/default-base.css" rel="stylesheet" />
-    <link rel="icon" href="favicon.ico" />
-    <link href="css/app.css" rel="stylesheet" />
-    <link href="manifest.json" rel="manifest" />
-    <link rel="apple-touch-icon" sizes="512x512" href="apple-touch-icon.png" />
-    <component type="typeof(HeadOutlet)" render-mode="WebAssemblyPrerendered" />
+    <title>ETech Énergie - Solutions Solaire & Formations</title>
+    <base href="/" />
+    
+    <!-- Meta tags par défaut pour les crawlers statiques -->
+    <meta name="description" content="ETech Énergie : Votre associé en installations solaires et domestiques ainsi qu'en formations relatives aux professions de la transition énergétique et à la vente de matériels électroniques." />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:site_name" content="ETech Énergie" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://etechenergie.onrender.com/android-chrome-512x512.png" />
+
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/app.css" />
+    <link rel="stylesheet" href="ETechEnergie.Client.styles.css" />
+    <link rel="icon" type="image/png" href="favicon-32x32.png" />
+    
+    <component type="typeof(Microsoft.AspNetCore.Components.Web.HeadOutlet)" render-mode="WebAssemblyPrerendered" />
 </head>
 <body>
-    <component type="typeof(ETechEnergie.Client.App)" render-mode="WebAssemblyPrerendered" />
+    <div id="app">
+        <component type="typeof(ETechEnergie.Client.App)" render-mode="WebAssemblyPrerendered" />
+    </div>
 
     <div id="blazor-error-ui">
-        <environment include="Staging,Production">
-            An error has occurred. This application may no longer respond until reloaded.
-        </environment>
-        <environment include="Development">
-            An unhandled exception has occurred. See browser dev tools for details.
-        </environment>
-        <a href="" class="reload">Reload</a>
+        Une erreur est survenue.
+        <a href="" class="reload">Recharger</a>
         <a class="dismiss">🗙</a>
     </div>
 
     <script src="_framework/blazor.webassembly.js"></script>
-    <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
-    <script>navigator.serviceWorker.register('service-worker.js');</script>
 </body>
 </html>
