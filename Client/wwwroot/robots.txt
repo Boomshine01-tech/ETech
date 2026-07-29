@@ -1,4 +1,10 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://etechenergie.onrender.com/sitemap.xml
+# Interdire l'indexation de l'administration et du panier
+Disallow: /admin
+Disallow: /admin-formations
+Disallow: /cart
+Disallow: /login
+
+Sitemap: https://etech-energie.com/sitemap.xml
