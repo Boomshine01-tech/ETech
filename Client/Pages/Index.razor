@@ -1,15 +1,12 @@
 @page "/"
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@using ETechEnergie.Client.Shared
 
-<PageTitle>Entreprise d'électricité et énergie solaire au Sénégal à Thies | e-Tech Energie+</PageTitle>
-<HeadContent>
-    <meta name="description" content="e-Tech Energie+ est une entreprise spécialisée en installation et vente d'équipments électrique, énergie solaire, automatismes industriels et solutions techniques à Thiès au Sénégal" />
-    <meta name="keywords" content="électricité Sénégal, énergie solaire Thiès, panneaux solaires Sénégal, automatismes industriels Sénégal, installation électrique Thiès, entreprise électrique Sénégal" />
-    <meta property="og:title" content="Accueil | e-Tech Energie+" />
-    <meta property="og:description" content="Présentation d'une Startup sénégalaise innovante dans le secteur de l'électricité et du bâtiment, située à Thiès." />
-    <meta property="og:url" content="https://etechenergie.onrender.com/" />
-</HeadContent>
+<SeoHeader Title="Accueil - Solutions Énergétiques & Panneaux Solaires"
+           Description="Découvrez ETech Énergie : experts en installation de panneaux solaires, bilans énergétiques et formations professionnelles aux métiers des énergies renouvelables."
+           Keywords="énergie solaire, kit solaire, formation électricité, installation photovoltaïque"
+           JsonLdSchema="@GetOrganizationSchema()" />
 
 <!-- ===== HERO SLIDER ===== -->
 <section class="hero">
@@ -291,6 +288,23 @@
         }
 
         StartSlider();
+    }
+
+    private string GetOrganizationSchema()
+    {
+        return @"{
+            ""@context"": ""https://schema.org"",
+            ""@type"": ""Organization"",
+            ""name"": ""ETech Énergie"",
+            ""url"": ""https://etech-energie.com"",
+            ""logo"": ""https://etech-energie.com/android-chrome-512x512.png"",
+            ""description"": ""Entreprise spécialisée dans les solutions énergétiques et la formation professionnelle."",
+            ""contactPoint"": {
+                ""@type"": ""ContactPoint"",
+                ""telephone"": ""+221-XX-XXX-XX-XX"",
+                ""contactType"": ""customer service""
+            }
+        }";
     }
 
     private void StartSlider()
