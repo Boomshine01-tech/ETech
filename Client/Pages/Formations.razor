@@ -1,14 +1,12 @@
 @page "/formations"
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@using ETechEnergie.Client.Shared
 
-<PageTitle>Formations en électricité et énergie solaire au Sénégal</PageTitle>
-<HeadContent>
-    <meta name="description" content="Formations professionnelles en électricité, énergie solaire et automatismes industriels à Thiès au Sénégal." />
-    <meta name="keywords" content="formation Thiès, formation professionnelle Sénégal, inscription formation" />
-    <meta property="og:title" content="Formations | e-Tech Energie+" />
-    <meta property="og:url" content="https://etechenergie.onrender.com/formations" />
-</HeadContent>
+<SeoHeader Title="Formations à l'IoT et à l'installation solaire et domestique"
+           Description="Inscrivez-vous à nos sessions de formation pratique en installation et maintenance solaire, programation et realisation de projet IoT. Attestations et diplômes reconnus."
+           Keywords="formation solaire, cours sur l'IoT, certificat électricité domestique, domotique"
+           JsonLdSchema="@GetCourseSchema()" />
 
 <!-- ===== HEADER ===== -->
 <div class="page-header">
@@ -244,6 +242,20 @@ else
     protected override async Task OnInitializedAsync()
     {
         await LoadFormations();
+    }
+
+    private string GetCourseSchema()
+    {
+        return @"{
+            ""@context"": ""https://schema.org"",
+            ""@type"": ""Course"",
+            ""name"": ""Formation en IoT et installation domestique/solaire"",
+            ""description"": ""Formation pratique pour devenir installateur certifié en systèmes photovoltaïques et électricité domestique et realisation de projet d'IoT d'envergure."",
+            ""provider"": {
+                ""@type"": ""Organization"",
+                ""name"": ""ETech Énergie""
+            }
+        }";
     }
 
     private async Task LoadFormations()
