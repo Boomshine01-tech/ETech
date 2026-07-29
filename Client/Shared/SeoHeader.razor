@@ -1,0 +1,44 @@
+@* Client/Shared/SeoHeader.razor *@
+@inject NavigationManager Navigation
+
+<PageTitle>@Title | ETech Énergie</PageTitle>
+
+<HeadContent>
+    <!-- Balises Métainformations Standards -->
+    <meta name="description" content="@Description" />
+    <meta name="keywords" content="@Keywords" />
+    <link rel="canonical" href="@CanonicalUrl" />
+
+    <!-- Open Graph / Facebook / LinkedIn -->
+    <meta property="og:type" content="@Type" />
+    <meta property="og:title" content="@Title" />
+    <meta property="og:description" content="@Description" />
+    <meta property="og:url" content="@CanonicalUrl" />
+    <meta property="og:image" content="@ImageUrl" />
+    <meta property="og:site_name" content="ETech Énergie" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="@Title" />
+    <meta name="twitter:description" content="@Description" />
+    <meta name="twitter:image" content="@ImageUrl" />
+
+    <!-- Données Structurées Schema.org (JSON-LD) -->
+    @if (!string.IsNullOrEmpty(JsonLdSchema))
+    {
+        <script type="application/ld+json">
+            @((MarkupString)JsonLdSchema)
+        </script>
+    }
+</HeadContent>
+
+@code {
+    [Parameter] public string Title { get; set; } = "Solutions d'Énergie Solaire & Formation";
+    [Parameter] public string Description { get; set; } = "ETech Énergie fournit des solutions solaires, des équipements électroniques et des formations professionnelles qualifiantes.";
+    [Parameter] public string Keywords { get; set; } = "énergie solaire, capteurs electroniques, formation énergie, installation solaire, installation domestique, domotique et IoT";
+    [Parameter] public string ImageUrl { get; set; } = "https://etech-energie.com/images/logo.png"; // Remplacez par votre domaine réel
+    [Parameter] public string Type { get; set; } = "website";
+    [Parameter] public string? JsonLdSchema { get; set; }
+
+    private string CanonicalUrl => Navigation.Uri;
+}
