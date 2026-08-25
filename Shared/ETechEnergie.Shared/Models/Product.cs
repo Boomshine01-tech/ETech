@@ -17,6 +17,17 @@ public class Product
     [Required]
     [Range(0.01, double.MaxValue, ErrorMessage = "Le prix doit être supérieur à 0")]
     public decimal Price { get; set; }
+    public decimal? DiscountPrice { get; set; }
+    public DateTime? DiscountEndDate { get; set; }
+    [NotMapped]
+    public bool IsOnDiscount => DiscountPrice.HasValue && 
+                                DiscountEndDate.HasValue && 
+                                DiscountEndDate.Value > DateTime.UtcNow;
+
+    [NotMapped]
+    public decimal ActivePrice => IsOnDiscount ? DiscountPrice!.Value : Price;
+
+    public bool IsOnOrder { get; set; }
     
     public string ImageUrl { get; set; } = "/images/products/default.jpg";
     
