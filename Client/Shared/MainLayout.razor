@@ -2,15 +2,6 @@
 
 <div class="page">
     <NavMenu />
-    @if (showAnnouncement)
-    {
-        <div class="announcement-bar d-flex justify-content-between align-items-center px-3 py-1 bg-dark text-white text-center fs-7">
-            <span class="w-100">💡 <strong>Offre Spéciale :</strong> Inscriptions ouvertes pour nos nouvelles formations d'énergie solaire !</span>
-            <button class="btn-close btn-close-white ms-2" style="font-size: 0.7rem;" @onclick="DismissBanner"></button>
-        </div>
-    }
-
-    <UnifiedHeader />
     <main>
         <article class="content px-4">
             @Body
@@ -18,11 +9,6 @@
     </main>
     <Footer />
 </div>
-@code {
-    private bool showAnnouncement = true;
-
-    private void DismissBanner() => showAnnouncement = false;
-}
 
 <script type="application/ld+json">
 {
