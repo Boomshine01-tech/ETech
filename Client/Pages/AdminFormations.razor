@@ -176,6 +176,10 @@
                             </InputSelect>
                             <ValidationMessage For="@(() => currentFormation.Statut)" />
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label">Image d'affiche (Optionnelle)</label>
+                            <input type="text" class="form-control" placeholder="https://..." @bind="editingFormation.ImageUrl" />
+                        </div>
                         <div class="form-group">
                             <label>Lieu *</label>
                             <InputText @bind-Value="currentFormation.Lieu" class="form-input" />
