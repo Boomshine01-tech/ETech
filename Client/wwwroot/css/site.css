@@ -335,6 +335,11 @@ a:focus {
     font-size: 0.8rem;
     color: #7f8c8d;
 }
+.announcement-bar {
+    font-size: 0.85rem;
+    letter-spacing: 0.3px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
 /* Réactivité améliorée */
 @media (max-width: 768px) {
     .notifications-container {
