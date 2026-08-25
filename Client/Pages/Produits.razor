@@ -227,13 +227,31 @@
                             {
                                 <span class="stock-badge low-stock">@product.Stock restants</span>
                             }
+                            @if (product.IsOnDiscount)
+                            {
+                                <span class="badge bg-danger position-absolute top-0 start-0 m-2">Promo</span>
+                            }
+                            @if (product.IsOnOrder)
+                            {
+                                <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">Sur commande</span>
+                            }
                         </div>
                         <div class="product-info">
                             <h3>@product.Name</h3>
                             <div class="category">@product.Category?.Name</div>
                             <div class="description-preview">@GetShortDescription(product.Description)</div>
                             <div class="product-footer">
-                                <span class="price">@product.Price.ToString("N0") FCFA</span>
+                                <div class="price-container my-2">
+                                    @if (product.IsOnDiscount)
+                                    {
+                                        <span class="text-muted text-decoration-line-through me-2">@product.Price.ToString("C")</span>
+                                        <span class="fw-bold text-danger fs-5">@product.DiscountPrice?.ToString("C")</span>
+                                    }
+                                    else
+                                    {
+                                       <span class="fw-bold fs-5">@product.Price.ToString("C")</span>
+                                   }
+                                </div>
                                 <button class="btn-add-cart"
                                         disabled="@(product.Stock == 0)"
                                         @onclick="() => AddToCart(product)"
