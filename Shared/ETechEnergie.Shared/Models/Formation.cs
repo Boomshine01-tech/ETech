@@ -15,6 +15,7 @@ public class Formation
     public bool InscriptionOuverte { get; set; } = true;
     public int CapaciteMax { get; set; } = 20;
     public int PlacesRestantes { get; set; } = 20;
+    public string? ImageUrl { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
     public List<Inscription> Inscriptions { get; set; } = new();
