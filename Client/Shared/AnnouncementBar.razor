@@ -1,0 +1,135 @@
+@* Bande d'annonce discrète affichée en haut de toutes les pages.
+   Se fond dans la charte graphique du site (dégradé bleu identique à la navbar),
+   reste fine pour ne pas gêner la navigation, et peut être fermée par l'utilisateur. *@
+@inject HttpClient Http
+@using System.Net.Http.Json
+
+@if (announcement != null && announcement.IsActive && !string.IsNullOrWhiteSpace(announcement.Message) && !isDismissed)
+{
+    <div class="announcement-bar">
+        <div class="announcement-content">
+            <i class="fas fa-bullhorn announcement-icon"></i>
+            <span class="announcement-message">@announcement.Message</span>
+            @if (!string.IsNullOrWhiteSpace(announcement.LinkUrl))
+            {
+                <a href="@announcement.LinkUrl" class="announcement-link">
+                    @(string.IsNullOrWhiteSpace(announcement.LinkText) ? "En savoir plus" : announcement.LinkText)
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            }
+        </div>
+        <button class="announcement-close" @onclick="Dismiss" title="Fermer" aria-label="Fermer l'annonce">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+}
+
+@code {
+    private Announcement? announcement;
+    private bool isDismissed = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            announcement = await Http.GetFromJsonAsync<Announcement>("api/announcement");
+        }
+        catch
+        {
+            // Si l'annonce ne peut pas être chargée, on n'affiche simplement rien :
+            // cela ne doit jamais bloquer l'affichage du reste du site.
+            announcement = null;
+        }
+    }
+
+    private void Dismiss()
+    {
+        isDismissed = true;
+    }
+}
+
+<style>
+    .announcement-bar {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 0.5rem 2.5rem 0.5rem 1rem;
+        position: relative;
+        font-size: 0.85rem;
+        line-height: 1.3;
+    }
+
+    .announcement-content {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 1200px;
+        text-align: center;
+    }
+
+    .announcement-icon {
+        color: #fbbf24;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+    }
+
+    .announcement-message {
+        font-weight: 500;
+    }
+
+    .announcement-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: white;
+        font-weight: 700;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        white-space: nowrap;
+        transition: opacity 0.2s;
+    }
+
+    .announcement-link:hover {
+        opacity: 0.85;
+    }
+
+    .announcement-link i {
+        font-size: 0.7rem;
+    }
+
+    .announcement-close {
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255,255,255,0.15);
+        border: none;
+        color: white;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 0.7rem;
+        transition: background 0.2s;
+        flex-shrink: 0;
+    }
+
+    .announcement-close:hover {
+        background: rgba(255,255,255,0.3);
+    }
+
+    @@media (max-width: 640px) {
+        .announcement-bar {
+            padding: 0.5rem 2.25rem 0.5rem 0.75rem;
+            font-size: 0.78rem;
+        }
+    }
+</style>
