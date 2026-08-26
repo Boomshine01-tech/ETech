@@ -27,7 +27,9 @@ public class CartService
             {
                 ProductId = product.Id,
                 ProductName = product.Name,
-                Price = product.Price,
+                // Utilise le prix effectif (prix promo si une remise est active) afin que le panier
+                // et le paiement reflètent réellement la remise affichée sur la fiche produit.
+                Price = product.EffectivePrice,
                 Quantity = quantity,
                 ImageUrl = product.ImageUrl
             });
