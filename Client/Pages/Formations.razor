@@ -63,6 +63,18 @@ else
                 @foreach (var formation in formationsEnCours)
                 {
                     <div class="formation-card">
+                        <div class="formation-image">
+                            @if (!string.IsNullOrEmpty(formation.ImageUrl))
+                            {
+                                <img src="@formation.ImageUrl" alt="@formation.Titre" />
+                            }
+                            else
+                            {
+                                <div class="formation-image-placeholder">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                            }
+                        </div>
                         <div class="formation-header">
                             <span class="formation-status status-en-cours">En cours</span>
                             <span class="formation-price">@formation.Prix.ToString("N0") FCFA</span>
@@ -107,6 +119,18 @@ else
                 @foreach (var formation in formationsAVenir)
                 {
                     <div class="formation-card">
+                        <div class="formation-image">
+                            @if (!string.IsNullOrEmpty(formation.ImageUrl))
+                            {
+                                <img src="@formation.ImageUrl" alt="@formation.Titre" />
+                            }
+                            else
+                            {
+                                <div class="formation-image-placeholder">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                            }
+                        </div>
                         <div class="formation-header">
                             <span class="formation-status status-avenir">À venir</span>
                             <span class="formation-price">@formation.Prix.ToString("N0") FCFA</span>
@@ -142,6 +166,18 @@ else
                 @foreach (var formation in formationsTerminees)
                 {
                     <div class="formation-card formation-terminee">
+                        <div class="formation-image">
+                            @if (!string.IsNullOrEmpty(formation.ImageUrl))
+                            {
+                                <img src="@formation.ImageUrl" alt="@formation.Titre" />
+                            }
+                            else
+                            {
+                                <div class="formation-image-placeholder">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                            }
+                        </div>
                         <div class="formation-header">
                             <span class="formation-status status-terminee">Terminée</span>
                         </div>
@@ -481,6 +517,7 @@ else
         box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         transition: all 0.3s;
         border: 1px solid #e5e7eb;
+        overflow: hidden;
     }
 
     .formation-card:hover {
@@ -490,6 +527,34 @@ else
 
     .formation-card.formation-terminee {
         opacity: 0.7;
+    }
+
+    .formation-image {
+        margin: -2rem -2rem 1.25rem;
+        aspect-ratio: 16/9;
+        overflow: hidden;
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    }
+
+    .formation-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .formation-image-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    }
+
+    .formation-image-placeholder i {
+        font-size: 2.5rem;
+        color: rgba(255,255,255,0.6);
     }
 
     .formation-header {
