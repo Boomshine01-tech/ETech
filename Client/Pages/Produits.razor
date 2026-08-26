@@ -227,13 +227,9 @@
                             {
                                 <span class="stock-badge low-stock">@product.Stock restants</span>
                             }
-                            @if (product.IsOnDiscount)
+                            @if (product.HasActiveDiscount)
                             {
-                                <span class="badge bg-danger position-absolute top-0 start-0 m-2">Promo</span>
-                            }
-                            @if (product.IsOnOrder)
-                            {
-                                <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">Sur commande</span>
+                                <span class="discount-badge"><i class="fas fa-tag"></i> -@product.DiscountPercentage%</span>
                             }
                         </div>
                         <div class="product-info">
@@ -241,17 +237,17 @@
                             <div class="category">@product.Category?.Name</div>
                             <div class="description-preview">@GetShortDescription(product.Description)</div>
                             <div class="product-footer">
-                                <div class="price-container my-2">
-                                    @if (product.IsOnDiscount)
-                                    {
-                                        <span class="text-muted text-decoration-line-through me-2">@product.Price.ToString("C")</span>
-                                        <span class="fw-bold text-danger fs-5">@product.DiscountPrice?.ToString("C")</span>
-                                    }
-                                    else
-                                    {
-                                       <span class="fw-bold fs-5">@product.Price.ToString("C")</span>
-                                   }
-                                </div>
+                                @if (product.HasActiveDiscount)
+                                {
+                                    <div class="price-block">
+                                        <span class="price price-old">@product.Price.ToString("N0") FCFA</span>
+                                        <span class="price price-new">@product.EffectivePrice.ToString("N0") FCFA</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="price">@product.Price.ToString("N0") FCFA</span>
+                                }
                                 <button class="btn-add-cart"
                                         disabled="@(product.Stock == 0)"
                                         @onclick="() => AddToCart(product)"
@@ -312,7 +308,26 @@
                 <div class="modal-details-section">
                     <div class="modal-category">@selectedProduct.Category?.Name</div>
                     <h2 class="modal-title">@selectedProduct.Name</h2>
-                    <div class="modal-price">@selectedProduct.Price.ToString("N0") FCFA</div>
+                    @if (selectedProduct.HasActiveDiscount)
+                    {
+                        <div class="modal-price-block">
+                            <span class="modal-price-old">@selectedProduct.Price.ToString("N0") FCFA</span>
+                            <div class="modal-price modal-price-discounted">
+                                @selectedProduct.EffectivePrice.ToString("N0") FCFA
+                                <span class="modal-discount-badge">-@selectedProduct.DiscountPercentage%</span>
+                            </div>
+                            @if (selectedProduct.DiscountEndDate.HasValue)
+                            {
+                                <div class="modal-discount-end">
+                                    <i class="fas fa-clock"></i> Offre valable jusqu'au @selectedProduct.DiscountEndDate.Value.ToString("dd/MM/yyyy")
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="modal-price">@selectedProduct.Price.ToString("N0") FCFA</div>
+                    }
                     <div class="modal-description">
                         <h3 class="section-title">
                             <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -848,6 +863,21 @@
             background: #f59e0b;
         }
 
+    .discount-badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: .75rem;
+        font-weight: 700;
+        color: white;
+        background: #dc2626;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
     .product-info {
         padding: 14px;
         display: flex;
@@ -900,6 +930,23 @@
         font-weight: bold;
         color: #1e3a8a;
         white-space: nowrap;
+    }
+
+    .price-block {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.2;
+    }
+
+    .price-old {
+        font-size: .78rem;
+        font-weight: 500;
+        color: #9ca3af;
+        text-decoration: line-through;
+    }
+
+    .price-new {
+        color: #dc2626;
     }
 
     .btn-add-cart {
@@ -1098,6 +1145,44 @@
         font-weight: bold;
         color: #1e3a8a;
         margin-bottom: 20px;
+    }
+
+    .modal-price-block {
+        margin-bottom: 20px;
+    }
+
+    .modal-price-old {
+        display: block;
+        font-size: 1.05rem;
+        font-weight: 500;
+        color: #9ca3af;
+        text-decoration: line-through;
+        margin-bottom: 2px;
+    }
+
+    .modal-price-discounted {
+        color: #dc2626;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .modal-discount-badge {
+        background: #dc2626;
+        color: white;
+        font-size: .75rem;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 6px;
+    }
+
+    .modal-discount-end {
+        font-size: .8rem;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        gap: 6px;
     }
 
     .modal-description {
