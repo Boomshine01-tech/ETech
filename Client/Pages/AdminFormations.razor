@@ -1,0 +1,1198 @@
+@page "/admin/formations"
+@inject HttpClient Http
+@inject NotificationService NotificationService
+@inject AuthenticationService AuthService
+@inject IJSRuntime JS
+@using ETechEnergie.Shared.Models
+@using ETechEnergie.Client.Services
+@using System.Net.Http.Headers
+
+<PageTitle>Administration - Formations</PageTitle>
+
+<AuthGuard RequireAdmin="true">
+    <div class="admin-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="header-left">
+                    <i class="fas fa-graduation-cap"></i>
+                    <div>
+                        <h1>Gestion des Formations</h1>
+                        <p class="subtitle">Gérez vos formations et inscriptions</p>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="user-details">
+                        <span class="username">@currentUsername</span>
+                        <span class="role">Administrateur</span>
+                    </div>
+                    <button class="btn-logout" @onclick="Logout" title="Déconnexion">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="admin-subnav">
+                <a href="/admin/products" class="subnav-link"><i class="fas fa-boxes"></i> Produits</a>
+                <a href="/admin/formations" class="subnav-link active"><i class="fas fa-graduation-cap"></i> Formations</a>
+                <a href="/admin/announcement" class="subnav-link"><i class="fas fa-bullhorn"></i> Bande d'annonce</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-container">
+        <div class="toolbar">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Rechercher une formation..." @bind="searchQuery" @bind:event="oninput" />
+            </div>
+            <div class="filter-group">
+                <select @bind="statutFilter" class="filter-select">
+                    <option value="">Tous les statuts</option>
+                    <option value="A venir">À venir</option>
+                    <option value="En cours">En cours</option>
+                    <option value="Terminée">Terminée</option>
+                </select>
+            </div>
+            <button class="btn-primary" @onclick="ShowAddForm">
+                <i class="fas fa-plus"></i>
+                <span>Nouvelle Formation</span>
+            </button>
+        </div>
+
+        @if (formations == null)
+        {
+            <div class="loading-state">
+                <div class="spinner"></div>
+                <p>Chargement des formations...</p>
+            </div>
+        }
+        else if (!FilteredFormations.Any())
+        {
+            <div class="empty-state">
+                <i class="fas fa-graduation-cap"></i>
+                <h3>Aucune formation trouvée</h3>
+                <p>@(string.IsNullOrEmpty(searchQuery) && string.IsNullOrEmpty(statutFilter) ? "Commencez par ajouter votre première formation" : "Aucune formation ne correspond à votre recherche")</p>
+                @if (string.IsNullOrEmpty(searchQuery) && string.IsNullOrEmpty(statutFilter))
+                {
+                    <button class="btn-primary" @onclick="ShowAddForm">
+                        <i class="fas fa-plus"></i> Ajouter une Formation
+                    </button>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="formations-grid">
+                @foreach (var formation in FilteredFormations)
+                {
+                    <div class="formation-card">
+                        @if (!string.IsNullOrEmpty(formation.ImageUrl))
+                        {
+                            <div class="formation-thumbnail">
+                                <img src="@formation.ImageUrl" alt="@formation.Titre" />
+                            </div>
+                        }
+                        <div class="formation-header">
+                            <span class="formation-status @GetStatusClass(formation.Statut)">@formation.Statut</span>
+                            <span class="formation-price">@formation.Prix.ToString("N0") FCFA</span>
+                        </div>
+                        <h3 class="formation-title">@formation.Titre</h3>
+                        <p class="formation-description">@formation.Description</p>
+                        <div class="formation-details">
+                            <div class="detail-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>@formation.DateDebut.ToString("dd/MM/yyyy") - @formation.DateFin.ToString("dd/MM/yyyy")</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-clock"></i>
+                                <span>@formation.Horaires</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>@formation.Lieu</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-users"></i>
+                                <span>@formation.PlacesRestantes / @formation.CapaciteMax places</span>
+                            </div>
+                        </div>
+                        <div class="formation-actions">
+                            <button class="btn-view" @onclick="() => ViewInscriptions(formation)" title="Voir les inscriptions">
+                                <i class="fas fa-users"></i>
+                                <span>@formation.Inscriptions.Count</span>
+                            </button>
+                            <button class="btn-edit" @onclick="() => EditFormation(formation)" title="Modifier">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" @onclick="() => DeleteFormation(formation)" title="Supprimer">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- MODAL AJOUT/MODIFICATION -->
+    @if (showModal)
+    {
+        <div class="modal-overlay" @onclick="CloseModal">
+            <div class="modal-content" @onclick:stopPropagation="true">
+                <div class="modal-header">
+                    <h2>@(isEditing ? "Modifier la Formation" : "Nouvelle Formation")</h2>
+                    <button class="modal-close" @onclick="CloseModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <EditForm Model="@currentFormation" OnValidSubmit="HandleSubmit">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Titre *</label>
+                            <InputText @bind-Value="currentFormation.Titre" class="form-input" />
+                            <ValidationMessage For="@(() => currentFormation.Titre)" />
+                        </div>
+                        <div class="form-group">
+                            <label>Prix (FCFA) *</label>
+                            <InputNumber @bind-Value="currentFormation.Prix" class="form-input" />
+                            <ValidationMessage For="@(() => currentFormation.Prix)" />
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Description *</label>
+                            <InputTextArea @bind-Value="currentFormation.Description" class="form-textarea" rows="3" />
+                            <ValidationMessage For="@(() => currentFormation.Description)" />
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Affiche de la formation (optionnel)</label>
+                            <div class="image-upload-zone">
+                                @if (string.IsNullOrEmpty(currentFormation.ImageUrl))
+                                {
+                                    <label for="formationImageUpload" class="upload-label">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p>Cliquez pour choisir une image</p>
+                                        <span class="upload-hint">PNG, JPG ou WEBP (max. 5MB) — facultatif</span>
+                                    </label>
+                                }
+                                else
+                                {
+                                    <div class="image-preview-container">
+                                        <img src="@currentFormation.ImageUrl" alt="Aperçu" class="image-preview" />
+                                        <button type="button" class="btn-remove-image" @onclick="RemoveFormationImage">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                        <label for="formationImageUpload" class="btn-change-image">
+                                            <i class="fas fa-sync-alt"></i> Changer l'image
+                                        </label>
+                                    </div>
+                                }
+                                <InputFile OnChange="HandleImageSelected" class="file-input" id="formationImageUpload" accept="image/*" />
+                                @if (isUploadingImage)
+                                {
+                                    <div class="upload-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill"></div>
+                                        </div>
+                                        <p>Upload en cours...</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Date de début *</label>
+                            <InputDate @bind-Value="currentFormation.DateDebut" class="form-input" />
+                            <ValidationMessage For="@(() => currentFormation.DateDebut)" />
+                        </div>
+                        <div class="form-group">
+                            <label>Date de fin *</label>
+                            <InputDate @bind-Value="currentFormation.DateFin" class="form-input" />
+                            <ValidationMessage For="@(() => currentFormation.DateFin)" />
+                        </div>
+                        <div class="form-group">
+                            <label>Horaires *</label>
+                            <InputText @bind-Value="currentFormation.Horaires" class="form-input" placeholder="ex: Tous les dimanches de 09h à 13h" />
+                            <ValidationMessage For="@(() => currentFormation.Horaires)" />
+                        </div>
+                        <div class="form-group">
+                            <label>Statut *</label>
+                            <InputSelect @bind-Value="currentFormation.Statut" class="form-input">
+                                <option value="A venir">À venir</option>
+                                <option value="En cours">En cours</option>
+                                <option value="Terminée">Terminée</option>
+                            </InputSelect>
+                            <ValidationMessage For="@(() => currentFormation.Statut)" />
+                        </div>
+                        <div class="form-group">
+                            <label>Lieu *</label>
+                            <InputText @bind-Value="currentFormation.Lieu" class="form-input" />
+                            <ValidationMessage For="@(() => currentFormation.Lieu)" />
+                        </div>
+                        <div class="form-group">
+                            <label>Partenaires</label>
+                            <InputText @bind-Value="currentFormation.Partenaires" class="form-input" placeholder="Séparés par des virgules" />
+                        </div>
+                        <div class="form-group">
+                            <label>Capacité max *</label>
+                            <InputNumber @bind-Value="currentFormation.CapaciteMax" class="form-input" />
+                            <ValidationMessage For="@(() => currentFormation.CapaciteMax)" />
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <InputCheckbox @bind-Value="currentFormation.InscriptionOuverte" />
+                                Inscriptions ouvertes
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary" @onclick="CloseModal">Annuler</button>
+                        <button type="submit" class="btn-primary" disabled="@isSubmitting">
+                            @if (isSubmitting)
+                            {
+                                <i class="fas fa-spinner fa-spin"></i> <text>Traitement en cours</text>
+                            }
+                            else
+                            {
+                                <i class="fas fa-save"></i> @(isEditing ? "Modifier" : "Créer")
+                            }
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    }
+
+    <!-- MODAL INSCRIPTIONS -->
+    @if (showInscriptionsModal && selectedFormation != null)
+    {
+        <div class="modal-overlay" @onclick="CloseInscriptionsModal">
+            <div class="modal-content large" @onclick:stopPropagation="true">
+                <div class="modal-header">
+                    <h2>Inscriptions - @selectedFormation.Titre</h2>
+                    <button class="modal-close" @onclick="CloseInscriptionsModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                @if (inscriptions == null)
+                {
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>Chargement des inscriptions...</p>
+                    </div>
+                }
+                else if (inscriptions.Count == 0)
+                {
+                    <div class="empty-state">
+                        <i class="fas fa-user-slash"></i>
+                        <h3>Aucune inscription</h3>
+                        <p>Cette formation n'a pas encore d'inscrits</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="inscriptions-list">
+                        @foreach (var inscription in inscriptions)
+                        {
+                            <div class="inscription-item">
+                                <div class="inscription-info">
+                                    <div class="inscription-name">@inscription.Nom</div>
+                                    <div class="inscription-contact">
+                                        <i class="fas fa-envelope"></i> @inscription.Email
+                                        <span class="separator">|</span>
+                                        <i class="fas fa-phone"></i> @inscription.Telephone
+                                    </div>
+                                    <div class="inscription-date">
+                                        <i class="fas fa-calendar"></i> @inscription.DateInscription.ToString("dd/MM/yyyy HH:mm")
+                                    </div>
+                                </div>
+                                <div class="inscription-status @GetInscriptionStatusClass(inscription.Statut)">
+                                    @inscription.Statut
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</AuthGuard>
+
+@code {
+    private List<Formation>? formations;
+    private List<Inscription>? inscriptions;
+    private Formation? selectedFormation;
+    private Formation currentFormation = new();
+    private string searchQuery = "";
+    private string statutFilter = "";
+    private bool showModal = false;
+    private bool showInscriptionsModal = false;
+    private bool isEditing = false;
+    private bool isSubmitting = false;
+    private bool isUploadingImage = false;
+    private string currentUsername = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadFormations();
+        var (username, _, _) = await AuthService.GetCurrentUserAsync();
+        currentUsername = username ?? "Admin";
+    }
+
+    private async Task LoadFormations()
+    {
+        formations = await Http.GetFromJsonAsync<List<Formation>>("api/formations");
+    }
+
+    private IEnumerable<Formation> FilteredFormations
+    {
+        get
+        {
+            if (formations == null) return Enumerable.Empty<Formation>();
+
+            var query = formations.AsEnumerable();
+
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                query = query.Where(f => 
+                    f.Titre.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    f.Description.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    f.Lieu.Contains(searchQuery, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrEmpty(statutFilter))
+            {
+                query = query.Where(f => f.Statut == statutFilter);
+            }
+
+            return query.OrderByDescending(f => f.DateDebut);
+        }
+    }
+
+    private string GetStatusClass(string statut)
+    {
+        return statut switch
+        {
+            "En cours" => "status-en-cours",
+            "A venir" => "status-avenir",
+            "Terminée" => "status-terminee",
+            _ => ""
+        };
+    }
+
+    private string GetInscriptionStatusClass(string statut)
+    {
+        return statut switch
+        {
+            "Confirmée" => "status-confirmee",
+            "En attente" => "status-attente",
+            "Annulée" => "status-annulee",
+            _ => ""
+        };
+    }
+
+    private void ShowAddForm()
+    {
+        currentFormation = new Formation
+        {
+            DateDebut = DateTime.Today.AddDays(7),
+            DateFin = DateTime.Today.AddDays(37),
+            CapaciteMax = 20,
+            InscriptionOuverte = true,
+            Statut = "A venir"
+        };
+        isEditing = false;
+        showModal = true;
+    }
+
+    private void EditFormation(Formation formation)
+    {
+        currentFormation = new Formation
+        {
+            Id = formation.Id,
+            Titre = formation.Titre,
+            Description = formation.Description,
+            Prix = formation.Prix,
+            DateDebut = formation.DateDebut,
+            DateFin = formation.DateFin,
+            Horaires = formation.Horaires,
+            Statut = formation.Statut,
+            Lieu = formation.Lieu,
+            Partenaires = formation.Partenaires,
+            InscriptionOuverte = formation.InscriptionOuverte,
+            CapaciteMax = formation.CapaciteMax,
+            PlacesRestantes = formation.PlacesRestantes,
+            ImageUrl = formation.ImageUrl
+        };
+        isEditing = true;
+        showModal = true;
+    }
+
+    private void RemoveFormationImage()
+    {
+        currentFormation.ImageUrl = null;
+    }
+
+    private async Task HandleImageSelected(InputFileChangeEventArgs e)
+    {
+        isUploadingImage = true;
+        try
+        {
+            var file = e.File;
+            if (file != null)
+            {
+                using var content = new MultipartFormDataContent();
+                using var fileStream = file.OpenReadStream(maxAllowedSize: 5_000_000);
+                using var streamContent = new StreamContent(fileStream);
+                streamContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+                content.Add(streamContent, "file", file.Name);
+
+                var response = await Http.PostAsync("api/formations/upload-image", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var imageUrl = await response.Content.ReadAsStringAsync();
+                    currentFormation.ImageUrl = imageUrl.Trim('"');
+                    NotificationService.ShowSuccess("Image uploadée avec succès");
+                }
+                else
+                {
+                    NotificationService.ShowError("Erreur lors de l'upload de l'image");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur upload: {ex.Message}");
+            NotificationService.ShowError("Erreur lors de l'upload de l'image");
+        }
+        finally
+        {
+            isUploadingImage = false;
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        isSubmitting = true;
+
+        try
+        {
+            HttpResponseMessage response;
+
+            if (isEditing)
+            {
+                response = await Http.PutAsJsonAsync($"api/formations/{currentFormation.Id}", currentFormation);
+            }
+            else
+            {
+                response = await Http.PostAsJsonAsync("api/formations", currentFormation);
+            }
+
+            if (response.IsSuccessStatusCode)
+            {
+                NotificationService.ShowSuccess(isEditing ? "Formation modifiée avec succès" : "Formation créée avec succès");
+                await LoadFormations();
+                CloseModal();
+            }
+            else
+            {
+                NotificationService.ShowError("Une erreur s'est produite");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError($"Erreur: {ex.Message}");
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private async Task DeleteFormation(Formation formation)
+    {
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"Êtes-vous sûr de vouloir supprimer la formation \"{formation.Titre}\" ?");
+        if (!confirmed)
+            return;
+
+        try
+        {
+            var response = await Http.DeleteAsync($"api/formations/{formation.Id}");
+            if (response.IsSuccessStatusCode)
+            {
+                NotificationService.ShowSuccess("Formation supprimée avec succès");
+                await LoadFormations();
+            }
+            else
+            {
+                NotificationService.ShowError("Une erreur s'est produite");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError($"Erreur: {ex.Message}");
+        }
+    }
+
+    private async Task ViewInscriptions(Formation formation)
+    {
+        selectedFormation = formation;
+        inscriptions = await Http.GetFromJsonAsync<List<Inscription>>($"api/formations/{formation.Id}/inscriptions");
+        showInscriptionsModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+        currentFormation = new Formation();
+    }
+
+    private void CloseInscriptionsModal()
+    {
+        showInscriptionsModal = false;
+        selectedFormation = null;
+        inscriptions = null;
+    }
+
+    private async Task Logout()
+    {
+        await AuthService.LogoutAsync();
+    }
+}
+
+<style>
+    .admin-header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        padding: 2rem 0 0;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 1.5rem;
+    }
+
+    .admin-subnav {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .subnav-link {
+        color: rgba(255,255,255,0.75);
+        text-decoration: none;
+        padding: 0.6rem 1rem;
+        border-radius: 8px 8px 0 0;
+        font-size: 0.9rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.2s;
+    }
+
+    .subnav-link:hover {
+        background: rgba(255,255,255,0.1);
+        color: white;
+    }
+
+    .subnav-link.active {
+        background: #f7f8fa;
+        color: #1e3a8a;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .header-left i {
+        font-size: 2.5rem;
+        color: #fbbf24;
+    }
+
+    .header-left h1 {
+        font-size: 1.8rem;
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .subtitle {
+        margin: 0.25rem 0 0;
+        opacity: 0.85;
+        font-size: 0.95rem;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .user-avatar {
+        width: 45px;
+        height: 45px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .user-details {
+        text-align: right;
+    }
+
+    .username {
+        display: block;
+        font-weight: 600;
+    }
+
+    .role {
+        display: block;
+        font-size: 0.8rem;
+        opacity: 0.75;
+    }
+
+    .btn-logout {
+        background: rgba(255,255,255,0.2);
+        border: none;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-logout:hover {
+        background: rgba(239,68,68,0.8);
+    }
+
+    .admin-container {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+    }
+
+    .toolbar {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        flex: 1;
+        min-width: 250px;
+        position: relative;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6b7280;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 0.95rem;
+    }
+
+    .filter-group {
+        min-width: 150px;
+    }
+
+    .filter-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 0.95rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(30,58,138,0.4);
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .btn-secondary {
+        background: #6b7280;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .formations-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .formation-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s;
+        overflow: hidden;
+    }
+
+    .formation-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    }
+
+    .formation-thumbnail {
+        margin: -1.5rem -1.5rem 1rem;
+        aspect-ratio: 16/9;
+        overflow: hidden;
+        background: #f3f4f6;
+    }
+
+    .formation-thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .formation-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .formation-status {
+        padding: 0.3rem 0.8rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-en-cours { background: #dbeafe; color: #1e40af; }
+    .status-avenir { background: #fef3c7; color: #92400e; }
+    .status-terminee { background: #e5e7eb; color: #4b5563; }
+
+    .formation-price {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e3a8a;
+    }
+
+    .formation-title {
+        font-size: 1.2rem;
+        color: #1e3a8a;
+        margin: 0 0 0.5rem;
+    }
+
+    .formation-description {
+        color: #6b7280;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin: 0 0 1rem;
+    }
+
+    .formation-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #4b5563;
+        font-size: 0.85rem;
+    }
+
+    .detail-item i {
+        color: #3b82f6;
+        width: 16px;
+    }
+
+    .formation-actions {
+        display: flex;
+        gap: 0.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .formation-actions button {
+        flex: 1;
+        padding: 0.5rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.3rem;
+        font-size: 0.85rem;
+        transition: all 0.3s;
+    }
+
+    .btn-view {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .btn-view:hover { background: #bfdbfe; }
+
+    .btn-edit {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .btn-edit:hover { background: #fde68a; }
+
+    .btn-delete {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .btn-delete:hover { background: #fecaca; }
+
+    .loading-state, .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #6b7280;
+    }
+
+    .loading-state i, .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #d1d5db;
+    }
+
+    .spinner {
+        border: 3px solid #e5e7eb;
+        border-top-color: #3b82f6;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 20px;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 16px;
+        max-width: 600px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-content.large {
+        max-width: 800px;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 1.3rem;
+        color: #1e3a8a;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: #6b7280;
+    }
+
+    .modal-close:hover { color: #ef4444; }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        padding: 1.5rem;
+    }
+
+    .form-group.full-width {
+        grid-column: span 2;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.4rem;
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.9rem;
+    }
+
+    .form-input, .form-textarea {
+        width: 100%;
+        padding: 0.6rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+
+    .form-textarea { resize: vertical; }
+
+    /* ===== IMAGE UPLOAD (affiche formation, optionnelle) ===== */
+    .image-upload-zone {
+        position: relative;
+    }
+
+    .file-input { display: none; }
+
+    .upload-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1.5rem;
+        border: 2px dashed #d1d5db;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+        background: #f9fafb;
+    }
+
+    .upload-label:hover {
+        border-color: #3b82f6;
+        background: rgba(59,130,246,0.05);
+    }
+
+    .upload-label i {
+        font-size: 2rem;
+        color: #9ca3af;
+        margin-bottom: 0.6rem;
+    }
+
+    .upload-label p {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.3rem;
+    }
+
+    .upload-hint {
+        font-size: 0.8rem;
+        color: #6b7280;
+    }
+
+    .image-preview-container {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .image-preview {
+        width: 100%;
+        max-height: 220px;
+        object-fit: contain;
+        border-radius: 10px;
+        border: 1px solid #e5e7eb;
+    }
+
+    .btn-remove-image {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        width: 28px;
+        height: 28px;
+        background: rgba(239,68,68,0.9);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+    }
+
+    .btn-remove-image:hover {
+        background: #ef4444;
+        transform: scale(1.1);
+    }
+
+    .btn-change-image {
+        padding: 0.4rem 0.9rem;
+        background: #f3f4f6;
+        color: #374151;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.3s;
+    }
+
+    .btn-change-image:hover { background: #e5e7eb; }
+
+    .upload-progress {
+        margin-top: 0.75rem;
+        text-align: center;
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 6px;
+        background: #e5e7eb;
+        border-radius: 3px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+        animation: progress 1.5s ease-in-out infinite;
+    }
+
+    @@keyframes progress {
+        0%   { width: 0%; }
+        50%  { width: 70%; }
+        100% { width: 100%; }
+    }
+
+    .upload-progress p {
+        font-size: 0.85rem;
+        color: #6b7280;
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .inscriptions-list {
+        padding: 1.5rem;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .inscription-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: #f9fafb;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+    }
+
+    .inscription-name {
+        font-weight: 600;
+        color: #1e3a8a;
+    }
+
+    .inscription-contact {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-top: 0.25rem;
+    }
+
+    .inscription-contact .separator {
+        margin: 0 0.5rem;
+    }
+
+    .inscription-date {
+        font-size: 0.8rem;
+        color: #9ca3af;
+        margin-top: 0.25rem;
+    }
+
+    .inscription-status {
+        padding: 0.3rem 0.8rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-confirmee { background: #d1fae5; color: #065f46; }
+    .status-attente { background: #fef3c7; color: #92400e; }
+    .status-annulee { background: #fee2e2; color: #991b1b; }
+
+    @@media (max-width: 768px) {
+        .formations-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .header-content {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+    }
+</style>
