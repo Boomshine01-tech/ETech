@@ -284,4 +284,117 @@ public static class DbInitializer
         Console.WriteLine("║   ✅ Initialisation Terminée avec Succès !   ║");
         Console.WriteLine("╚═══════════════════════════════════════════════╝");
     }
+
+    /// <summary>
+    /// Seed indépendant pour la page "Réalisations", qui était jusqu'ici codée en dur dans le
+    /// front-end. Volontairement séparé de <see cref="Initialize"/> (qui s'arrête dès que des
+    /// Services existent déjà) afin que ce seed s'exécute même sur une base de données déjà en
+    /// production. Idempotent : ne fait rien si des sections existent déjà.
+    /// </summary>
+    public static async Task SeedRealisations(AppDbContext context)
+    {
+        if (context.RealisationSections.Any())
+            return;
+
+        var sections = new List<RealisationSection>
+        {
+            new RealisationSection
+            {
+                Slug = "btp",
+                NavLabel = "Génie Civil",
+                NavIcon = "fa-hard-hat",
+                Eyebrow = "Génie Civil & BTP",
+                TitleMain = "Bâtir",
+                TitleAccent = "l'avenir",
+                Body = "De la fondation à la finition, nos équipes qualifiées interviennent sur vos projets de construction et de génie civil avec rigueur et savoir-faire reconnus.",
+                ProjectLabel = "Projet en cours",
+                Theme = "blue",
+                ReverseLayout = false,
+                ShowBadge = false,
+                DisplayOrder = 0,
+                IsActive = true,
+                Images = new List<RealisationImage>
+                {
+                    new() { ImageUrl = "/images/realisations/ChantierBTP1.png", Titre = "Chantier Principal",     Lieu = "Thiès, Sénégal", Description = "Structure complète et finitions haut de gamme. Une réalisation dont nous sommes fiers.", DisplayOrder = 0 },
+                    new() { ImageUrl = "/images/realisations/ChantierBTP2.png", Titre = "Phase 2 — Avancement",   Lieu = "Thiès, Sénégal", Description = "Travaux de génie civil. Chaque étape rigoureusement contrôlée.", DisplayOrder = 1 },
+                    new() { ImageUrl = "/images/realisations/ChantierBTP3.png", Titre = "Phase 3 — Finalisation", Lieu = "Thiès, Sénégal", Description = "Dernières étapes avant livraison. La qualité reste notre priorité.", DisplayOrder = 2 },
+                    new() { ImageUrl = "/images/realisations/ChantierBTP4.png", Titre = "Phase 4 — Livraison",    Lieu = "Thiès, Sénégal", Description = "Projet livré dans les délais. Client entièrement satisfait.", DisplayOrder = 3 },
+                }
+            },
+            new RealisationSection
+            {
+                Slug = "electrique",
+                NavLabel = "Électrique",
+                NavIcon = "fa-bolt",
+                Eyebrow = "Installation Électrique",
+                TitleMain = "Lumière",
+                TitleAccent = "sur mesure",
+                Body = "LED haute performance, faux plafonds lumineux, bornes solaires — nos techniciens certifiés transforment chaque espace en une expérience lumineuse mémorable.",
+                ProjectLabel = "Projet en vedette",
+                Theme = "dark",
+                ReverseLayout = true,
+                ShowBadge = false,
+                DisplayOrder = 1,
+                IsActive = true,
+                Images = new List<RealisationImage>
+                {
+                    new() { ImageUrl = "/images/realisations/Restaurant.jpeg",                            Titre = "Restaurant — Éclairage LED",      Lieu = "Thiès, Sénégal",    Description = "Installation LED sur mesure et faux plafond design.", DisplayOrder = 0 },
+                    new() { ImageUrl = "/images/realisations/Restaurant1.jpeg",                           Titre = "Restaurant — Vue d'ensemble",     Lieu = "Thiès, Sénégal",    Description = "Ambiance lumineuse parfaite, notre savoir-faire en action.", DisplayOrder = 1 },
+                    new() { ImageUrl = "/images/realisations/SpotsSolCotéUniversité.jpeg",                Titre = "Spots sol — Université",          Lieu = "Thiès, Sénégal",    Description = "Spots encastrés au sol pour un éclairage moderne.", DisplayOrder = 2 },
+                    new() { ImageUrl = "/images/realisations/PetiteSalledeRéunionSAES1.jpeg",             Titre = "Salle de Réunion SAES",           Lieu = "Siège SAES, Thiès", Description = "Éclairage LED et aménagement complet.", DisplayOrder = 3 },
+                    new() { ImageUrl = "/images/realisations/PetiteSalledeRéunionSAES2.jpeg",             Titre = "SAES — Détails",                  Lieu = "Siège SAES, Thiès", Description = "Faux plafond et spots design. Rendu professionnel.", DisplayOrder = 4 },
+                    new() { ImageUrl = "/images/realisations/PetiteSalledeRéunionSAES3.jpeg",             Titre = "SAES — Rendu final",              Lieu = "Siège SAES, Thiès", Description = "Éclairage d'ambiance professionnel.", DisplayOrder = 5 },
+                    new() { ImageUrl = "/images/realisations/Siège3fptThies1.jpeg",                       Titre = "Siège 3FPT",                      Lieu = "3FPT, Thiès",       Description = "Installation électrique complète.", DisplayOrder = 6 },
+                    new() { ImageUrl = "/images/realisations/Siège3fptThies2.jpeg",                       Titre = "3FPT — Éclairage LED",            Lieu = "3FPT, Thiès",       Description = "LED haute performance. Économies et durabilité.", DisplayOrder = 7 },
+                    new() { ImageUrl = "/images/realisations/Siège3fptThies3.jpeg",                       Titre = "3FPT — Hall",                     Lieu = "3FPT, Thiès",       Description = "Hall d'accueil lumineux.", DisplayOrder = 8 },
+                    new() { ImageUrl = "/images/realisations/Siège3fptThies4.jpeg",                       Titre = "3FPT — Finitions",                Lieu = "3FPT, Thiès",       Description = "Détails des installations. Rigueur et précision.", DisplayOrder = 9 },
+                    new() { ImageUrl = "/images/realisations/InstallationPanneau1.png",                   Titre = "Panneaux Solaires",                Lieu = "Thiès, Sénégal",    Description = "Solutions énergétiques durables.", DisplayOrder = 10 },
+                    new() { ImageUrl = "/images/realisations/InstallationPanneau2.png",                   Titre = "Panneaux Solaires — Installation", Lieu = "Thiès, Sénégal",    Description = "Installation haute performance.", DisplayOrder = 11 },
+                    new() { ImageUrl = "/images/realisations/InstallationPanneau (2).png",                Titre = "Panneaux Solaires — Vue finale",   Lieu = "Thiès, Sénégal",    Description = "Mise en service réussie.", DisplayOrder = 12 },
+                    new() { ImageUrl = "/images/realisations/WhatsApp Image 2026-03-13 at 18.18.02.jpeg", Titre = "Installation Électrique",         Lieu = "Thiès, Sénégal",    Description = "", DisplayOrder = 13 },
+                    new() { ImageUrl = "/images/realisations/WhatsApp Image 2026-03-13 at 18.18.04.jpeg", Titre = "Installation Électrique",         Lieu = "Thiès, Sénégal",    Description = "", DisplayOrder = 14 },
+                    new() { ImageUrl = "/images/realisations/Installation elec.jpg",                      Titre = "Installation Électrique",         Lieu = "Thiès, Sénégal",    Description = "", DisplayOrder = 15 },
+                }
+            },
+            new RealisationSection
+            {
+                Slug = "partenaire",
+                NavLabel = "Partenariats",
+                NavIcon = "fa-handshake",
+                Eyebrow = "Partenariats",
+                TitleMain = "Au-delà",
+                TitleAccent = "des frontières",
+                Body = "e-Tech Energie+ collabore avec ARLA France, combinant expertise locale et standards européens pour des réalisations d'exception.",
+                ProjectLabel = "Projet à la une",
+                Theme = "green",
+                ReverseLayout = false,
+                ShowBadge = true,
+                BadgeIcon = "fa-globe",
+                BadgeLabel = "Partenariat International",
+                BadgeHighlight = "ARLA France",
+                DisplayOrder = 2,
+                IsActive = true,
+                Images = new List<RealisationImage>
+                {
+                    new() { ImageUrl = "/images/realisations/ChantierPartenaire1.jpeg", Titre = "ARLA France — Phase 1", Lieu = "Thiès, Sénégal", Description = "Partenariat international. Une collaboration d'excellence.", DisplayOrder = 0 },
+                    new() { ImageUrl = "/images/realisations/ChantierPartenaire2.jpeg", Titre = "ARLA France — Phase 2", Lieu = "Thiès, Sénégal", Description = "Standards internationaux appliqués.", DisplayOrder = 1 },
+                    new() { ImageUrl = "/images/realisations/ChantierPartenaire3.jpeg", Titre = "ARLA France — Phase 3", Lieu = "Thiès, Sénégal", Description = "Protocoles français. Rigueur exemplaire.", DisplayOrder = 2 },
+                    new() { ImageUrl = "/images/realisations/ChantierPartenaire4.jpeg", Titre = "ARLA France — Phase 4", Lieu = "Thiès, Sénégal", Description = "Avancement des travaux. Suivi quotidien.", DisplayOrder = 3 },
+                    new() { ImageUrl = "/images/realisations/ChantierPartenaire5.jpeg", Titre = "ARLA France — Phase 5", Lieu = "Thiès, Sénégal", Description = "Contrôle qualité rigoureux. Zéro défaut.", DisplayOrder = 4 },
+                    new() { ImageUrl = "/images/realisations/ChantierPartenaire6.jpeg", Titre = "ARLA France — Phase 6", Lieu = "Thiès, Sénégal", Description = "Finitions aux normes européennes.", DisplayOrder = 5 },
+                    new() { ImageUrl = "/images/realisations/ChantierPartenaire7.jpeg", Titre = "ARLA France — Phase 7", Lieu = "Thiès, Sénégal", Description = "Précision technique. Notre force.", DisplayOrder = 6 },
+                    new() { ImageUrl = "/images/realisations/ChantierPartenaire8.jpeg", Titre = "ARLA France — Phase 8", Lieu = "Thiès, Sénégal", Description = "Équipements de dernière génération.", DisplayOrder = 7 },
+                    new() { ImageUrl = "/images/realisations/ChantierPartenaire9.jpeg", Titre = "ARLA France — Phase 9", Lieu = "Thiès, Sénégal", Description = "Projet livré. Réussite internationale.", DisplayOrder = 8 },
+                    new() { ImageUrl = "/images/realisations/Formation1.jpg",           Titre = "Formation IoT",         Lieu = "Thiès, Sénégal", Description = "Cour au CFP Baye Gora Samb", DisplayOrder = 9 },
+                    new() { ImageUrl = "/images/realisations/Formation2.jpg",           Titre = "Formation IoT",         Lieu = "Thiès, Sénégal", Description = "Cour au CFP Baye Gora Samb", DisplayOrder = 10 },
+                    new() { ImageUrl = "/images/realisations/partenaire.jpg",           Titre = "Mobilité Professionelle", Lieu = "Thiès, Sénégal", Description = "Partenaire de Marseille", DisplayOrder = 11 },
+                }
+            },
+        };
+
+        context.RealisationSections.AddRange(sections);
+        await context.SaveChangesAsync();
+
+        Console.WriteLine($"✅ {sections.Count} sections de réalisations ajoutées ({sections.Sum(s => s.Images.Count)} images)");
+    }
 }
