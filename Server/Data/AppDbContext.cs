@@ -16,6 +16,8 @@ public class AppDbContext : DbContext
     public DbSet<Formation> Formations { get; set; }
     public DbSet<Inscription> Inscriptions { get; set; }
     public DbSet<Announcement> Announcements { get; set; }
+    public DbSet<RealisationSection> RealisationSections { get; set; }
+    public DbSet<RealisationImage> RealisationImages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -34,6 +36,16 @@ public class AppDbContext : DbContext
             .WithMany(c => c.Products)
             .HasForeignKey(p => p.CategoryId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<RealisationImage>()
+            .HasOne(i => i.Section)
+            .WithMany(s => s.Images)
+            .HasForeignKey(i => i.SectionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<RealisationSection>()
+            .HasIndex(s => s.Slug)
+            .IsUnique();
 
         modelBuilder.Entity<Service>()
             .HasIndex(s => s.Name)
