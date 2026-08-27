@@ -63,11 +63,11 @@
         <button class="pill @(activeCategory == "froid" ? "active" : "")" @onclick='() => SetCategory("froid")'>
             <i class="fas fa-wind"></i> Froid &amp; Clim
         </button>
-        <button class="pill @(activeCategory == "btp" ? "active" : "")" @onclick='() => SetCategory("btp")'>
-            <i class="fas fa-hard-hat"></i> Génie Civil
-        </button>
         <button class="pill @(activeCategory == "it" ? "active" : "")" @onclick='() => SetCategory("it")'>
             <i class="fas fa-network"></i> Télécoms &amp; IT
+        </button>
+        <button class="pill @(activeCategory == "btp" ? "active" : "")" @onclick='() => SetCategory("btp")'>
+            <i class="fas fa-hard-hat"></i> Génie Civil
         </button>
     </nav>
 </div>
@@ -409,25 +409,6 @@
                 }
             },
             new ServiceViewModel {
-                Id = "btp",
-                Category = "btp",
-                CategoryDisplayName = "Génie civil",
-                NameTitlePart = "Génie Civil",
-                NameSubtitlePart = "Gros Œuvre BTP",
-                Description = "Grâce à notre polyvalence, nous réalisons des structures de génie civil solides et durables. De la conceptualisation architecturale aux travaux de coulage de béton armé, e-Tech Energie+ déploie des chefs de chantier et des ingénieurs qualifiés pour garantir le respect rigoureux des plans de ferraillage, de dosage du béton et des délais de livraison.",
-                IconClass = "fa-hard-hat",
-                StatValue = "100%",
-                StatLabel = "Livraison dans les critères de qualité et d'ingénierie",
-                DetailsList = new List<ServiceDetailVM> {
-                    new("Béton Armé & Structures Métalliques", "Bâtiment résidentiel, hangars d'entreposage logistique, fondations de poteaux d'éclairage ou de pylônes solaires."),
-                    new("Second Œuvre & Finition Soignée", "Faux-plafonnages décoratifs, plâtrerie moderne, carrelage grand format et peintures intérieures/extérieures résistantes au soleil et à l'humidité.")
-                },
-                ImagesList = new List<ServiceImageVM> {
-                    new("images/service/civil.png", "Constrution d'un mur en beton"),
-                    new("https://images.unsplash.com/photo-1590069261209-f8e9b8642343?q=80&w=800", "Suivi technique et revues de plans")
-                }
-            },
-            new ServiceViewModel {
                 Id = "it",
                 Category = "it",
                 CategoryDisplayName = "Télécoms, IT & Sécurité",
@@ -444,6 +425,25 @@
                 ImagesList = new List<ServiceImageVM> {
                     new( "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=800",  "Baie informatique câblée dans les règles de l'art par nos techniciens"),
                     new("https://images.unsplash.com/photo-1557597774-9d273605dfa9?q=80&w=800",  "Caméra IP extérieure dômes motorisés PTZ de surveillance active")
+                }
+            },
+            new ServiceViewModel {
+                Id = "btp",
+                Category = "btp",
+                CategoryDisplayName = "Génie civil",
+                NameTitlePart = "Génie Civil",
+                NameSubtitlePart = "Gros Œuvre BTP",
+                Description = "Grâce à notre polyvalence, nous réalisons des structures de génie civil solides et durables. De la conceptualisation architecturale aux travaux de coulage de béton armé, e-Tech Energie+ déploie des chefs de chantier et des ingénieurs qualifiés pour garantir le respect rigoureux des plans de ferraillage, de dosage du béton et des délais de livraison.",
+                IconClass = "fa-hard-hat",
+                StatValue = "100%",
+                StatLabel = "Livraison dans les critères de qualité et d'ingénierie",
+                DetailsList = new List<ServiceDetailVM> {
+                    new("Béton Armé & Structures Métalliques", "Bâtiment résidentiel, hangars d'entreposage logistique, fondations de poteaux d'éclairage ou de pylônes solaires."),
+                    new("Second Œuvre & Finition Soignée", "Faux-plafonnages décoratifs, plâtrerie moderne, carrelage grand format et peintures intérieures/extérieures résistantes au soleil et à l'humidité.")
+                },
+                ImagesList = new List<ServiceImageVM> {
+                    new("images/service/civil.png", "Constrution d'un mur en beton"),
+                    new("https://images.unsplash.com/photo-1590069261209-f8e9b8642343?q=80&w=800", "Suivi technique et revues de plans")
                 }
             }
         };
