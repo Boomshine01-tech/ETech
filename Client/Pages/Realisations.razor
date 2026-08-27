@@ -138,16 +138,16 @@ else
                 @<div class="hero-info-side">
                     <div class="section-eyebrow @EyebrowClass(section.Theme)">
                         <span class="ey-line"></span>
-                        <i class="fas @section.NavIcon"></i> @section.Eyebrow
+                        <i class="fas @(section.NavIcon)"></i> @(section.Eyebrow)
                     </div>
                     <h2 class="section-title @TitleClass(section.Theme)">
-                        @section.TitleMain<br /><em>@section.TitleAccent</em>
+                        @(section.TitleMain)<br /><em>@(section.TitleAccent)</em>
                     </h2>
                     <p class="section-body @BodyClass(section.Theme)">
-                        @section.Body
+                        @(section.Body)
                     </p>
                     <div class="project-card-info @PciClass(section.Theme)">
-                        <div class="pci-label">@section.ProjectLabel</div>
+                        <div class="pci-label">@(section.ProjectLabel)</div>
                         <div class="pci-title">@current.Titre</div>
                         <div class="pci-loc"><i class="fas fa-map-marker-alt"></i> @current.Lieu</div>
                         @if (!string.IsNullOrEmpty(current.Description))
@@ -157,7 +157,7 @@ else
                     </div>
                 </div>;
 
-            <section class="rz-section @(isDark ? "dark-section" : "")" id="@section.Slug">
+            <section class="rz-section @(isDark ? "dark-section" : "")" id="@(section.Slug)">
                 @if (isDark)
                 {
                     <div class="dark-bg-deco"></div>
@@ -168,8 +168,8 @@ else
                     <div class="partner-hero">
                         <div class="partner-badge-float">
                             <i class="fas @(section.BadgeIcon ?? "fa-star")"></i>
-                            <span>@section.BadgeLabel</span>
-                            <strong>@section.BadgeHighlight</strong>
+                            <span>@(section.BadgeLabel)</span>
+                            <strong>@(section.BadgeHighlight)</strong>
                         </div>
 
                         <div class="hero-split @(section.ReverseLayout ? "hero-split-reverse" : "")">
