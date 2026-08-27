@@ -72,22 +72,22 @@
                 @foreach (var section in sections)
                 {
                     var expanded = expandedSectionId == section.Id;
-                    <div class="section-card theme-@section.Theme">
+                    <div class="section-card theme-@(section.Theme)">
                         <div class="section-card-header" @onclick="() => ToggleExpand(section.Id)">
                             <div class="sch-left">
                                 <button class="chevron-btn" title="Voir les images">
                                     <i class="fas @(expanded ? "fa-chevron-down" : "fa-chevron-right")"></i>
                                 </button>
-                                <span class="theme-dot theme-dot-@section.Theme"></span>
+                                <span class="theme-dot theme-dot-@(section.Theme)"></span>
                                 <div>
                                     <div class="sch-title">
-                                        <i class="fas @section.NavIcon"></i> @section.NavLabel
+                                        <i class="fas @(section.NavIcon)"></i> @(section.NavLabel)
                                         @if (!section.IsActive)
                                         {
                                             <span class="badge badge-inactive">Masquée</span>
                                         }
                                     </div>
-                                    <div class="sch-sub">#@section.Slug · @section.Images.Count image(s)</div>
+                                    <div class="sch-sub">#@(section.Slug) · @(section.Images.Count) image(s)</div>
                                 </div>
                             </div>
                             <div class="sch-actions" @onclick:stopPropagation="true">
