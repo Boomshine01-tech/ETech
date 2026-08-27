@@ -91,7 +91,7 @@
             <div class="services-list">
                 @foreach (var s in GetFilteredServices())
                 {
-                    var isDarkTheme = s.Category == "electricite";
+                    var isDarkTheme = s.Category == "electricite" || s.Category == "it";
                     <div class="service-detail-card @(isDarkTheme ? "dark-theme" : "")">
                         
                         <!-- Header de section adaptative -->
