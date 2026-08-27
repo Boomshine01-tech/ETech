@@ -1,0 +1,1339 @@
+@page "/admin/realisations"
+@inject HttpClient Http
+@inject NotificationService NotificationService
+@inject AuthenticationService AuthService
+@inject IJSRuntime JS
+@using ETechEnergie.Shared.Models
+@using ETechEnergie.Client.Services
+@using System.Net.Http.Headers
+
+<PageTitle>Administration - Réalisations</PageTitle>
+
+<AuthGuard RequireAdmin="true">
+    <div class="admin-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="header-left">
+                    <i class="fas fa-images"></i>
+                    <div>
+                        <h1>Page Réalisations</h1>
+                        <p class="subtitle">Gérez les sections et les images de la page publique "Réalisations"</p>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
+                    <div class="user-details">
+                        <span class="username">@currentUsername</span>
+                        <span class="role">Administrateur</span>
+                    </div>
+                    <button class="btn-logout" @onclick="Logout" title="Déconnexion">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="admin-subnav">
+                <a href="/admin/products" class="subnav-link"><i class="fas fa-boxes"></i> Produits</a>
+                <a href="/admin/formations" class="subnav-link"><i class="fas fa-graduation-cap"></i> Formations</a>
+                <a href="/admin/announcement" class="subnav-link"><i class="fas fa-bullhorn"></i> Bande d'annonce</a>
+                <a href="/admin/realisations" class="subnav-link active"><i class="fas fa-images"></i> Réalisations</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-container">
+        @if (isLoading)
+        {
+            <div class="loading-state">
+                <div class="spinner"></div>
+                <p>Chargement...</p>
+            </div>
+        }
+        else
+        {
+            <div class="toolbar">
+                <p class="toolbar-hint">
+                    <i class="fas fa-circle-info"></i>
+                    Chaque nouvelle section reprend automatiquement le style visuel (bleu, sombre ou vert) déjà utilisé sur le site.
+                </p>
+                <button class="btn-primary" @onclick="OpenCreateSection">
+                    <i class="fas fa-plus"></i> Nouvelle section
+                </button>
+            </div>
+
+            @if (!sections.Any())
+            {
+                <div class="empty-state">
+                    <i class="fas fa-images"></i>
+                    <p>Aucune section pour le moment. Créez-en une pour commencer.</p>
+                </div>
+            }
+
+            <div class="sections-list">
+                @foreach (var section in sections)
+                {
+                    var expanded = expandedSectionId == section.Id;
+                    <div class="section-card theme-@section.Theme">
+                        <div class="section-card-header" @onclick="() => ToggleExpand(section.Id)">
+                            <div class="sch-left">
+                                <button class="chevron-btn" title="Voir les images">
+                                    <i class="fas @(expanded ? "fa-chevron-down" : "fa-chevron-right")"></i>
+                                </button>
+                                <span class="theme-dot theme-dot-@section.Theme"></span>
+                                <div>
+                                    <div class="sch-title">
+                                        <i class="fas @section.NavIcon"></i> @section.NavLabel
+                                        @if (!section.IsActive)
+                                        {
+                                            <span class="badge badge-inactive">Masquée</span>
+                                        }
+                                    </div>
+                                    <div class="sch-sub">#@section.Slug · @section.Images.Count image(s)</div>
+                                </div>
+                            </div>
+                            <div class="sch-actions" @onclick:stopPropagation="true">
+                                <button class="btn-icon" title="Monter" @onclick='() => MoveSection(section.Id, "up")'><i class="fas fa-arrow-up"></i></button>
+                                <button class="btn-icon" title="Descendre" @onclick='() => MoveSection(section.Id, "down")'><i class="fas fa-arrow-down"></i></button>
+                                <button class="btn-icon" title="Modifier" @onclick="() => OpenEditSection(section)"><i class="fas fa-edit"></i></button>
+                                <button class="btn-icon btn-icon-danger" title="Supprimer" @onclick="() => DeleteSection(section)"><i class="fas fa-trash-alt"></i></button>
+                            </div>
+                        </div>
+
+                        @if (expanded)
+                        {
+                            <div class="section-card-body">
+                                <div class="images-grid">
+                                    @foreach (var image in section.Images)
+                                    {
+                                        <div class="image-tile">
+                                            <img src="@image.ImageUrl" alt="@image.Titre" />
+                                            <div class="image-tile-overlay">
+                                                <div class="image-tile-info">
+                                                    <strong>@image.Titre</strong>
+                                                    <span>@image.Lieu</span>
+                                                </div>
+                                                <div class="image-tile-actions">
+                                                    <button class="btn-icon" title="Monter" @onclick='() => MoveImage(section, image.Id, "up")'><i class="fas fa-arrow-up"></i></button>
+                                                    <button class="btn-icon" title="Descendre" @onclick='() => MoveImage(section, image.Id, "down")'><i class="fas fa-arrow-down"></i></button>
+                                                    <button class="btn-icon" title="Modifier" @onclick="() => OpenEditImage(section, image)"><i class="fas fa-edit"></i></button>
+                                                    <button class="btn-icon btn-icon-danger" title="Supprimer" @onclick="() => DeleteImage(section, image)"><i class="fas fa-trash-alt"></i></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                    <button class="add-image-tile" @onclick="() => OpenAddImage(section)">
+                                        <i class="fas fa-plus"></i>
+                                        <span>Ajouter une image</span>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</AuthGuard>
+
+<!-- ═══════════ MODAL SECTION (créer / modifier) ═══════════ -->
+@if (showSectionModal)
+{
+    <div class="modal-overlay" @onclick="CloseSectionModal">
+        <div class="modal-content wide" @onclick:stopPropagation="true">
+            <div class="modal-header">
+                <h2>@(isEditingSection ? "Modifier la section" : "Nouvelle section")</h2>
+                <button class="btn-close" @onclick="CloseSectionModal"><i class="fas fa-times"></i></button>
+            </div>
+
+            <EditForm Model="@currentSection" OnValidSubmit="SaveSection">
+                <DataAnnotationsValidator />
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Identifiant (URL) *</label>
+                            <InputText @bind-Value="currentSection.Slug" class="form-input" placeholder="ex: renovation" />
+                            <p class="hint">Lettres minuscules, chiffres et tirets uniquement. Utilisé comme ancre de la section.</p>
+                            <ValidationMessage For="@(() => currentSection.Slug)" />
+                        </div>
+                        <div class="form-group">
+                            <label>Libellé du menu *</label>
+                            <InputText @bind-Value="currentSection.NavLabel" class="form-input" placeholder="ex: Rénovation" />
+                            <ValidationMessage For="@(() => currentSection.NavLabel)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Icône (Font Awesome) *</label>
+                            <InputText @bind-Value="currentSection.NavIcon" class="form-input" placeholder="ex: fa-house" />
+                            <p class="hint">Nom de classe sans le préfixe "fas", ex: fa-hard-hat, fa-bolt, fa-solar-panel, fa-handshake…</p>
+                            <ValidationMessage For="@(() => currentSection.NavIcon)" />
+                        </div>
+                        <div class="form-group">
+                            <label>Texte au-dessus du titre *</label>
+                            <InputText @bind-Value="currentSection.Eyebrow" class="form-input" placeholder="ex: Rénovation & Aménagement" />
+                            <ValidationMessage For="@(() => currentSection.Eyebrow)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Titre (1ère ligne) *</label>
+                            <InputText @bind-Value="currentSection.TitleMain" class="form-input" placeholder="ex: Rénover" />
+                            <ValidationMessage For="@(() => currentSection.TitleMain)" />
+                        </div>
+                        <div class="form-group">
+                            <label>Titre (2ème ligne, en italique) *</label>
+                            <InputText @bind-Value="currentSection.TitleAccent" class="form-input" placeholder="ex: avec précision" />
+                            <ValidationMessage For="@(() => currentSection.TitleAccent)" />
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Description *</label>
+                            <InputTextArea @bind-Value="currentSection.Body" class="form-textarea" rows="3" />
+                            <ValidationMessage For="@(() => currentSection.Body)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Libellé du projet mis en avant *</label>
+                            <InputText @bind-Value="currentSection.ProjectLabel" class="form-input" placeholder="ex: Projet en cours" />
+                            <ValidationMessage For="@(() => currentSection.ProjectLabel)" />
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label-inline">
+                                <InputCheckbox @bind-Value="currentSection.ReverseLayout" />
+                                Image à droite (mise en page inversée)
+                            </label>
+                            <label class="checkbox-label-inline">
+                                <InputCheckbox @bind-Value="currentSection.IsActive" />
+                                Section visible sur le site
+                            </label>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Style visuel de la section *</label>
+                            <div class="theme-picker">
+                                <button type="button" class="theme-option theme-option-blue @(currentSection.Theme == "blue" ? "selected" : "")" @onclick='() => currentSection.Theme = "blue"'>
+                                    <span class="theme-swatch theme-swatch-blue"></span> Bleu (fond clair)
+                                </button>
+                                <button type="button" class="theme-option theme-option-dark @(currentSection.Theme == "dark" ? "selected" : "")" @onclick='() => currentSection.Theme = "dark"'>
+                                    <span class="theme-swatch theme-swatch-dark"></span> Sombre
+                                </button>
+                                <button type="button" class="theme-option theme-option-green @(currentSection.Theme == "green" ? "selected" : "")" @onclick='() => currentSection.Theme = "green"'>
+                                    <span class="theme-swatch theme-swatch-green"></span> Vert (fond clair)
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group full-width badge-section">
+                            <label class="checkbox-label-inline">
+                                <InputCheckbox @bind-Value="currentSection.ShowBadge" />
+                                Afficher un badge flottant (ex: partenariat)
+                            </label>
+
+                            @if (currentSection.ShowBadge)
+                            {
+                                <div class="form-grid badge-fields">
+                                    <div class="form-group">
+                                        <label>Icône du badge</label>
+                                        <InputText @bind-Value="currentSection.BadgeIcon" class="form-input" placeholder="ex: fa-globe" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Texte du badge</label>
+                                        <InputText @bind-Value="currentSection.BadgeLabel" class="form-input" placeholder="ex: Partenariat International" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Texte mis en avant</label>
+                                        <InputText @bind-Value="currentSection.BadgeHighlight" class="form-input" placeholder="ex: ARLA France" />
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" @onclick="CloseSectionModal">Annuler</button>
+                    <button type="submit" class="btn-primary" disabled="@isSaving">
+                        @if (isSaving)
+                        {
+                            <i class="fas fa-spinner fa-spin"></i> <text>Enregistrement...</text>
+                        }
+                        else
+                        {
+                            <i class="fas fa-save"></i> <text>Enregistrer</text>
+                        }
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<!-- ═══════════ MODAL IMAGE (ajouter / modifier) ═══════════ -->
+@if (showImageModal)
+{
+    <div class="modal-overlay" @onclick="CloseImageModal">
+        <div class="modal-content" @onclick:stopPropagation="true">
+            <div class="modal-header">
+                <h2>@(isEditingImage ? "Modifier l'image" : "Ajouter une image")</h2>
+                <button class="btn-close" @onclick="CloseImageModal"><i class="fas fa-times"></i></button>
+            </div>
+
+            <EditForm Model="@currentImage" OnValidSubmit="SaveImage">
+                <DataAnnotationsValidator />
+                <div class="modal-body">
+                    @if (!isEditingImage)
+                    {
+                        <div class="form-group">
+                            <label>Image *</label>
+                            <div class="image-upload-zone">
+                                @if (string.IsNullOrEmpty(currentImage.ImageUrl))
+                                {
+                                    <label for="realisationImageUpload" class="upload-label">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p>Cliquez pour choisir une image</p>
+                                        <span class="upload-hint">PNG, JPG ou WEBP (max. 5MB)</span>
+                                    </label>
+                                }
+                                else
+                                {
+                                    <div class="image-preview-container">
+                                        <img src="@currentImage.ImageUrl" alt="Aperçu" class="image-preview" />
+                                        <button type="button" class="btn-remove-image" @onclick="() => currentImage.ImageUrl = string.Empty">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                        <label for="realisationImageUpload" class="btn-change-image">
+                                            <i class="fas fa-sync-alt"></i> Changer l'image
+                                        </label>
+                                    </div>
+                                }
+                                <InputFile OnChange="HandleImageSelected" class="file-input" id="realisationImageUpload" accept="image/*" />
+                                @if (isUploadingImage)
+                                {
+                                    <div class="upload-progress">
+                                        <div class="progress-bar"><div class="progress-fill"></div></div>
+                                        <p>Upload en cours...</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    <div class="form-group">
+                        <label>Titre *</label>
+                        <InputText @bind-Value="currentImage.Titre" class="form-input" placeholder="ex: Chantier — Phase 1" />
+                        <ValidationMessage For="@(() => currentImage.Titre)" />
+                    </div>
+                    <div class="form-group">
+                        <label>Lieu</label>
+                        <InputText @bind-Value="currentImage.Lieu" class="form-input" placeholder="ex: Thiès, Sénégal" />
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <InputTextArea @bind-Value="currentImage.Description" class="form-textarea" rows="2" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" @onclick="CloseImageModal">Annuler</button>
+                    <button type="submit" class="btn-primary" disabled="@(isSaving || (!isEditingImage && string.IsNullOrEmpty(currentImage.ImageUrl)))">
+                        @if (isSaving)
+                        {
+                            <i class="fas fa-spinner fa-spin"></i> <text>Enregistrement...</text>
+                        }
+                        else
+                        {
+                            <i class="fas fa-save"></i> <text>Enregistrer</text>
+                        }
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    private List<RealisationSection> sections = new();
+    private bool isLoading = true;
+    private bool isSaving = false;
+    private bool isUploadingImage = false;
+    private string currentUsername = "";
+    private int? expandedSectionId = null;
+
+    private bool showSectionModal = false;
+    private bool isEditingSection = false;
+    private RealisationSection currentSection = new();
+
+    private bool showImageModal = false;
+    private bool isEditingImage = false;
+    private RealisationImage currentImage = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var (username, _, _) = await AuthService.GetCurrentUserAsync();
+        currentUsername = username ?? "Admin";
+        await LoadSections();
+    }
+
+    private async Task LoadSections()
+    {
+        isLoading = true;
+        try
+        {
+            sections = await Http.GetFromJsonAsync<List<RealisationSection>>("api/realisations/admin") ?? new();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur de chargement: {ex.Message}");
+            NotificationService.ShowError("Erreur lors du chargement des sections");
+            sections = new();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void ToggleExpand(int sectionId)
+    {
+        expandedSectionId = expandedSectionId == sectionId ? null : sectionId;
+    }
+
+    // ── SECTIONS ─────────────────────────────────────────────────
+    private void OpenCreateSection()
+    {
+        currentSection = new RealisationSection { Theme = "blue", ProjectLabel = "Projet en cours", IsActive = true };
+        isEditingSection = false;
+        showSectionModal = true;
+    }
+
+    private void OpenEditSection(RealisationSection section)
+    {
+        currentSection = new RealisationSection
+        {
+            Id = section.Id,
+            Slug = section.Slug,
+            NavLabel = section.NavLabel,
+            NavIcon = section.NavIcon,
+            Eyebrow = section.Eyebrow,
+            TitleMain = section.TitleMain,
+            TitleAccent = section.TitleAccent,
+            Body = section.Body,
+            ProjectLabel = section.ProjectLabel,
+            Theme = section.Theme,
+            ReverseLayout = section.ReverseLayout,
+            ShowBadge = section.ShowBadge,
+            BadgeIcon = section.BadgeIcon,
+            BadgeLabel = section.BadgeLabel,
+            BadgeHighlight = section.BadgeHighlight,
+            IsActive = section.IsActive,
+        };
+        isEditingSection = true;
+        showSectionModal = true;
+    }
+
+    private void CloseSectionModal() => showSectionModal = false;
+
+    private async Task SaveSection()
+    {
+        isSaving = true;
+        try
+        {
+            HttpResponseMessage response = isEditingSection
+                ? await Http.PutAsJsonAsync($"api/realisations/sections/{currentSection.Id}", currentSection)
+                : await Http.PostAsJsonAsync("api/realisations/sections", currentSection);
+
+            if (response.IsSuccessStatusCode)
+            {
+                NotificationService.ShowSuccess(isEditingSection ? "Section modifiée" : "Section créée");
+                showSectionModal = false;
+                await LoadSections();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                NotificationService.ShowError($"Erreur: {error}");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError("Erreur lors de l'enregistrement");
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private async Task DeleteSection(RealisationSection section)
+    {
+        if (!await ConfirmAsync($"Supprimer la section « {section.NavLabel} » et ses {section.Images.Count} image(s) ? Cette action est irréversible."))
+            return;
+
+        try
+        {
+            var response = await Http.DeleteAsync($"api/realisations/sections/{section.Id}");
+            if (response.IsSuccessStatusCode)
+            {
+                NotificationService.ShowSuccess("Section supprimée");
+                await LoadSections();
+            }
+            else
+            {
+                NotificationService.ShowError("Erreur lors de la suppression");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError("Erreur lors de la suppression");
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private async Task MoveSection(int sectionId, string direction)
+    {
+        try
+        {
+            await Http.PostAsync($"api/realisations/sections/{sectionId}/move?direction={direction}", null);
+            await LoadSections();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    // ── IMAGES ───────────────────────────────────────────────────
+    private void OpenAddImage(RealisationSection section)
+    {
+        currentImage = new RealisationImage { SectionId = section.Id };
+        isEditingImage = false;
+        showImageModal = true;
+    }
+
+    private void OpenEditImage(RealisationSection section, RealisationImage image)
+    {
+        currentImage = new RealisationImage
+        {
+            Id = image.Id,
+            SectionId = section.Id,
+            ImageUrl = image.ImageUrl,
+            Titre = image.Titre,
+            Lieu = image.Lieu,
+            Description = image.Description,
+        };
+        isEditingImage = true;
+        showImageModal = true;
+    }
+
+    private void CloseImageModal() => showImageModal = false;
+
+    private async Task HandleImageSelected(InputFileChangeEventArgs e)
+    {
+        isUploadingImage = true;
+        try
+        {
+            var file = e.File;
+            if (file != null)
+            {
+                using var content = new MultipartFormDataContent();
+                using var fileStream = file.OpenReadStream(maxAllowedSize: 5_000_000);
+                using var streamContent = new StreamContent(fileStream);
+                streamContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+                content.Add(streamContent, "file", file.Name);
+
+                var response = await Http.PostAsync("api/realisations/upload-image", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var imageUrl = await response.Content.ReadAsStringAsync();
+                    currentImage.ImageUrl = imageUrl.Trim('"');
+                }
+                else
+                {
+                    NotificationService.ShowError("Erreur lors de l'upload de l'image");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError("Erreur lors de l'upload de l'image");
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            isUploadingImage = false;
+        }
+    }
+
+    private async Task SaveImage()
+    {
+        isSaving = true;
+        try
+        {
+            HttpResponseMessage response = isEditingImage
+                ? await Http.PutAsJsonAsync($"api/realisations/images/{currentImage.Id}", currentImage)
+                : await Http.PostAsJsonAsync("api/realisations/images", currentImage);
+
+            if (response.IsSuccessStatusCode)
+            {
+                NotificationService.ShowSuccess(isEditingImage ? "Image modifiée" : "Image ajoutée");
+                showImageModal = false;
+                await LoadSections();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                NotificationService.ShowError($"Erreur: {error}");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError("Erreur lors de l'enregistrement");
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private async Task DeleteImage(RealisationSection section, RealisationImage image)
+    {
+        if (!await ConfirmAsync($"Supprimer l'image « {image.Titre} » ?"))
+            return;
+
+        try
+        {
+            var response = await Http.DeleteAsync($"api/realisations/images/{image.Id}");
+            if (response.IsSuccessStatusCode)
+            {
+                NotificationService.ShowSuccess("Image supprimée");
+                await LoadSections();
+            }
+            else
+            {
+                NotificationService.ShowError("Erreur lors de la suppression");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError("Erreur lors de la suppression");
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private async Task MoveImage(RealisationSection section, int imageId, string direction)
+    {
+        try
+        {
+            await Http.PostAsync($"api/realisations/images/{imageId}/move?direction={direction}", null);
+            await LoadSections();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    // ── UTIL ─────────────────────────────────────────────────────
+    private async Task<bool> ConfirmAsync(string message)
+    {
+        return await JS.InvokeAsync<bool>("confirm", message);
+    }
+
+    private async Task Logout()
+    {
+        await AuthService.LogoutAsync();
+        NotificationService.ShowSuccess("Déconnexion réussie");
+    }
+}
+
+<style>
+    .admin-header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        padding: 2rem 0 0;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 1.5rem;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .header-left i {
+        font-size: 2.5rem;
+        color: #fbbf24;
+    }
+
+    .header-left h1 {
+        margin: 0;
+        font-size: 1.6rem;
+    }
+
+    .subtitle {
+        margin: 0.25rem 0 0;
+        opacity: 0.85;
+        font-size: 0.9rem;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .user-details {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.2;
+    }
+
+    .username { font-weight: 600; }
+    .role { font-size: 0.75rem; opacity: 0.8; }
+
+    .btn-logout {
+        background: rgba(255,255,255,0.15);
+        border: none;
+        color: white;
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    .btn-logout:hover { background: rgba(255,255,255,0.3); }
+
+    .admin-subnav {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .subnav-link {
+        color: rgba(255,255,255,0.75);
+        text-decoration: none;
+        padding: 0.6rem 1rem;
+        border-radius: 8px 8px 0 0;
+        font-size: 0.9rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.2s;
+    }
+
+    .subnav-link:hover {
+        background: rgba(255,255,255,0.1);
+        color: white;
+    }
+
+    .subnav-link.active {
+        background: #f7f8fa;
+        color: #1e3a8a;
+    }
+
+    .admin-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .toolbar-hint {
+        font-size: 0.85rem;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        max-width: 560px;
+    }
+
+    .toolbar-hint i { color: #3b82f6; }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+        color: white;
+        border: none;
+        padding: 0.7rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: opacity 0.2s;
+        white-space: nowrap;
+    }
+
+    .btn-primary:hover:not(:disabled) { opacity: 0.9; }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .btn-secondary {
+        background: #f3f4f6;
+        color: #374151;
+        border: none;
+        padding: 0.7rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .btn-secondary:hover { background: #e5e7eb; }
+
+    /* ===== SECTIONS LIST ===== */
+    .sections-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .section-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    .section-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.25rem;
+        cursor: pointer;
+        gap: 1rem;
+    }
+
+    .sch-left {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        min-width: 0;
+    }
+
+    .chevron-btn {
+        background: none;
+        border: none;
+        color: #9ca3af;
+        font-size: 0.85rem;
+        cursor: pointer;
+        width: 20px;
+        flex-shrink: 0;
+    }
+
+    .theme-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .theme-dot-blue  { background: #1e3a8a; }
+    .theme-dot-dark  { background: #0f1923; }
+    .theme-dot-green { background: #10b981; }
+
+    .sch-title {
+        font-weight: 700;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .sch-title i { color: #6b7280; }
+
+    .sch-sub {
+        font-size: 0.8rem;
+        color: #9ca3af;
+        margin-top: 0.15rem;
+    }
+
+    .sch-actions {
+        display: flex;
+        gap: 0.4rem;
+        flex-shrink: 0;
+    }
+
+    .btn-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        border: none;
+        background: #f3f4f6;
+        color: #4b5563;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        font-size: 0.8rem;
+    }
+
+    .btn-icon:hover { background: #e5e7eb; }
+    .btn-icon-danger:hover { background: #fee2e2; color: #dc2626; }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.15rem 0.5rem;
+        border-radius: 999px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .badge-inactive {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .section-card-body {
+        padding: 1rem 1.25rem 1.25rem;
+        border-top: 1px solid #f3f4f6;
+        background: #fafbfc;
+    }
+
+    .images-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .image-tile {
+        position: relative;
+        aspect-ratio: 4/3;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #e5e7eb;
+    }
+
+    .image-tile img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .image-tile-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 55%);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 0.5rem;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .image-tile:hover .image-tile-overlay { opacity: 1; }
+
+    .image-tile-info {
+        color: white;
+        display: flex;
+        flex-direction: column;
+        margin-top: auto;
+    }
+
+    .image-tile-info strong {
+        font-size: 0.78rem;
+        line-height: 1.2;
+    }
+
+    .image-tile-info span {
+        font-size: 0.68rem;
+        opacity: 0.8;
+    }
+
+    .image-tile-actions {
+        display: flex;
+        gap: 0.3rem;
+        justify-content: flex-end;
+    }
+
+    .image-tile-actions .btn-icon {
+        width: 26px;
+        height: 26px;
+        background: rgba(255,255,255,0.9);
+        font-size: 0.7rem;
+    }
+
+    .add-image-tile {
+        aspect-ratio: 4/3;
+        border-radius: 10px;
+        border: 2px dashed #d1d5db;
+        background: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        color: #9ca3af;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+
+    .add-image-tile:hover {
+        border-color: #3b82f6;
+        color: #3b82f6;
+        background: rgba(59,130,246,0.04);
+    }
+
+    .add-image-tile i { font-size: 1.3rem; }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #9ca3af;
+    }
+
+    .empty-state i {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .loading-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #6b7280;
+    }
+
+    .spinner {
+        border: 3px solid #e5e7eb;
+        border-top-color: #3b82f6;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    @@keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 1rem;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 14px;
+        max-width: 520px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+    }
+
+    .modal-content.wide { max-width: 780px; }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #e5e7eb;
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 2;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 1.15rem;
+        color: #1f2937;
+    }
+
+    .btn-close {
+        background: #f3f4f6;
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        cursor: pointer;
+        color: #6b7280;
+    }
+
+    .btn-close:hover { background: #e5e7eb; }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        padding: 1.1rem 1.5rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    /* ===== FORMS ===== */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 1rem;
+    }
+
+    .form-group.full-width { grid-column: 1 / -1; }
+
+    .form-group label {
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.85rem;
+        margin-bottom: 0.35rem;
+    }
+
+    .form-input, .form-textarea {
+        width: 100%;
+        padding: 0.6rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        transition: border-color 0.3s;
+        font-family: inherit;
+    }
+
+    .form-input:focus, .form-textarea:focus {
+        outline: none;
+        border-color: #3b82f6;
+    }
+
+    .form-textarea { resize: vertical; }
+
+    .hint {
+        margin: 0.3rem 0 0;
+        font-size: 0.76rem;
+        color: #9ca3af;
+    }
+
+    .checkbox-label-inline {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500 !important;
+        cursor: pointer;
+        margin-bottom: 0.6rem;
+    }
+
+    /* ===== THEME PICKER ===== */
+    .theme-picker {
+        display: flex;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+    }
+
+    .theme-option {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        border: 2px solid #e5e7eb;
+        background: white;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #4b5563;
+        transition: all 0.2s;
+    }
+
+    .theme-option:hover { border-color: #d1d5db; }
+    .theme-option.selected { border-color: #3b82f6; background: rgba(59,130,246,0.06); color: #1e3a8a; }
+
+    .theme-swatch {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .theme-swatch-blue  { background: linear-gradient(135deg, #1e3a8a, #3b82f6); }
+    .theme-swatch-dark  { background: #0f1923; }
+    .theme-swatch-green { background: #10b981; }
+
+    .badge-section {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 1rem;
+    }
+
+    .badge-fields {
+        margin-top: 0.75rem;
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    /* ===== IMAGE UPLOAD ===== */
+    .image-upload-zone { position: relative; }
+    .file-input { display: none; }
+
+    .upload-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1.5rem;
+        border: 2px dashed #d1d5db;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+        background: #f9fafb;
+    }
+
+    .upload-label:hover {
+        border-color: #3b82f6;
+        background: rgba(59,130,246,0.05);
+    }
+
+    .upload-label i {
+        font-size: 2rem;
+        color: #9ca3af;
+        margin-bottom: 0.6rem;
+    }
+
+    .upload-label p {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.3rem;
+    }
+
+    .upload-hint {
+        font-size: 0.8rem;
+        color: #6b7280;
+    }
+
+    .image-preview-container {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .image-preview {
+        width: 100%;
+        max-height: 220px;
+        object-fit: contain;
+        border-radius: 10px;
+        border: 1px solid #e5e7eb;
+    }
+
+    .btn-remove-image {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        width: 28px;
+        height: 28px;
+        background: rgba(239,68,68,0.9);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+    }
+
+    .btn-remove-image:hover { background: #ef4444; transform: scale(1.1); }
+
+    .btn-change-image {
+        padding: 0.4rem 0.9rem;
+        background: #f3f4f6;
+        color: #374151;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.3s;
+    }
+
+    .btn-change-image:hover { background: #e5e7eb; }
+
+    .upload-progress { margin-top: 0.75rem; text-align: center; }
+
+    .progress-bar {
+        width: 100%;
+        height: 6px;
+        background: #e5e7eb;
+        border-radius: 3px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+        animation: progress 1.5s ease-in-out infinite;
+    }
+
+    @@keyframes progress {
+        0%   { width: 0%; }
+        50%  { width: 70%; }
+        100% { width: 100%; }
+    }
+
+    .upload-progress p { font-size: 0.85rem; color: #6b7280; }
+
+    @@media (max-width: 768px) {
+        .header-content { flex-direction: column; gap: 1rem; text-align: center; }
+        .form-grid { grid-template-columns: 1fr; }
+        .badge-fields { grid-template-columns: 1fr; }
+        .admin-container { padding: 1rem; }
+        .toolbar { flex-direction: column; align-items: stretch; }
+    }
+</style>
+
