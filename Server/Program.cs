@@ -201,6 +201,34 @@ builder.Services.Configure<BrevoSettings>(
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+// ───────────────────────────────────────────────────────────────
+// SUPABASE STORAGE (upload des images produits / formations / réalisations)
+// ───────────────────────────────────────────────────────────────
+var supabaseUrl = Environment.GetEnvironmentVariable("SUPABASE_URL")
+    ?? builder.Configuration["Supabase:Url"] ?? "";
+var supabaseServiceRoleKey = Environment.GetEnvironmentVariable("SUPABASE_SERVICE_ROLE_KEY")
+    ?? builder.Configuration["Supabase:ServiceRoleKey"] ?? "";
+var supabaseBucket = Environment.GetEnvironmentVariable("SUPABASE_BUCKET")
+    ?? builder.Configuration["Supabase:Bucket"] ?? "images";
+
+if (string.IsNullOrEmpty(supabaseUrl) || string.IsNullOrEmpty(supabaseServiceRoleKey))
+{
+    Console.WriteLine("⚠️  SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY non définies : les uploads d'images échoueront tant qu'elles ne sont pas configurées.");
+}
+else
+{
+    Console.WriteLine($"✅ Supabase Storage configuré (bucket: \"{supabaseBucket}\")");
+}
+
+builder.Services.Configure<SupabaseSettings>(options =>
+{
+    options.Url = supabaseUrl;
+    options.ServiceRoleKey = supabaseServiceRoleKey;
+    options.Bucket = supabaseBucket;
+});
+
+builder.Services.AddHttpClient<ISupabaseStorageService, SupabaseStorageService>();
+
 builder.Services.AddSingleton(new JwtConfiguration
 {
     SecretKey = secretKey,
@@ -266,39 +294,6 @@ builder.Services.AddCors(options =>
 }); 
 
 var app = builder.Build();
-
-
-if (app.Environment.IsDevelopment())
-{
-    using (var scope = app.Services.CreateScope())
-    {
-        try
-        {
-            Console.WriteLine("Application des migrations EF Core...");
-
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-            await context.Database.MigrateAsync();
-
-            Console.WriteLine("✅ Migrations appliquées avec succès");
-
-            await DbInitializer.Initialize(context);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("❌ ERREUR lors des migrations PostgreSQL");
-            Console.WriteLine(ex.Message);
-            throw;
-        }
-    }
-}
-
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
 
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
