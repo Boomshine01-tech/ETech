@@ -14,7 +14,7 @@ namespace ETechEnergie.Server.Controllers;
 public class ProductsController : ControllerBase
 {
     private readonly AppDbContext _context;
-    private readonly IWebHostEnvironment _environment;
+    private readonly ISupabaseStorageService _storageService;
     private readonly ILogger<ProductsController> _logger;
     private readonly IMemoryCache _cache;
 
@@ -23,13 +23,13 @@ public class ProductsController : ControllerBase
     private static CancellationTokenSource _productsCacheToken = new();
 
     public ProductsController(
-        IWebHostEnvironment environment,
+        ISupabaseStorageService storageService,
         AppDbContext context,
         ILogger<ProductsController> logger,
         IMemoryCache cache)
     {
         _context = context;
-        _environment = environment;
+        _storageService = storageService;
         _logger = logger;
         _cache = cache;
     }
@@ -348,29 +348,20 @@ public class ProductsController : ControllerBase
                 return BadRequest(new { error = "Type de fichier non autorisé" });
             }
 
-            var webRootPath = _environment.WebRootPath ?? Path.Combine(_environment.ContentRootPath, "wwwroot");
-            var uploadsFolder = Path.Combine(webRootPath, "images", "products");
-            Directory.CreateDirectory(uploadsFolder);
-
-            var uniqueFileName = $"{Guid.NewGuid()}{extension}";
-            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            var request = HttpContext.Request;
-            var baseUrl = $"{request.Scheme}://{request.Host}";
-            var imageUrl = $"{baseUrl}/images/products/{uniqueFileName}";
+            var imageUrl = await _storageService.UploadImageAsync(file, "products");
 
             _logger.LogInformation(
-                "Image uploadée par {Username}: {FileName} ({Size}KB)",
+                "Image uploadée sur Supabase Storage par {Username}: {Url} ({Size}KB)",
                 User.Identity?.Name,
-                uniqueFileName,
+                imageUrl,
                 file.Length / 1024);
 
             return Ok(imageUrl);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Configuration Supabase Storage manquante ou invalide");
+            return StatusCode(500, new { error = ex.Message });
         }
         catch (Exception ex)
         {
