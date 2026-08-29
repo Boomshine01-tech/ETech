@@ -786,13 +786,14 @@
         margin: -1.5rem -1.5rem 1rem;
         aspect-ratio: 16/9;
         overflow: hidden;
-        background: #f3f4f6;
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
     }
 
     .formation-thumbnail img {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        /* "contain" pour voir l'image en entier (comme sur la page publique), sans recadrage. */
+        object-fit: contain;
     }
 
     .formation-header {
