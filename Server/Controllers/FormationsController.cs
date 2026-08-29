@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ETechEnergie.Server.Data;
 using ETechEnergie.Shared.Models;
-using ETechEnergie.Server.Services
+using ETechEnergie.Server.Services;
 
 namespace ETechEnergie.Server.Controllers;
 
