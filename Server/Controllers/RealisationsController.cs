@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ETechEnergie.Server.Data;
+using ETechEnergie.Server.Services;
 using ETechEnergie.Shared.Models;
 
 namespace ETechEnergie.Server.Controllers;
@@ -12,13 +13,13 @@ public class RealisationsController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly ILogger<RealisationsController> _logger;
-    private readonly IWebHostEnvironment _environment;
+    private readonly ISupabaseStorageService _storageService;
 
-    public RealisationsController(AppDbContext context, ILogger<RealisationsController> logger, IWebHostEnvironment environment)
+    public RealisationsController(AppDbContext context, ILogger<RealisationsController> logger, ISupabaseStorageService storageService)
     {
         _context = context;
         _logger = logger;
-        _environment = environment;
+        _storageService = storageService;
     }
 
     // ═══════════════════════════ LECTURE (public) ═══════════════════════════
@@ -142,14 +143,24 @@ public class RealisationsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteSection(int id)
     {
-        var section = await _context.RealisationSections.FindAsync(id);
+        var section = await _context.RealisationSections
+            .Include(s => s.Images)
+            .FirstOrDefaultAsync(s => s.Id == id);
+
         if (section == null)
         {
             return NotFound(new { error = "Section introuvable" });
         }
 
+        var imageUrls = section.Images.Select(i => i.ImageUrl).ToList();
+
         _context.RealisationSections.Remove(section);
         await _context.SaveChangesAsync();
+
+        foreach (var url in imageUrls)
+        {
+            await _storageService.DeleteImageAsync(url);
+        }
 
         _logger.LogInformation("Admin {Username} a supprimé la section réalisation '{Slug}' (et ses images)", User.Identity?.Name, section.Slug);
 
@@ -256,6 +267,8 @@ public class RealisationsController : ControllerBase
         _context.RealisationImages.Remove(image);
         await _context.SaveChangesAsync();
 
+        await _storageService.DeleteImageAsync(image.ImageUrl);
+
         _logger.LogInformation("Admin {Username} a supprimé une image de réalisation ({Id})", User.Identity?.Name, id);
 
         return NoContent();
@@ -326,27 +339,18 @@ public class RealisationsController : ControllerBase
                 return BadRequest(new { error = "Type de fichier non autorisé" });
             }
 
-            var webRootPath = _environment.WebRootPath ?? Path.Combine(_environment.ContentRootPath, "wwwroot");
-            var uploadsFolder = Path.Combine(webRootPath, "images", "realisations");
-            Directory.CreateDirectory(uploadsFolder);
-
-            var uniqueFileName = $"{Guid.NewGuid()}{extension}";
-            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            var request = HttpContext.Request;
-            var baseUrl = $"{request.Scheme}://{request.Host}";
-            var imageUrl = $"{baseUrl}/images/realisations/{uniqueFileName}";
+            var imageUrl = await _storageService.UploadImageAsync(file, "realisations");
 
             _logger.LogInformation(
-                "Image de réalisation uploadée par {Username}: {FileName} ({Size}KB)",
-                User.Identity?.Name, uniqueFileName, file.Length / 1024);
+                "Image de réalisation uploadée sur Supabase Storage par {Username}: {Url} ({Size}KB)",
+                User.Identity?.Name, imageUrl, file.Length / 1024);
 
             return Ok(imageUrl);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Configuration Supabase Storage manquante ou invalide");
+            return StatusCode(500, new { error = ex.Message });
         }
         catch (Exception ex)
         {
