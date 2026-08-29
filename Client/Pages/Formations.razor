@@ -63,10 +63,11 @@ else
                 @foreach (var formation in formationsEnCours)
                 {
                     <div class="formation-card">
-                        <div class="formation-image">
+                        <div class="formation-image @(!string.IsNullOrEmpty(formation.ImageUrl) ? "clickable" : "")" @onclick="() => OpenImagePreview(formation)">
                             @if (!string.IsNullOrEmpty(formation.ImageUrl))
                             {
                                 <img src="@formation.ImageUrl" alt="@formation.Titre" />
+                                <div class="formation-image-zoom"><i class="fas fa-search-plus"></i></div>
                             }
                             else
                             {
@@ -119,10 +120,11 @@ else
                 @foreach (var formation in formationsAVenir)
                 {
                     <div class="formation-card">
-                        <div class="formation-image">
+                        <div class="formation-image @(!string.IsNullOrEmpty(formation.ImageUrl) ? "clickable" : "")" @onclick="() => OpenImagePreview(formation)">
                             @if (!string.IsNullOrEmpty(formation.ImageUrl))
                             {
                                 <img src="@formation.ImageUrl" alt="@formation.Titre" />
+                                <div class="formation-image-zoom"><i class="fas fa-search-plus"></i></div>
                             }
                             else
                             {
@@ -166,10 +168,11 @@ else
                 @foreach (var formation in formationsTerminees)
                 {
                     <div class="formation-card formation-terminee">
-                        <div class="formation-image">
+                        <div class="formation-image @(!string.IsNullOrEmpty(formation.ImageUrl) ? "clickable" : "")" @onclick="() => OpenImagePreview(formation)">
                             @if (!string.IsNullOrEmpty(formation.ImageUrl))
                             {
                                 <img src="@formation.ImageUrl" alt="@formation.Titre" />
+                                <div class="formation-image-zoom"><i class="fas fa-search-plus"></i></div>
                             }
                             else
                             {
@@ -261,6 +264,18 @@ else
     </div>
 }
 
+<!-- ===== MODAL APERÇU IMAGE FORMATION ===== -->
+@if (showImagePreview && previewFormation != null)
+{
+    <div class="modal-overlay image-preview-overlay" @onclick="CloseImagePreview">
+        <div class="image-preview-content" @onclick:stopPropagation="true">
+            <button class="modal-close image-preview-close" @onclick="CloseImagePreview"><i class="fas fa-times"></i></button>
+            <img src="@previewFormation.ImageUrl" alt="@previewFormation.Titre" />
+            <div class="image-preview-caption">@previewFormation.Titre</div>
+        </div>
+    </div>
+}
+
 @code {
     private List<Formation> allFormations = new();
     private List<Formation> formationsEnCours = new();
@@ -274,6 +289,9 @@ else
     private bool isSubmitting = false;
     private bool inscriptionSuccess = false;
     private string? errorMessage = null;
+
+    private bool showImagePreview = false;
+    private Formation? previewFormation;
 
     protected override async Task OnInitializedAsync()
     {
@@ -330,6 +348,19 @@ else
     {
         showInscriptionModal = false;
         selectedFormation = null;
+    }
+
+    private void OpenImagePreview(Formation formation)
+    {
+        if (string.IsNullOrEmpty(formation.ImageUrl)) return;
+        previewFormation = formation;
+        showImagePreview = true;
+    }
+
+    private void CloseImagePreview()
+    {
+        showImagePreview = false;
+        previewFormation = null;
     }
 
     private async Task HandleInscription()
@@ -534,13 +565,49 @@ else
         aspect-ratio: 16/9;
         overflow: hidden;
         background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        position: relative;
+    }
+
+    .formation-image.clickable {
+        cursor: pointer;
     }
 
     .formation-image img {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        /* "contain" (et non "cover") pour que l'image reste visible dans son ensemble,
+           sans être recadrée. Le fond en dégradé remplit l'espace restant (letterboxing). */
+        object-fit: contain;
         display: block;
+    }
+
+    .formation-image-zoom {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 23, 42, 0.35);
+        opacity: 0;
+        transition: opacity 0.25s;
+        pointer-events: none;
+    }
+
+    .formation-image.clickable:hover .formation-image-zoom {
+        opacity: 1;
+    }
+
+    .formation-image-zoom i {
+        color: white;
+        font-size: 1.6rem;
+        background: rgba(255,255,255,0.15);
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(2px);
     }
 
     .formation-image-placeholder {
@@ -555,6 +622,64 @@ else
     .formation-image-placeholder i {
         font-size: 2.5rem;
         color: rgba(255,255,255,0.6);
+    }
+
+    /* ===== MODAL APERÇU IMAGE ===== */
+    .image-preview-overlay {
+        background: rgba(15, 23, 42, 0.85);
+        z-index: 1100;
+    }
+
+    .image-preview-content {
+        position: relative;
+        max-width: 90vw;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .image-preview-content img {
+        max-width: 90vw;
+        max-height: 80vh;
+        object-fit: contain;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+
+    .image-preview-caption {
+        color: white;
+        margin-top: 1rem;
+        font-weight: 600;
+        font-size: 1.05rem;
+        text-align: center;
+    }
+
+    .image-preview-close {
+        position: absolute;
+        top: -18px;
+        right: -18px;
+        background: white;
+        color: #1f2937;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 2;
+    }
+
+    /* Spécificité renforcée pour l'emporter sur la règle générique .modal-close
+       (définie plus bas dans ce fichier) qui partagerait sinon les mêmes propriétés. */
+    .image-preview-content .modal-close.image-preview-close {
+        position: absolute;
+        top: -18px;
+        right: -18px;
+        background: white;
+        border: none;
+        color: #1f2937;
     }
 
     .formation-header {
