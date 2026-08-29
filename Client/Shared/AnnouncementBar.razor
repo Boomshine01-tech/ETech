@@ -33,11 +33,15 @@
         try
         {
             announcement = await Http.GetFromJsonAsync<Announcement>("api/announcement");
+            Console.WriteLine($"[AnnouncementBar] Réponse reçue — IsActive={announcement?.IsActive}, Message=\"{announcement?.Message}\"");
         }
-        catch
+        catch (Exception ex)
         {
             // Si l'annonce ne peut pas être chargée, on n'affiche simplement rien :
             // cela ne doit jamais bloquer l'affichage du reste du site.
+            // On journalise quand même l'erreur dans la console du navigateur pour pouvoir
+            // diagnostiquer un souci réseau/serveur (F12 → Console).
+            Console.WriteLine($"[AnnouncementBar] Échec du chargement de l'annonce: {ex.Message}");
             announcement = null;
         }
     }
