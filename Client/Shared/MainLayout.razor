@@ -1,8 +1,10 @@
 @inherits LayoutComponentBase
 
 <div class="page">
-    <AnnouncementBar />
-    <NavMenu />
+    <div class="sticky-header">
+        <AnnouncementBar />
+        <NavMenu />
+    </div>
     <main>
         <article class="content px-4">
             @Body
@@ -34,6 +36,14 @@
         display: flex;
         flex-direction: column;
         min-height: 100vh;
+    }
+
+    /* Bande d'annonce + barre de navigation restent visibles ensemble au défilement,
+       comme une seule unité compacte (pas de double barre superposée ni de saut visuel). */
+    .sticky-header {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
     }
 
     main {
