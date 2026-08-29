@@ -12,13 +12,13 @@ public class FormationsController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly ILogger<FormationsController> _logger;
-    private readonly IWebHostEnvironment _environment;
+    private readonly ISupabaseStorageService _storageService;
 
-    public FormationsController(AppDbContext context, ILogger<FormationsController> logger, IWebHostEnvironment environment)
+    public FormationsController(AppDbContext context, ILogger<FormationsController> logger, ISupabaseStorageService storageService)
     {
         _context = context;
         _logger = logger;
-        _environment = environment;
+        _storageService = storageService;
     }
 
     private static DateTime ToUtc(DateTime dt) =>
@@ -144,29 +144,20 @@ public class FormationsController : ControllerBase
                 return BadRequest(new { error = "Type de fichier non autorisé" });
             }
 
-            var webRootPath = _environment.WebRootPath ?? Path.Combine(_environment.ContentRootPath, "wwwroot");
-            var uploadsFolder = Path.Combine(webRootPath, "images", "formations");
-            Directory.CreateDirectory(uploadsFolder);
-
-            var uniqueFileName = $"{Guid.NewGuid()}{extension}";
-            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            var request = HttpContext.Request;
-            var baseUrl = $"{request.Scheme}://{request.Host}";
-            var imageUrl = $"{baseUrl}/images/formations/{uniqueFileName}";
+            var imageUrl = await _storageService.UploadImageAsync(file, "formations");
 
             _logger.LogInformation(
-                "Image de formation uploadée par {Username}: {FileName} ({Size}KB)",
+                "Image de formation uploadée sur Supabase Storage par {Username}: {Url} ({Size}KB)",
                 User.Identity?.Name,
-                uniqueFileName,
+                imageUrl,
                 file.Length / 1024);
 
             return Ok(imageUrl);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Configuration Supabase Storage manquante ou invalide");
+            return StatusCode(500, new { error = ex.Message });
         }
         catch (Exception ex)
         {
@@ -187,6 +178,8 @@ public class FormationsController : ControllerBase
 
         _context.Formations.Remove(formation);
         await _context.SaveChangesAsync();
+
+        await _storageService.DeleteImageAsync(formation.ImageUrl);
 
         _logger.LogInformation("Admin a supprimé la formation ID {Id}: {Titre}", id, formation.Titre);
 
