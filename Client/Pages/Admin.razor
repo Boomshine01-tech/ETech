@@ -61,6 +61,10 @@
                     }
                 </select>
             </div>
+            <button class="btn-secondary" @onclick="OpenCategoryManager">
+                <i class="fas fa-tags"></i>
+                <span>Catégories</span>
+            </button>
             <button class="btn-primary" @onclick="ShowAddForm">
                 <i class="fas fa-plus"></i>
                 <span>Nouveau Produit</span>
@@ -296,6 +300,141 @@
             </div>
         </div>
     }
+
+    @if (showCategoryModal)
+    {
+        <div class="modal-overlay" @onclick="CloseCategoryManager">
+            <div class="modal-content" @onclick:stopPropagation="true">
+                <div class="modal-header">
+                    <h2><i class="fas fa-tags"></i> Catégories</h2>
+                    <button class="modal-close" @onclick="CloseCategoryManager">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                @if (!showCategoryForm)
+                {
+                    <!-- ═══════ LISTE DES CATÉGORIES ═══════ -->
+                    <div class="category-list-body">
+                        <button class="btn-primary category-add-btn" @onclick="NewCategoryForm">
+                            <i class="fas fa-plus"></i> Ajouter une catégorie
+                        </button>
+
+                        @if (categories == null || categories.Length == 0)
+                        {
+                            <p class="hint" style="text-align:center; padding: 1rem;">Aucune catégorie pour le moment.</p>
+                        }
+                        else
+                        {
+                            <div class="category-list">
+                                @foreach (var cat in categories)
+                                {
+                                    <div class="category-row">
+                                        <div class="category-row-thumb">
+                                            @if (!string.IsNullOrEmpty(cat.ImageUrl))
+                                            {
+                                                <img src="@cat.ImageUrl" alt="@cat.Name" />
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-tag"></i>
+                                            }
+                                        </div>
+                                        <div class="category-row-info">
+                                            <strong>@cat.Name</strong>
+                                            @if (!string.IsNullOrEmpty(cat.Description))
+                                            {
+                                                <span>@cat.Description</span>
+                                            }
+                                        </div>
+                                        <button class="btn-icon" title="Modifier" @onclick="() => EditCategoryForm(cat)">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <!-- ═══════ FORMULAIRE AJOUT / MODIFICATION ═══════ -->
+                    <button class="category-back-btn" @onclick="() => showCategoryForm = false">
+                        <i class="fas fa-arrow-left"></i> Retour à la liste
+                    </button>
+
+                    <EditForm Model="@editingCategory" OnValidSubmit="SaveCategory">
+                        <DataAnnotationsValidator />
+
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label>Nom de la catégorie <span class="required">*</span></label>
+                                <InputText class="form-input" @bind-Value="editingCategory!.Name" placeholder="Ex: Panneaux solaires" />
+                                <ValidationMessage For="@(() => editingCategory.Name)" />
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label>Description</label>
+                                <InputTextArea class="form-textarea" @bind-Value="editingCategory.Description"
+                                              rows="2" placeholder="Description courte (optionnel)..." />
+                                <ValidationMessage For="@(() => editingCategory.Description)" />
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label>Image (optionnel)</label>
+                                <div class="image-upload-zone">
+                                    @if (string.IsNullOrEmpty(editingCategory.ImageUrl))
+                                    {
+                                        <label for="categoryImageUpload" class="upload-label">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <p>Cliquez pour choisir une image</p>
+                                            <span class="upload-hint">PNG, JPG ou WEBP (max. 5MB)</span>
+                                        </label>
+                                    }
+                                    else
+                                    {
+                                        <div class="image-preview-container">
+                                            <img src="@editingCategory.ImageUrl" alt="Aperçu" class="image-preview" />
+                                            <button type="button" class="btn-remove-image" @onclick="RemoveCategoryImage">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                            <label for="categoryImageUpload" class="btn-change-image">
+                                                <i class="fas fa-sync-alt"></i> Changer l'image
+                                            </label>
+                                        </div>
+                                    }
+                                    <InputFile OnChange="HandleCategoryImageSelected" class="file-input" id="categoryImageUpload" accept="image/*" />
+                                    @if (isUploadingCategoryImage)
+                                    {
+                                        <div class="upload-progress">
+                                            <div class="progress-bar">
+                                                <div class="progress-fill"></div>
+                                            </div>
+                                            <p>Upload en cours...</p>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn-secondary" @onclick="() => showCategoryForm = false">Annuler</button>
+                            <button type="submit" class="btn-primary" disabled="@isSavingCategory">
+                                @if (isSavingCategory)
+                                {
+                                    <i class="fas fa-spinner fa-spin"></i> <text>Enregistrement...</text>
+                                }
+                                else
+                                {
+                                    <i class="fas fa-save"></i> @(editingCategory?.Id > 0 ? "Modifier" : "Créer")
+                                }
+                            </button>
+                        </div>
+                    </EditForm>
+                }
+            </div>
+        </div>
+    }
 </AuthGuard>
 
 @code {
@@ -309,6 +448,12 @@
     private string? currentUsername;
     private string searchQuery = "";
     private int categoryFilter = 0;
+
+    private bool showCategoryModal = false;
+    private bool showCategoryForm = false;
+    private bool isSavingCategory = false;
+    private bool isUploadingCategoryImage = false;
+    private Category? editingCategory;
 
     private Product[] FilteredProducts
     {
@@ -465,6 +610,118 @@
         finally
         {
             isUploadingImage = false;
+        }
+    }
+
+    // ── CATÉGORIES ───────────────────────────────────────────────
+    private void OpenCategoryManager()
+    {
+        showCategoryForm = false;
+        showCategoryModal = true;
+    }
+
+    private void CloseCategoryManager()
+    {
+        showCategoryModal = false;
+        showCategoryForm = false;
+    }
+
+    private void NewCategoryForm()
+    {
+        editingCategory = new Category();
+        showCategoryForm = true;
+    }
+
+    private void EditCategoryForm(Category category)
+    {
+        editingCategory = new Category
+        {
+            Id = category.Id,
+            Name = category.Name,
+            Description = category.Description,
+            ImageUrl = category.ImageUrl,
+        };
+        showCategoryForm = true;
+    }
+
+    private void RemoveCategoryImage()
+    {
+        if (editingCategory != null)
+        {
+            editingCategory.ImageUrl = string.Empty;
+        }
+    }
+
+    private async Task HandleCategoryImageSelected(InputFileChangeEventArgs e)
+    {
+        isUploadingCategoryImage = true;
+        try
+        {
+            var file = e.File;
+            if (file != null)
+            {
+                using var content = new MultipartFormDataContent();
+                using var fileStream = file.OpenReadStream(maxAllowedSize: 5_000_000);
+                using var streamContent = new StreamContent(fileStream);
+                streamContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+                content.Add(streamContent, "file", file.Name);
+
+                var response = await Http.PostAsync("api/categories/upload-image", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var imageUrl = await response.Content.ReadAsStringAsync();
+                    editingCategory!.ImageUrl = imageUrl.Trim('"');
+                    NotificationService.ShowSuccess("Image uploadée avec succès");
+                }
+                else
+                {
+                    NotificationService.ShowError("Erreur lors de l'upload de l'image");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur upload: {ex.Message}");
+            NotificationService.ShowError("Erreur lors de l'upload de l'image");
+        }
+        finally
+        {
+            isUploadingCategoryImage = false;
+        }
+    }
+
+    private async Task SaveCategory()
+    {
+        if (editingCategory == null) return;
+
+        isSavingCategory = true;
+        try
+        {
+            HttpResponseMessage response = editingCategory.Id > 0
+                ? await Http.PutAsJsonAsync($"api/categories/{editingCategory.Id}", editingCategory)
+                : await Http.PostAsJsonAsync("api/categories", editingCategory);
+
+            if (response.IsSuccessStatusCode)
+            {
+                NotificationService.ShowSuccess(editingCategory.Id > 0 ? "Catégorie modifiée" : "Catégorie créée");
+                showCategoryForm = false;
+                categories = await Http.GetFromJsonAsync<Category[]>("api/categories");
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                NotificationService.ShowError($"Erreur: {error}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur: {ex.Message}");
+            NotificationService.ShowError("Erreur lors de l'enregistrement de la catégorie");
+        }
+        finally
+        {
+            isSavingCategory = false;
         }
     }
 
@@ -1320,5 +1577,98 @@
         .form-grid { grid-template-columns: 1fr; }
 
         .form-group.full-width { grid-column: span 1; }
+    }
+
+    /* ===== GESTION DES CATÉGORIES ===== */
+    .category-list-body {
+        padding: 1.5rem;
+    }
+
+    .category-add-btn {
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 1.25rem;
+    }
+
+    .category-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        max-height: 420px;
+        overflow-y: auto;
+    }
+
+    .category-row {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        padding: 0.6rem 0.75rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        transition: border-color 0.2s;
+    }
+
+    .category-row:hover {
+        border-color: #3b82f6;
+    }
+
+    .category-row-thumb {
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+        overflow: hidden;
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .category-row-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .category-row-thumb i {
+        color: rgba(255,255,255,0.75);
+        font-size: 1.1rem;
+    }
+
+    .category-row-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .category-row-info strong {
+        font-size: 0.92rem;
+        color: #1f2937;
+    }
+
+    .category-row-info span {
+        font-size: 0.78rem;
+        color: #9ca3af;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .category-back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: none;
+        border: none;
+        color: #3b82f6;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        padding: 1.25rem 1.5rem 0;
+    }
+
+    .category-back-btn:hover {
+        text-decoration: underline;
     }
 </style>
