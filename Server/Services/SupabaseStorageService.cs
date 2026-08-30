@@ -65,6 +65,10 @@ public class SupabaseStorageService : ISupabaseStorageService
         // Autorise l'écrasement si jamais le même chemin existe déjà (ne devrait pas arriver
         // avec un nom de fichier GUID, mais rend l'appel idempotent en cas de retry réseau).
         request.Headers.Add("x-upsert", "true");
+        // Chaque upload génère un nom de fichier GUID unique (jamais réécrit au même chemin),
+        // un cache très long côté navigateur/CDN est donc totalement sûr et accélère nettement
+        // les chargements répétés (produits/formations/réalisations affichés sur plusieurs pages).
+        request.Headers.Add("cache-control", "public, max-age=31536000, immutable");
 
         var response = await _http.SendAsync(request);
 
