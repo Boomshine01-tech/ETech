@@ -66,7 +66,7 @@ else
                         <div class="formation-image @(!string.IsNullOrEmpty(formation.ImageUrl) ? "clickable" : "")" @onclick="() => OpenImagePreview(formation)">
                             @if (!string.IsNullOrEmpty(formation.ImageUrl))
                             {
-                                <img src="@formation.ImageUrl" alt="@formation.Titre" />
+                                <img src="@formation.ImageUrl" alt="@formation.Titre" loading="lazy" />
                                 <div class="formation-image-zoom"><i class="fas fa-search-plus"></i></div>
                             }
                             else
@@ -123,7 +123,7 @@ else
                         <div class="formation-image @(!string.IsNullOrEmpty(formation.ImageUrl) ? "clickable" : "")" @onclick="() => OpenImagePreview(formation)">
                             @if (!string.IsNullOrEmpty(formation.ImageUrl))
                             {
-                                <img src="@formation.ImageUrl" alt="@formation.Titre" />
+                                <img src="@formation.ImageUrl" alt="@formation.Titre" loading="lazy" />
                                 <div class="formation-image-zoom"><i class="fas fa-search-plus"></i></div>
                             }
                             else
@@ -171,7 +171,7 @@ else
                         <div class="formation-image @(!string.IsNullOrEmpty(formation.ImageUrl) ? "clickable" : "")" @onclick="() => OpenImagePreview(formation)">
                             @if (!string.IsNullOrEmpty(formation.ImageUrl))
                             {
-                                <img src="@formation.ImageUrl" alt="@formation.Titre" />
+                                <img src="@formation.ImageUrl" alt="@formation.Titre" loading="lazy" />
                                 <div class="formation-image-zoom"><i class="fas fa-search-plus"></i></div>
                             }
                             else
