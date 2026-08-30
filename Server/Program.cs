@@ -7,6 +7,7 @@ using ETechEnergie.Server.Data;
 using ETechEnergie.Server.Configuration;
 using ETechEnergie.Server.Services;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.ResponseCompression;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +32,15 @@ if (!string.IsNullOrEmpty(host))
         $"Password={password};" +
         $"SSL Mode=Require;" +
         $"Trust Server Certificate=true;" +
-        $"Pooling=false;";
+        // Pooling activé (comportement par défaut de Npgsql) : une connexion PostgreSQL/TLS est
+        // coûteuse à établir (surtout vers Supabase, hébergé à distance). La désactiver forçait
+        // une reconnexion complète à CHAQUE requête, ce qui ralentissait fortement toute l'appli.
+        // ⚠️ Si vous utilisez le "Transaction pooler" de Supabase (port 6543 / pgbouncer), gardez
+        // un œil sur les logs après ce changement : ce mode a des limitations connues avec le
+        // pooling côté client. Dans ce cas, préférez le "Session pooler" (port 5432) plutôt que
+        // de redésactiver Pooling entièrement.
+        $"Maximum Pool Size=20;" +
+        $"Minimum Pool Size=1;";
 }
 else
 {
@@ -246,6 +255,19 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
 
+// Compression des réponses (gzip/brotli) : réduit nettement la taille des réponses JSON
+// (listes de produits/formations/réalisations) et donc le temps de chargement perçu,
+// surtout sur connexion mobile.
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/json" });
+});
+builder.Services.Configure<BrotliCompressionProviderOptions>(o => o.Level = System.IO.Compression.CompressionLevel.Fastest);
+builder.Services.Configure<GzipCompressionProviderOptions>(o => o.Level = System.IO.Compression.CompressionLevel.Fastest);
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -294,6 +316,9 @@ builder.Services.AddCors(options =>
 }); 
 
 var app = builder.Build();
+
+// Doit être l'un des tout premiers middlewares du pipeline pour compresser toutes les réponses.
+app.UseResponseCompression();
 
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
