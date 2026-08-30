@@ -36,7 +36,6 @@ public class ProductsController : ControllerBase
 
     [HttpGet]
     [AllowAnonymous]
-    [ResponseCache(Duration = 300)]
     public async Task<ActionResult<PagedResult<Product>>> GetProducts(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
@@ -128,7 +127,6 @@ public class ProductsController : ControllerBase
 
     [HttpGet("{id}")]
     [AllowAnonymous]
-    [ResponseCache(Duration = 300)]
     public async Task<ActionResult<Product>> GetProduct(int id)
     {
         var cacheKey = $"{ProductCacheKeyPrefix}{id}";
@@ -162,7 +160,6 @@ public class ProductsController : ControllerBase
 
     [HttpGet("category/{categoryId}")]
     [AllowAnonymous]
-    [ResponseCache(Duration = 300)]
     public async Task<ActionResult<IEnumerable<Product>>> GetProductsByCategory(int categoryId)
     {
         _logger.LogWarning("Endpoint /category/{categoryId} déprécié. Utiliser ?categoryId={categoryId}");
