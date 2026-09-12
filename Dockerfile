@@ -10,7 +10,7 @@ WORKDIR /src
 # Copier les fichiers de projet
 COPY ["Server/ETechEnergie.Server.csproj", "Server/"]
 COPY ["Client/ETechEnergie.Client.csproj", "Client/"]
-COPY ["Shared/ETechEnergie.Shared/ETechEnergie.Shared.csproj", "Shared/"]
+COPY ["Shared/ETechEnergie.Shared.csproj", "Shared/"]
 
 # Restaurer les dépendances
 RUN dotnet restore "Server/ETechEnergie.Server.csproj"
