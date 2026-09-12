@@ -30,28 +30,6 @@ public class CategoriesController : ControllerBase
             .ToListAsync();
     }
 
-    [HttpGet("with-products")]
-    public async Task<ActionResult<IEnumerable<Category>>> GetCategoriesWithProducts()
-    {
-        return await _context.Categories
-            .Where(c => c.Products.Any())
-            .OrderBy(c => c.Name)
-            .ToListAsync();
-    }
-
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Category>> GetCategory(int id)
-    {
-        var category = await _context.Categories
-            .Include(c => c.Products)
-            .FirstOrDefaultAsync(c => c.Id == id);
-
-        if (category == null)
-            return NotFound();
-
-        return category;
-    }
-
     [HttpPost]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Category>> CreateCategory([FromBody] Category category)
