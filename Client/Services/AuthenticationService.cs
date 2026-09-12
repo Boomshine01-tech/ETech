@@ -228,18 +228,6 @@ public class AuthenticationService
         }
     }
 
-    public async Task<bool> IsRememberedAsync()
-    {
-        try
-        {
-            return await _localStorage.GetItemAsync<bool>(RememberMeKey);
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
     public async Task<bool> IsAdminAsync()
     {
         try
@@ -360,18 +348,6 @@ public class AuthenticationService
         catch (Exception ex)
         {
             Console.WriteLine($"❌ Erreur GetToken: {ex.Message}");
-            return null;
-        }
-    }
-
-    public async Task<DateTime?> GetTokenExpirationAsync()
-    {
-        try
-        {
-            return await _localStorage.GetItemAsync<DateTime?>(TokenExpirationKey);
-        }
-        catch
-        {
             return null;
         }
     }
