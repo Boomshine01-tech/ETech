@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Shared\ETechEnergie.Shared\ETechEnergie.Shared.csproj" />
+    <ProjectReference Include="..\Shared\ETechEnergie.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
