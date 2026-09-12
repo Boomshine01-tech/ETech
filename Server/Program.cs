@@ -32,13 +32,6 @@ if (!string.IsNullOrEmpty(host))
         $"Password={password};" +
         $"SSL Mode=Require;" +
         $"Trust Server Certificate=true;" +
-        // Pooling activé (comportement par défaut de Npgsql) : une connexion PostgreSQL/TLS est
-        // coûteuse à établir (surtout vers Supabase, hébergé à distance). La désactiver forçait
-        // une reconnexion complète à CHAQUE requête, ce qui ralentissait fortement toute l'appli.
-        // ⚠️ Si vous utilisez le "Transaction pooler" de Supabase (port 6543 / pgbouncer), gardez
-        // un œil sur les logs après ce changement : ce mode a des limitations connues avec le
-        // pooling côté client. Dans ce cas, préférez le "Session pooler" (port 5432) plutôt que
-        // de redésactiver Pooling entièrement.
         $"Maximum Pool Size=20;" +
         $"Minimum Pool Size=1;";
 }
@@ -71,7 +64,7 @@ if (string.IsNullOrEmpty(secretKey))
 }
 else
 {
-    Console.WriteLine(" JWT Config depuis variables d'environnement Render");
+    Console.WriteLine(" JWT Config depuis variables d'environnement");
 }
 
 if (string.IsNullOrEmpty(issuer))
@@ -93,20 +86,10 @@ if (string.IsNullOrEmpty(expirationHours))
 
 if (string.IsNullOrEmpty(secretKey))
 {
-    throw new InvalidOperationException(
-        "❌ JWT_SECRET_KEY non configurée !\n" +
-        "Sur Render, ajoutez la variable d'environnement : JWT_SECRET_KEY\n" +
-        "En local, ajoutez-la dans appsettings.json");
+    throw new InvalidOperationException("JWT_SECRET_KEY non configurée !\n");
 }
 
-if (secretKey.Length < 32)
-{
-    throw new InvalidOperationException(
-        $"❌ JWT_SECRET_KEY trop courte ({secretKey.Length} caractères)!\n" +
-        "La clé doit faire au moins 32 caractères.");
-}
-
-Console.WriteLine("✅ Configuration JWT:");
+Console.WriteLine("Configuration JWT reussie:");
 Console.WriteLine($"   Issuer        : {issuer}");
 Console.WriteLine($"   Audience      : {audience}");
 Console.WriteLine($"   Expiration    : {expirationHours}h");
@@ -141,7 +124,7 @@ builder.Services.AddAuthentication(options =>
     {
         OnAuthenticationFailed = context =>
         {
-            Console.WriteLine($"❌ Authentification échouée: {context.Exception.Message}");
+            Console.WriteLine($"Authentification échouée: {context.Exception.Message}");
             
             if (context.Exception is SecurityTokenExpiredException)
             {
@@ -150,7 +133,6 @@ builder.Services.AddAuthentication(options =>
             else if (context.Exception is SecurityTokenInvalidAudienceException)
             {
                 Console.WriteLine($"   Raison: Audience invalide");
-                Console.WriteLine($"   Audience attendue: '{audience}'");
                 
                 try
                 {
@@ -168,7 +150,6 @@ builder.Services.AddAuthentication(options =>
             else if (context.Exception is SecurityTokenInvalidIssuerException)
             {
                 Console.WriteLine($"   Raison: Issuer invalide");
-                Console.WriteLine($"   Issuer attendu: '{issuer}'");
             }
             
             return Task.CompletedTask;
@@ -177,30 +158,21 @@ builder.Services.AddAuthentication(options =>
         {
             var username = context.Principal?.Identity?.Name;
             var role = context.Principal?.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
-            Console.WriteLine($"✅ Token validé pour: {username} (Rôle: {role})");
             return Task.CompletedTask;
         },
         OnMessageReceived = context =>
         {
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-            if (!string.IsNullOrEmpty(token))
-            {
-                Console.WriteLine($" Token reçu (longueur: {token.Length})");
-            }
             return Task.CompletedTask;
         },
         OnChallenge = context =>
         {
-            Console.WriteLine($"⚠️ Challenge: {context.Error} - {context.ErrorDescription}");
             return Task.CompletedTask;
         }
     };
 });
 
 builder.Services.AddAuthorization();
-
-Console.WriteLine("✅ JWT Authentication configurée avec succès");
-
 
 builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection("EmailSettings"));
@@ -210,9 +182,6 @@ builder.Services.Configure<BrevoSettings>(
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// ───────────────────────────────────────────────────────────────
-// SUPABASE STORAGE (upload des images produits / formations / réalisations)
-// ───────────────────────────────────────────────────────────────
 var supabaseUrl = Environment.GetEnvironmentVariable("SUPABASE_URL")
     ?? builder.Configuration["Supabase:Url"] ?? "";
 var supabaseServiceRoleKey = Environment.GetEnvironmentVariable("SUPABASE_SERVICE_ROLE_KEY")
@@ -222,11 +191,7 @@ var supabaseBucket = Environment.GetEnvironmentVariable("SUPABASE_BUCKET")
 
 if (string.IsNullOrEmpty(supabaseUrl) || string.IsNullOrEmpty(supabaseServiceRoleKey))
 {
-    Console.WriteLine("⚠️  SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY non définies : les uploads d'images échoueront tant qu'elles ne sont pas configurées.");
-}
-else
-{
-    Console.WriteLine($"✅ Supabase Storage configuré (bucket: \"{supabaseBucket}\")");
+    Console.WriteLine(" Erreur Config SupaBase.");
 }
 
 builder.Services.Configure<SupabaseSettings>(options =>
@@ -246,8 +211,6 @@ builder.Services.AddSingleton(new JwtConfiguration
     ExpirationHours = double.Parse(expirationHours)
 });
 
-Console.WriteLine("✅ Services enregistrés");
-
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -255,9 +218,6 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
 
-// Compression des réponses (gzip/brotli) : réduit nettement la taille des réponses JSON
-// (listes de produits/formations/réalisations) et donc le temps de chargement perçu,
-// surtout sur connexion mobile.
 builder.Services.AddResponseCompression(options =>
 {
     options.EnableForHttps = true;
@@ -269,40 +229,10 @@ builder.Services.Configure<BrotliCompressionProviderOptions>(o => o.Level = Syst
 builder.Services.Configure<GzipCompressionProviderOptions>(o => o.Level = System.IO.Compression.CompressionLevel.Fastest);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new() { Title = "ETech Energie API", Version = "v1" });
-    
-    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-    {
-        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-        Name = "Authorization",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
-    });
-
-    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-    {
-        {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-            {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
-                {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
 builder.Services.AddMemoryCache();
 
 var allowedOrigins = Environment.GetEnvironmentVariable("ALLOWED_ORIGINS")?.Split(',') 
     ?? new[] { "https://etechenergie.onrender.com", "http://localhost:5000", "https://localhost:5001", "https://localhost:58534", "http://127.0.0.1:63624" };
-
-Console.WriteLine($"🌐 CORS Origins autorisées: {string.Join(", ", allowedOrigins)}");
 
 builder.Services.AddCors(options =>
 {
@@ -317,12 +247,9 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Doit être l'un des tout premiers middlewares du pipeline pour compresser toutes les réponses.
 app.UseResponseCompression();
-
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
-
 app.UseRouting();
 
 app.UseCors("SecureCors");
@@ -332,18 +259,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapFallbackToFile("index.html");
-
-
-// var portEnv = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-// app.Urls.Add($"http://0.0.0.0:{portEnv}");
-
-Console.WriteLine("==========================================");
-Console.WriteLine("🚀 APPLICATION DÉMARRÉE");
-Console.WriteLine($"🌐 Environnement : {app.Environment.EnvironmentName}");
-Console.WriteLine($"🔐 JWT Auth      : Activée");
-Console.WriteLine($"   Issuer        : {issuer}");
-Console.WriteLine($"   Audience      : {audience}");
-Console.WriteLine("==========================================");
 
 app.Run();
 
