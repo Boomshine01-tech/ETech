@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
-    <PackageReference Include="MailKit" Version="4.14.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
     <PackageReference Include="sib_api_v3_sdk" Version="4.0.2" /> 
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.0" />
@@ -16,7 +15,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="MimeKit" Version="4.14.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.1" />
@@ -24,7 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Client\ETechEnergie.Client.csproj" />
-    <ProjectReference Include="..\Shared\ETechEnergie.Shared\ETechEnergie.Shared.csproj" />
+    <ProjectReference Include="..\Shared\ETechEnergie.Shared.csproj" />
   </ItemGroup>
 
   <Target Name="CopyClientImages" AfterTargets="Build">
