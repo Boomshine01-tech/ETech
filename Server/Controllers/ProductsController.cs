@@ -158,35 +158,6 @@ public class ProductsController : ControllerBase
         return Ok(product);
     }
 
-    [HttpGet("category/{categoryId}")]
-    [AllowAnonymous]
-    public async Task<ActionResult<IEnumerable<Product>>> GetProductsByCategory(int categoryId)
-    {
-        _logger.LogWarning("Endpoint /category/{categoryId} déprécié. Utiliser ?categoryId={categoryId}");
-
-        var cacheKey = $"category_products_{categoryId}";
-
-        if (!_cache.TryGetValue(cacheKey, out List<Product>? products))
-        {
-            products = await _context.Products
-                .Include(p => p.Category)
-                .Where(p => p.CategoryId == categoryId && p.IsAvailable)
-                .OrderByDescending(p => p.CreatedAt)
-                .ToListAsync();
-
-            var cacheOptions = new MemoryCacheEntryOptions()
-                .SetSlidingExpiration(TimeSpan.FromMinutes(5))
-                .AddExpirationToken(new CancellationChangeToken(_productsCacheToken.Token));
-
-            _cache.Set(cacheKey, products, cacheOptions);
-        }
-
-        return Ok(products);
-    }
-
-    /// <summary>
-    /// Vérifie la cohérence des champs de remise (prix promo &lt; prix normal, date de fin dans le futur).
-    /// </summary>
     private bool ValidateDiscount(Product product, out string? error)
     {
         error = null;
