@@ -324,8 +324,6 @@ public class AuthenticationService
                         new AuthenticationHeaderValue("Bearer", token);
                     Console.WriteLine("   ✓ Header Authorization configuré");
                     
-                    var isRemembered = await IsRememberedAsync();
-                    Console.WriteLine($"   RememberMe: {isRemembered}");
                 }
             }
             else
