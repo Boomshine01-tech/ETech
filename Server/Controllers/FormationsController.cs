@@ -33,28 +33,6 @@ public class FormationsController : ControllerBase
             .ToListAsync();
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Formation>> GetFormation(int id)
-    {
-        var formation = await _context.Formations.FindAsync(id);
-
-        if (formation == null)
-        {
-            return NotFound();
-        }
-
-        return formation;
-    }
-
-    [HttpGet("statut/{statut}")]
-    public async Task<ActionResult<IEnumerable<Formation>>> GetFormationsByStatut(string statut)
-    {
-        return await _context.Formations
-            .Where(f => f.Statut == statut)
-            .OrderBy(f => f.DateDebut)
-            .ToListAsync();
-    }
-
     [HttpPost]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<Formation>> CreateFormation(Formation formation)
