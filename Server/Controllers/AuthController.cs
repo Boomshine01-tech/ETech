@@ -57,10 +57,4 @@ public class AuthController : ControllerBase
         });
     }
 
-    [HttpGet("test-admin")]
-    [Authorize(Roles = "Admin")]
-    public ActionResult TestAdmin()
-    {
-        return Ok(new { Message = "Vous êtes bien authentifié en tant qu'Admin!", Username = User.Identity?.Name });
-    }
 }
