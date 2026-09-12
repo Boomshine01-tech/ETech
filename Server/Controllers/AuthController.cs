@@ -42,30 +42,6 @@ public class AuthController : ControllerBase
         return Ok(response);
     }
 
-    [HttpPost("register")]
-    [AllowAnonymous]
-    public async Task<ActionResult<LoginResponse>> Register([FromBody] RegisterRequest request)
-    {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new LoginResponse 
-            { 
-                Success = false, 
-                Message = "Données d'enregistrement invalides" 
-            });
-        }
-
-        var response = await _authService.RegisterAsync(request);
-        
-        if (!response.Success)
-        {
-            return BadRequest(response);
-        }
-
-        _logger.LogInformation("Nouvel utilisateur {Username} enregistré", request.Username);
-        return Ok(response);
-    }
-
     [HttpGet("validate")]
     [Authorize]
     public ActionResult<TokenValidationResponse> ValidateToken()
