@@ -11,11 +11,9 @@ namespace ETechEnergie.Server.Services;
 public interface IAuthService
 {
     Task<LoginResponse> LoginAsync(LoginRequest request);
-    Task<LoginResponse> RegisterAsync(RegisterRequest request);
     string GenerateJwtToken(User user, bool rememberMe = false);
     string HashPassword(string password);
     bool VerifyPassword(string password, string passwordHash);
-    TokenValidationResponse ValidateToken(string token);
 }
 
 public class AuthService : IAuthService
@@ -95,66 +93,6 @@ public class AuthService : IAuthService
         }
     }
 
-    public async Task<LoginResponse> RegisterAsync(RegisterRequest request)
-    {
-        try
-        {
-            if (await _context.Users.AnyAsync(u => u.Username == request.Username))
-            {
-                return new LoginResponse 
-                { 
-                    Success = false, 
-                    Message = "Ce nom d'utilisateur est déjà utilisé" 
-                };
-            }
-
-            if (await _context.Users.AnyAsync(u => u.Email == request.Email))
-            {
-                return new LoginResponse 
-                { 
-                    Success = false, 
-                    Message = "Cet email est déjà utilisé" 
-                };
-            }
-
-            var user = new User
-            {
-                Username = request.Username,
-                Email = request.Email,
-                PasswordHash = HashPassword(request.Password),
-                Role = "User",
-                CreatedAt = DateTime.UtcNow,
-                IsActive = true
-            };
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            var token = GenerateJwtToken(user, false); 
-
-            return new LoginResponse
-            {
-                Success = true,
-                Message = "Compte créé avec succès",
-                Token = token,
-                Username = user.Username,
-                Email = user.Email,
-                Role = user.Role,
-                RememberMe = false,
-                ExpiresAt = DateTime.UtcNow.AddHours(_jwtConfig.ExpirationHours)
-            };
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erreur lors de l'enregistrement");
-            return new LoginResponse 
-            { 
-                Success = false, 
-                Message = "Une erreur est survenue lors de la création du compte" 
-            };
-        }
-    }
-
     public string GenerateJwtToken(User user, bool rememberMe = false)
     {
         var expirationHours = rememberMe ? 720.0 : _jwtConfig.ExpirationHours; 
@@ -168,8 +106,6 @@ public class AuthService : IAuthService
 
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Name, user.Username),
             new Claim(ClaimTypes.Email, user.Email),
@@ -207,40 +143,5 @@ public class AuthService : IAuthService
     public bool VerifyPassword(string password, string passwordHash)
     {
         return BCrypt.Net.BCrypt.Verify(password, passwordHash);
-    }
-
-    public TokenValidationResponse ValidateToken(string token)
-    {
-        try
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_jwtConfig.SecretKey);
-
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = _jwtConfig.Issuer,
-                ValidAudience = _jwtConfig.Audience,
-                IssuerSigningKey = new SymmetricSecurityKey(key),
-                ClockSkew = TimeSpan.Zero
-            };
-
-            var principal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
-            
-            return new TokenValidationResponse
-            {
-                IsValid = true,
-                Username = principal.FindFirst(ClaimTypes.Name)?.Value,
-                Role = principal.FindFirst(ClaimTypes.Role)?.Value
-            };
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Token invalide");
-            return new TokenValidationResponse { IsValid = false };
-        }
     }
 }
