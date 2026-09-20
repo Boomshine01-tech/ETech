@@ -222,6 +222,39 @@
     </div>
 </section>
 
+<!-- ===== PARTENAIRES ===== -->
+@if (partners != null && partners.Any())
+{
+    <section class="partners-section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-tag"><i class="fas fa-handshake"></i> Nos partenaires</div>
+                <h2>Ils nous accompagnent</h2>
+                <p class="section-subtitle">Des collaborations solides avec des acteurs reconnus de notre secteur</p>
+            </div>
+
+            <div class="partners-grid">
+                @foreach (var partner in partners)
+                {
+                    @if (!string.IsNullOrEmpty(partner.WebsiteUrl))
+                    {
+                        <a href="@partner.WebsiteUrl" target="_blank" rel="noopener noreferrer"
+                           class="partner-card" title="@partner.Name">
+                            <img src="@partner.LogoUrl" alt="@partner.Name" loading="lazy" />
+                        </a>
+                    }
+                    else
+                    {
+                        <div class="partner-card" title="@partner.Name">
+                            <img src="@partner.LogoUrl" alt="@partner.Name" loading="lazy" />
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </section>
+}
+
 <!-- ===== POURQUOI NOUS ===== -->
 <section class="why-choose-us">
     <div class="container">
@@ -267,6 +300,7 @@
 
 @code {
     private Service[]? services;
+    private Partner[]? partners;
 
     // Slider
     private int currentSlide = 0;
@@ -285,6 +319,15 @@
         catch (Exception ex)
         {
             Console.WriteLine($"Erreur lors du chargement des services: {ex.Message}");
+        }
+
+        try
+        {
+            partners = await Http.GetFromJsonAsync<Partner[]>("api/partners");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur lors du chargement des partenaires: {ex.Message}");
         }
 
         StartSlider();
@@ -668,6 +711,51 @@
         color: #9ca3af; font-size: 0.8rem;
     }
 
+    /* ===== PARTENAIRES ===== */
+    .partners-section {
+        padding: 70px 20px;
+        background: #f9fafb;
+    }
+
+    .partners-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1.25rem;
+    }
+
+    .partner-card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        height: 110px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.25rem;
+        text-decoration: none;
+        transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+    }
+
+    .partner-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(30,58,138,0.1);
+        border-color: #3b82f6;
+    }
+
+    .partner-card img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        filter: grayscale(100%);
+        opacity: 0.65;
+        transition: filter 0.3s, opacity 0.3s;
+    }
+
+    .partner-card:hover img {
+        filter: grayscale(0%);
+        opacity: 1;
+    }
+
     /* ===== POURQUOI NOUS ===== */
     .why-choose-us {
         padding: 80px 20px;
@@ -799,6 +887,8 @@
         /* Réduction des paddings des sections */
         .realisations-section  { padding: 50px 15px; }
         .testimonials-section  { padding: 50px 15px; }
+        .partners-section      { padding: 50px 15px; }
+        .partners-grid         { grid-template-columns: repeat(2, 1fr); }
         .why-choose-us         { padding: 50px 15px; }
         .cta-section           { padding: 50px 15px; }
 
