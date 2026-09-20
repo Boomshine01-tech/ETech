@@ -18,6 +18,7 @@ public class AppDbContext : DbContext
     public DbSet<Announcement> Announcements { get; set; }
     public DbSet<RealisationSection> RealisationSections { get; set; }
     public DbSet<RealisationImage> RealisationImages { get; set; }
+    public DbSet<Partner> Partners { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
