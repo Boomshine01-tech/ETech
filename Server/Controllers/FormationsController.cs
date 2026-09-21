@@ -69,8 +69,6 @@ public class FormationsController : ControllerBase
         _context.Formations.Add(formation);
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Admin a créé une formation: {Titre}", formation.Titre);
-
         return CreatedAtAction(nameof(GetFormation), new { id = formation.Id }, formation);
     }
 
@@ -104,8 +102,6 @@ public class FormationsController : ControllerBase
         existing.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
-
-        _logger.LogInformation("Admin a modifié la formation ID {Id}: {Titre}", id, formation.Titre);
 
         return NoContent();
     }
@@ -143,12 +139,6 @@ public class FormationsController : ControllerBase
 
             var imageUrl = await _storageService.UploadImageAsync(file, "formations");
 
-            _logger.LogInformation(
-                "Image de formation uploadée sur Supabase Storage par {Username}: {Url} ({Size}KB)",
-                User.Identity?.Name,
-                imageUrl,
-                file.Length / 1024);
-
             return Ok(imageUrl);
         }
         catch (InvalidOperationException ex)
@@ -177,8 +167,6 @@ public class FormationsController : ControllerBase
         await _context.SaveChangesAsync();
 
         await _storageService.DeleteImageAsync(formation.ImageUrl);
-
-        _logger.LogInformation("Admin a supprimé la formation ID {Id}: {Titre}", id, formation.Titre);
 
         return NoContent();
     }
@@ -209,9 +197,6 @@ public class FormationsController : ControllerBase
         _context.Inscriptions.Add(inscription);
         formation.PlacesRestantes--;
         await _context.SaveChangesAsync();
-
-        _logger.LogInformation("Nouvelle inscription pour la formation {FormationId} par {Email}", id, inscription.Email);
-
         return CreatedAtAction(nameof(GetInscription), new { id = inscription.Id }, inscription);
     }
 
