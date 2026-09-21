@@ -53,8 +53,6 @@ public class CategoriesController : ControllerBase
         _context.Categories.Add(category);
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Admin {Username} a créé la catégorie '{Name}'", User.Identity?.Name, category.Name);
-
         return Ok(category);
     }
 
@@ -86,15 +84,9 @@ public class CategoriesController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Admin {Username} a modifié la catégorie {Id} ('{Name}')", User.Identity?.Name, id, existing.Name);
-
         return Ok(existing);
     }
 
-    /// <summary>
-    /// Upload de l'image d'une catégorie. Optionnelle : cet endpoint n'est appelé que si
-    /// l'admin choisit d'en ajouter/remplacer une.
-    /// </summary>
     [HttpPost("upload-image")]
     [Authorize(Roles = "Admin")]
     [RequestSizeLimit(10_000_000)]
@@ -127,10 +119,6 @@ public class CategoriesController : ControllerBase
             }
 
             var imageUrl = await _storageService.UploadImageAsync(file, "categories");
-
-            _logger.LogInformation(
-                "Image de catégorie uploadée sur Supabase Storage par {Username}: {Url} ({Size}KB)",
-                User.Identity?.Name, imageUrl, file.Length / 1024);
 
             return Ok(imageUrl);
         }
