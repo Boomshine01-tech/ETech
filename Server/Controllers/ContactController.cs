@@ -27,12 +27,8 @@ namespace ETechEnergie.Server.Controllers
 
             try
             {
-                _logger.LogInformation("Réception d'une demande de contact de {Email}", request.Email);
-
                 await _emailService.SendContactNotificationAsync(request);
                 await _emailService.SendContactConfirmationAsync(request);
-
-                _logger.LogInformation("Emails de contact envoyés avec succès pour {Email}", request.Email);
 
                 return Ok(new { success = true, message = "Message envoyé avec succès" });
             }
@@ -59,12 +55,8 @@ namespace ETechEnergie.Server.Controllers
 
             try
             {
-                _logger.LogInformation("Réception d'une commande de {Email}", request.Email);
-
                 await _emailService.SendOrderNotificationAsync(request);
                 await _emailService.SendOrderConfirmationAsync(request);
-
-                _logger.LogInformation("Emails de commande envoyés avec succès pour {Email}", request.Email);
 
                 return Ok(new { success = true, message = "Commande envoyée avec succès" });
             }
