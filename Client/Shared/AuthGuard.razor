@@ -57,30 +57,23 @@ else
         isLoading = true;
 
         try
-        {
-            Console.WriteLine(" AuthGuard - Vérification de l'authentification...");
-            
-            var token = await AuthService.GetTokenAsync();
-            Console.WriteLine($"   Token présent: {!string.IsNullOrEmpty(token)}");
-            
+        {            
+            var token = await AuthService.GetTokenAsync();            
             if (string.IsNullOrEmpty(token))
             {
-                Console.WriteLine("❌ Aucun token trouvé");
                 isAuthenticated = false;
                 isAuthorized = false;
                 isLoading = false;
                 
-                await Task.Delay(100); // éviter navigation probleme
+                await Task.Delay(100); 
                 Navigation.NavigateTo("/login", forceLoad: true);
                 return;
             }
 
             isAuthenticated = await AuthService.IsAuthenticatedAsync();
-            Console.WriteLine($"   Authentifié: {isAuthenticated}");
 
             if (!isAuthenticated)
             {
-                Console.WriteLine("❌ Utilisateur non authentifié");
                 isAuthorized = false;
                 isLoading = false;
                 
@@ -91,45 +84,22 @@ else
 
             var (username, email, role) = await AuthService.GetCurrentUserAsync();
             currentRole = role;
-            Console.WriteLine($"   Username: {username}");
-            Console.WriteLine($"   Role: {role}");
+
 
             if (RequireAdmin)
             {
                 var isAdmin = await AuthService.IsAdminAsync();
-                Console.WriteLine($"   Admin requis: {RequireAdmin}");
-                Console.WriteLine($"   Est Admin: {isAdmin}");
                 isAuthorized = isAdmin;
                 
-                if (!isAuthorized)
-                {
-                    Console.WriteLine($"❌ Accès refusé - Rôle requis: Admin, Rôle actuel: {role}");
-                }
-                else
-                {
-                    Console.WriteLine("✅ Accès autorisé - Utilisateur est Admin");
-                }
             }
             else
             {
                 isAuthorized = true;
-                Console.WriteLine("✅ Accès autorisé - Aucun rôle spécifique requis");
             }
 
-            if (isAuthenticated && isAuthorized)
-            {
-                Console.WriteLine("✅ AuthGuard - Authentification et autorisation réussies");
-            }
-            else if (isAuthenticated && !isAuthorized)
-            {
-                Console.WriteLine("⚠️ AuthGuard - Authentifié mais pas autorisé");
-                // Afficher le message d'erreur, ne pas rediriger
-            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ Erreur AuthGuard: {ex.Message}");
-            Console.WriteLine($"   Stack: {ex.StackTrace}");
             isAuthenticated = false;
             isAuthorized = false;
         }
