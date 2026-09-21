@@ -38,7 +38,6 @@ public class AuthController : ControllerBase
             return Unauthorized(response);
         }
 
-        _logger.LogInformation("Utilisateur {Username} connecté avec succès", request.Username);
         return Ok(response);
     }
 
