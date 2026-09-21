@@ -22,9 +22,6 @@ public class RealisationsController : ControllerBase
         _storageService = storageService;
     }
 
-    // ═══════════════════════════ LECTURE (public) ═══════════════════════════
-
-    /// <summary>Sections actives avec leurs images, pour la page publique "Réalisations".</summary>
     [HttpGet]
     [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<RealisationSection>>> GetSections()
@@ -38,7 +35,6 @@ public class RealisationsController : ControllerBase
         return Ok(sections);
     }
 
-    /// <summary>Toutes les sections (actives et inactives), pour la page d'administration.</summary>
     [HttpGet("admin")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<IEnumerable<RealisationSection>>> GetSectionsForAdmin()
@@ -50,8 +46,6 @@ public class RealisationsController : ControllerBase
 
         return Ok(sections);
     }
-
-    // ═══════════════════════════ SECTIONS (admin) ═══════════════════════════
 
     [HttpPost("sections")]
     [Authorize(Roles = "Admin")]
@@ -84,8 +78,6 @@ public class RealisationsController : ControllerBase
 
         _context.RealisationSections.Add(section);
         await _context.SaveChangesAsync();
-
-        _logger.LogInformation("Admin {Username} a créé la section réalisation '{Slug}'", User.Identity?.Name, section.Slug);
 
         return Ok(section);
     }
@@ -134,8 +126,6 @@ public class RealisationsController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Admin {Username} a modifié la section réalisation {Id}", User.Identity?.Name, id);
-
         return NoContent();
     }
 
@@ -162,12 +152,9 @@ public class RealisationsController : ControllerBase
             await _storageService.DeleteImageAsync(url);
         }
 
-        _logger.LogInformation("Admin {Username} a supprimé la section réalisation '{Slug}' (et ses images)", User.Identity?.Name, section.Slug);
-
         return NoContent();
     }
 
-    /// <summary>Déplace une section vers le haut ou le bas dans l'ordre d'affichage.</summary>
     [HttpPost("sections/{id}/move")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> MoveSection(int id, [FromQuery] string direction)
@@ -183,7 +170,7 @@ public class RealisationsController : ControllerBase
         var swapIndex = direction == "up" ? index - 1 : index + 1;
         if (swapIndex < 0 || swapIndex >= sections.Count)
         {
-            return Ok(); // déjà en haut/bas de la liste, rien à faire
+            return Ok(); 
         }
 
         (sections[index].DisplayOrder, sections[swapIndex].DisplayOrder) =
@@ -193,8 +180,6 @@ public class RealisationsController : ControllerBase
 
         return Ok();
     }
-
-    // ═══════════════════════════ IMAGES (admin) ═══════════════════════════
 
     [HttpPost("images")]
     [Authorize(Roles = "Admin")]
@@ -220,8 +205,6 @@ public class RealisationsController : ControllerBase
 
         _context.RealisationImages.Add(image);
         await _context.SaveChangesAsync();
-
-        _logger.LogInformation("Admin {Username} a ajouté une image à la section {SectionId}", User.Identity?.Name, image.SectionId);
 
         return Ok(image);
     }
@@ -269,12 +252,9 @@ public class RealisationsController : ControllerBase
 
         await _storageService.DeleteImageAsync(image.ImageUrl);
 
-        _logger.LogInformation("Admin {Username} a supprimé une image de réalisation ({Id})", User.Identity?.Name, id);
-
         return NoContent();
     }
 
-    /// <summary>Déplace une image vers le haut ou le bas au sein de sa section.</summary>
     [HttpPost("images/{id}/move")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> MoveImage(int id, [FromQuery] string direction)
@@ -305,8 +285,6 @@ public class RealisationsController : ControllerBase
 
         return Ok();
     }
-
-    // ═══════════════════════════ UPLOAD ═══════════════════════════
 
     [HttpPost("upload-image")]
     [Authorize(Roles = "Admin")]
@@ -341,20 +319,14 @@ public class RealisationsController : ControllerBase
 
             var imageUrl = await _storageService.UploadImageAsync(file, "realisations");
 
-            _logger.LogInformation(
-                "Image de réalisation uploadée sur Supabase Storage par {Username}: {Url} ({Size}KB)",
-                User.Identity?.Name, imageUrl, file.Length / 1024);
-
             return Ok(imageUrl);
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogError(ex, "Configuration Supabase Storage manquante ou invalide");
             return StatusCode(500, new { error = ex.Message });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erreur lors de l'upload d'image de réalisation");
             return StatusCode(500, new { error = "Erreur lors de l'upload de l'image" });
         }
     }
