@@ -1,6 +1,3 @@
-@* Bande d'annonce discrète affichée en haut de toutes les pages.
-   Se fond dans la charte graphique du site (dégradé bleu identique à la navbar),
-   reste fine pour ne pas gêner la navigation, et peut être fermée par l'utilisateur. *@
 @inject HttpClient Http
 @using System.Net.Http.Json
 
@@ -33,14 +30,9 @@
         try
         {
             announcement = await Http.GetFromJsonAsync<Announcement>("api/announcement");
-            Console.WriteLine($"[AnnouncementBar] Réponse reçue — IsActive={announcement?.IsActive}, Message=\"{announcement?.Message}\"");
         }
         catch (Exception ex)
         {
-            // Si l'annonce ne peut pas être chargée, on n'affiche simplement rien :
-            // cela ne doit jamais bloquer l'affichage du reste du site.
-            // On journalise quand même l'erreur dans la console du navigateur pour pouvoir
-            // diagnostiquer un souci réseau/serveur (F12 → Console).
             Console.WriteLine($"[AnnouncementBar] Échec du chargement de l'annonce: {ex.Message}");
             announcement = null;
         }
