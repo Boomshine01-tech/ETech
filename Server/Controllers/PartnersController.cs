@@ -22,9 +22,6 @@ public class PartnersController : ControllerBase
         _storageService = storageService;
     }
 
-    // ═══════════════════════════ LECTURE ═══════════════════════════
-
-    /// <summary>Partenaires actifs, pour la section "Nos partenaires" de la page d'accueil.</summary>
     [HttpGet]
     [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<Partner>>> GetPartners()
@@ -37,7 +34,6 @@ public class PartnersController : ControllerBase
         return Ok(partners);
     }
 
-    /// <summary>Tous les partenaires (actifs et inactifs), pour la page d'administration.</summary>
     [HttpGet("admin")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<IEnumerable<Partner>>> GetPartnersForAdmin()
@@ -48,8 +44,6 @@ public class PartnersController : ControllerBase
 
         return Ok(partners);
     }
-
-    // ═══════════════════════════ ÉCRITURE (admin) ═══════════════════════════
 
     [HttpPost]
     [Authorize(Roles = "Admin")]
@@ -70,8 +64,6 @@ public class PartnersController : ControllerBase
 
         _context.Partners.Add(partner);
         await _context.SaveChangesAsync();
-
-        _logger.LogInformation("Admin {Username} a créé le partenaire '{Name}'", User.Identity?.Name, partner.Name);
 
         return Ok(partner);
     }
@@ -101,16 +93,12 @@ public class PartnersController : ControllerBase
         existing.WebsiteUrl = partner.WebsiteUrl;
         existing.IsActive = partner.IsActive;
 
-        // Le logo n'est remplacé que si une nouvelle URL a bien été fournie
-        // (évite d'écraser le logo existant si le formulaire est soumis sans ré-upload).
         if (!string.IsNullOrWhiteSpace(partner.LogoUrl))
         {
             existing.LogoUrl = partner.LogoUrl;
         }
 
         await _context.SaveChangesAsync();
-
-        _logger.LogInformation("Admin {Username} a modifié le partenaire {Id}", User.Identity?.Name, id);
 
         return NoContent();
     }
@@ -131,15 +119,11 @@ public class PartnersController : ControllerBase
         _context.Partners.Remove(partner);
         await _context.SaveChangesAsync();
 
-        // Suppression best-effort du logo sur Supabase Storage (n'échoue jamais la requête).
         await _storageService.DeleteImageAsync(logoUrl);
-
-        _logger.LogInformation("Admin {Username} a supprimé le partenaire '{Name}'", User.Identity?.Name, name);
 
         return NoContent();
     }
 
-    /// <summary>Déplace un partenaire vers le haut ou le bas dans l'ordre d'affichage.</summary>
     [HttpPost("{id}/move")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> MovePartner(int id, [FromQuery] string direction)
@@ -155,7 +139,7 @@ public class PartnersController : ControllerBase
         var swapIndex = direction == "up" ? index - 1 : index + 1;
         if (swapIndex < 0 || swapIndex >= partners.Count)
         {
-            return Ok(); // déjà en haut/bas de la liste, rien à faire
+            return Ok(); 
         }
 
         (partners[index].DisplayOrder, partners[swapIndex].DisplayOrder) =
@@ -165,8 +149,6 @@ public class PartnersController : ControllerBase
 
         return Ok();
     }
-
-    // ═══════════════════════════ UPLOAD DU LOGO ═══════════════════════════
 
     [HttpPost("upload-image")]
     [Authorize(Roles = "Admin")]
@@ -200,10 +182,6 @@ public class PartnersController : ControllerBase
             }
 
             var imageUrl = await _storageService.UploadImageAsync(file, "partenaires");
-
-            _logger.LogInformation(
-                "Logo de partenaire uploadé sur Supabase Storage par {Username}: {Url} ({Size}KB)",
-                User.Identity?.Name, imageUrl, file.Length / 1024);
 
             return Ok(imageUrl);
         }
