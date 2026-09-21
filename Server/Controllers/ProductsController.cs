@@ -52,8 +52,6 @@ public class ProductsController : ControllerBase
 
             if (!_cache.TryGetValue(cacheKey, out PagedResult<Product>? cachedResult))
             {
-                _logger.LogInformation("Cache MISS - Chargement depuis DB: {CacheKey}", cacheKey);
-
                 var query = _context.Products
                     .Include(p => p.Category)
                     .Where(p => p.IsAvailable)
@@ -107,20 +105,13 @@ public class ProductsController : ControllerBase
 
                 _cache.Set(cacheKey, cachedResult, cacheOptions);
 
-                _logger.LogInformation(
-                    "Produits chargés depuis DB - Page {Page}/{TotalPages} ({ItemCount} produits)",
-                    page, totalPages, products.Count);
             }
-            else
-            {
-                _logger.LogInformation("Cache HIT - Page {Page}", page);
-            }
+            
 
             return Ok(cachedResult);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erreur lors du chargement des produits");
             return StatusCode(500, new { error = "Erreur lors du chargement des produits" });
         }
     }
@@ -139,7 +130,6 @@ public class ProductsController : ControllerBase
 
             if (product == null)
             {
-                _logger.LogWarning("Produit {ProductId} introuvable", id);
                 return NotFound(new { error = "Produit introuvable" });
             }
 
@@ -208,16 +198,11 @@ public class ProductsController : ControllerBase
             return BadRequest(new { error = discountError });
         }
 
-        _logger.LogInformation("Admin {Username} crée un produit: {ProductName}",
-            User.Identity?.Name, product.Name);
-
         product.CreatedAt = DateTime.UtcNow;
         _context.Products.Add(product);
         await _context.SaveChangesAsync();
 
         ClearProductsCache();
-
-        _logger.LogInformation("Produit {ProductId} créé avec succès", product.Id);
 
         return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
     }
@@ -240,20 +225,14 @@ public class ProductsController : ControllerBase
         {
             return BadRequest(new { error = discountError });
         }
-
-        _logger.LogInformation("Admin {Username} modifie le produit ID {ProductId}",
-            User.Identity?.Name, id);
-
         
         var existing = await _context.Products.FindAsync(id);
 
         if (existing == null)
         {
-            _logger.LogWarning("Produit {ProductId} introuvable pour modification", id);
             return NotFound(new { error = "Produit introuvable" });
         }
 
-        // Mise à jour uniquement des champs éditables
         existing.Name              = product.Name;
         existing.Description       = product.Description;
         existing.Price             = product.Price;
@@ -270,13 +249,11 @@ public class ProductsController : ControllerBase
 
             ClearProductsCache();
 
-            _logger.LogInformation("Produit {ProductId} modifié avec succès", id);
         }
         catch (DbUpdateConcurrencyException)
         {
             if (!await _context.Products.AnyAsync(p => p.Id == id))
             {
-                _logger.LogWarning("Produit {ProductId} introuvable pour modification", id);
                 return NotFound(new { error = "Produit introuvable" });
             }
             throw;
@@ -318,22 +295,14 @@ public class ProductsController : ControllerBase
 
             var imageUrl = await _storageService.UploadImageAsync(file, "products");
 
-            _logger.LogInformation(
-                "Image uploadée sur Supabase Storage par {Username}: {Url} ({Size}KB)",
-                User.Identity?.Name,
-                imageUrl,
-                file.Length / 1024);
-
             return Ok(imageUrl);
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogError(ex, "Configuration Supabase Storage manquante ou invalide");
             return StatusCode(500, new { error = ex.Message });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erreur lors de l'upload d'image");
             return StatusCode(500, new { error = "Erreur lors de l'upload de l'image" });
         }
     }
@@ -346,19 +315,13 @@ public class ProductsController : ControllerBase
 
         if (product == null)
         {
-            _logger.LogWarning("Tentative de suppression d'un produit inexistant: {ProductId}", id);
             return NotFound(new { error = "Produit introuvable" });
         }
-
-        _logger.LogWarning("Admin {Username} supprime le produit ID {ProductId}: {ProductName}",
-            User.Identity?.Name, id, product.Name);
 
         _context.Products.Remove(product);
         await _context.SaveChangesAsync();
 
         ClearProductsCache();
-
-        _logger.LogInformation("Produit {ProductId} supprimé avec succès", id);
 
         return NoContent();
     }
