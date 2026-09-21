@@ -35,16 +35,12 @@ public class AuthService : IAuthService
     public async Task<LoginResponse> LoginAsync(LoginRequest request)
     {
         try
-        {
-            _logger.LogInformation("🔐 Tentative de connexion pour: {Username} | RememberMe: {RememberMe}", 
-                request.Username, request.RememberMe);
-            
+        {   
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Username == request.Username && u.IsActive);
 
             if (user == null)
             {
-                _logger.LogWarning("❌ Utilisateur introuvable: {Username}", request.Username);
                 return new LoginResponse 
                 { 
                     Success = false, 
@@ -54,7 +50,6 @@ public class AuthService : IAuthService
 
             if (!VerifyPassword(request.Password, user.PasswordHash))
             {
-                _logger.LogWarning("❌ Mot de passe incorrect pour: {Username}", request.Username);
                 return new LoginResponse 
                 { 
                     Success = false, 
@@ -66,9 +61,6 @@ public class AuthService : IAuthService
             
             var expirationHours = request.RememberMe ? 720.0 : _jwtConfig.ExpirationHours; 
             var expiresAt = DateTime.UtcNow.AddHours(expirationHours);
-
-            _logger.LogInformation("✅ Connexion réussie pour: {Username} | RememberMe: {RememberMe} | Expiration: {ExpiresAt}", 
-                user.Username, request.RememberMe, expiresAt);
 
             return new LoginResponse
             {
@@ -84,7 +76,6 @@ public class AuthService : IAuthService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erreur lors de la connexion pour: {Username}", request.Username);
             return new LoginResponse 
             { 
                 Success = false, 
@@ -96,10 +87,6 @@ public class AuthService : IAuthService
     public string GenerateJwtToken(User user, bool rememberMe = false)
     {
         var expirationHours = rememberMe ? 720.0 : _jwtConfig.ExpirationHours; 
-        
-        _logger.LogInformation(
-            "🔑 Génération token JWT | User: {Username} | RememberMe: {RememberMe} | Durée: {Hours}h | Issuer: {Issuer} | Audience: {Audience}", 
-            user.Username, rememberMe, expirationHours, _jwtConfig.Issuer, _jwtConfig.Audience);
         
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfig.SecretKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -127,10 +114,6 @@ public class AuthService : IAuthService
         );
 
         var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-        
-        _logger.LogInformation(
-            "✅ Token généré | User: {Username} | RememberMe: {RememberMe} | Expiration: {Expiration}", 
-            user.Username, rememberMe, expiration);
 
         return tokenString;
     }
