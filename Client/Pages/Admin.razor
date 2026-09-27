@@ -519,7 +519,6 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erreur de chargement: {ex.Message}");
             NotificationService.ShowError("Erreur lors du chargement des données");
         }
     }
@@ -605,7 +604,6 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erreur upload: {ex.Message}");
             NotificationService.ShowError("Erreur lors de l'upload de l'image");
         }
         finally
@@ -683,7 +681,6 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erreur upload: {ex.Message}");
             NotificationService.ShowError("Erreur lors de l'upload de l'image");
         }
         finally
@@ -717,7 +714,6 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erreur: {ex.Message}");
             NotificationService.ShowError("Erreur lors de l'enregistrement de la catégorie");
         }
         finally
@@ -774,7 +770,6 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erreur: {ex.Message}");
             NotificationService.ShowError("Erreur lors de l'enregistrement");
         }
         finally
@@ -803,7 +798,6 @@
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erreur: {ex.Message}");
                 NotificationService.ShowError("Erreur lors de la suppression");
             }
         }
