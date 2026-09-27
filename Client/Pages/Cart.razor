@@ -2,6 +2,7 @@
 @inject CartService CartService
 @inject NavigationManager Navigation
 @inject HttpClient Http
+@inject NotificationService NotificationService
 @using ETechEnergie.Client.Services
 @using ETechEnergie.Shared.Models
 @using System.Text.Json
@@ -202,12 +203,11 @@
             }
             else
             {
-                Console.WriteLine("Erreur lors de l'envoi de la commande");
+                NotificationService.ShowError("Erreur lors de l'envoi de la commande");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erreur: {ex.Message}");
         }
     }
 
