@@ -378,7 +378,6 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erreur de chargement: {ex.Message}");
             NotificationService.ShowError("Erreur lors du chargement des sections");
             sections = new();
         }
@@ -452,7 +451,6 @@
         catch (Exception ex)
         {
             NotificationService.ShowError("Erreur lors de l'enregistrement");
-            Console.WriteLine(ex.Message);
         }
         finally
         {
@@ -481,7 +479,6 @@
         catch (Exception ex)
         {
             NotificationService.ShowError("Erreur lors de la suppression");
-            Console.WriteLine(ex.Message);
         }
     }
 
@@ -494,7 +491,6 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
         }
     }
 
@@ -553,7 +549,6 @@
         catch (Exception ex)
         {
             NotificationService.ShowError("Erreur lors de l'upload de l'image");
-            Console.WriteLine(ex.Message);
         }
         finally
         {
@@ -585,7 +580,6 @@
         catch (Exception ex)
         {
             NotificationService.ShowError("Erreur lors de l'enregistrement");
-            Console.WriteLine(ex.Message);
         }
         finally
         {
@@ -614,7 +608,6 @@
         catch (Exception ex)
         {
             NotificationService.ShowError("Erreur lors de la suppression");
-            Console.WriteLine(ex.Message);
         }
     }
 
@@ -627,11 +620,9 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
         }
     }
 
-    // ── UTIL ─────────────────────────────────────────────────────
     private async Task<bool> ConfirmAsync(string message)
     {
         return await JS.InvokeAsync<bool>("confirm", message);
