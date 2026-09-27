@@ -112,7 +112,6 @@
         
         if (isAuthenticated)
         {
-            Console.WriteLine("⚠️ Utilisateur déjà connecté, redirection vers admin");
             Navigation.NavigateTo("/admin/products");
         }
     }
@@ -124,13 +123,11 @@
 
         try
         {
-            Console.WriteLine($"📝 Soumission login | Username: {loginRequest.Username} | RememberMe: {loginRequest.RememberMe}");
             
             var response = await AuthService.LoginAsync(loginRequest);
 
             if (response.Success)
             {
-                Console.WriteLine("✅ Login réussi");
                 
                 if (loginRequest.RememberMe)
                 {
@@ -155,13 +152,11 @@
             else
             {
                 errorMessage = response.Message;
-                Console.WriteLine($"❌ Login échoué: {response.Message}");
             }
         }
         catch (Exception ex)
         {
             errorMessage = "Une erreur est survenue lors de la connexion";
-            Console.WriteLine($"❌ Exception: {ex.Message}");
         }
         finally
         {
