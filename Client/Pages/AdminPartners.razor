@@ -223,7 +223,6 @@
         catch (Exception ex)
         {
             NotificationService.ShowError("Erreur lors du chargement des partenaires");
-            Console.WriteLine(ex.Message);
         }
         finally
         {
@@ -294,7 +293,6 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erreur upload: {ex.Message}");
             NotificationService.ShowError("Erreur lors de l'upload du logo");
         }
         finally
@@ -332,7 +330,6 @@
         catch (Exception ex)
         {
             NotificationService.ShowError("Erreur lors de l'enregistrement");
-            Console.WriteLine(ex.Message);
         }
         finally
         {
@@ -361,7 +358,6 @@
         catch (Exception ex)
         {
             NotificationService.ShowError("Erreur lors de la suppression");
-            Console.WriteLine(ex.Message);
         }
     }
 
@@ -377,7 +373,6 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
         }
     }
 
