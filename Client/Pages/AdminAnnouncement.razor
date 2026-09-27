@@ -139,7 +139,6 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erreur de chargement: {ex.Message}");
             NotificationService.ShowError("Erreur lors du chargement de l'annonce");
             currentAnnouncement = new Announcement();
         }
@@ -169,7 +168,6 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erreur: {ex.Message}");
             NotificationService.ShowError("Erreur lors de l'enregistrement");
         }
         finally
